@@ -50,7 +50,7 @@ function determineDisasterType(title: string, description: string): string {
 
 // Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
 export const fetchGDACSEvents = onSchedule({
-  schedule: 'every 30 minutes',
+  schedule: 'every 10 minutes',
   region: 'southamerica-east1',
   timeoutSeconds: 60,
   memory: '256MiB',

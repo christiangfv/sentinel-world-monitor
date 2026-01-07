@@ -53,7 +53,7 @@ function determineDisasterType(title, description) {
 }
 // Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
 exports.fetchGDACSEvents = (0, scheduler_1.onSchedule)({
-    schedule: 'every 30 minutes',
+    schedule: 'every 10 minutes',
     region: 'southamerica-east1',
     timeoutSeconds: 60,
     memory: '256MiB',
