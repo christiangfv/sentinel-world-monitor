@@ -1,0 +1,5 @@
+{
+  "projects": {
+    "default": "sentinel-app-prod"
+  }
+}
