@@ -3,18 +3,17 @@
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Header } from "@/components/layout/Header";
-import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { useEvent } from "@/lib/hooks/useEvents";
 import { DISASTER_CONFIGS } from "@/lib/constants/disasters";
 import { getSeverityColor, getSeverityLabel } from "@/lib/utils/severity";
-import { Spinner } from "@/components/ui/Spinner";
+import { LoadingSpinner } from "@/components/ui/Spinner";
 import dynamic from 'next/dynamic';
 
 // Importar el mapa dinámicamente para evitar SSR
 const DisasterMap = dynamic(
   () => import('@/components/map/DisasterMap').then(mod => mod.DisasterMap),
-  { ssr: false, loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg" /> }
+  { ssr: false, loading: () => <div className="h-64 bg-surface animate-pulse rounded-lg" /> }
 );
 
 function EventContent() {
@@ -26,10 +25,13 @@ function EventContent() {
   if (!eventId) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">ID de evento no proporcionado</p>
-        <Button variant="outline" asChild className="mt-4">
-          <Link href="/">Volver al inicio</Link>
-        </Button>
+        <p className="text-smoke">ID de evento no proporcionado</p>
+        <Link 
+          href="/" 
+          className="mt-4 inline-block px-4 py-2 border border-slate rounded-lg text-muted hover:bg-surface transition-colors"
+        >
+          Volver al inicio
+        </Link>
       </div>
     );
   }
@@ -37,8 +39,7 @@ function EventContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Spinner className="h-8 w-8" />
-        <span className="ml-2">Cargando evento...</span>
+        <LoadingSpinner text="Cargando evento..." />
       </div>
     );
   }
@@ -46,10 +47,13 @@ function EventContent() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-destructive">{error}</p>
-        <Button variant="outline" asChild className="mt-4">
-          <Link href="/">Volver al inicio</Link>
-        </Button>
+        <p className="text-sakura">{error}</p>
+        <Link 
+          href="/" 
+          className="mt-4 inline-block px-4 py-2 border border-slate rounded-lg text-muted hover:bg-surface transition-colors"
+        >
+          Volver al inicio
+        </Link>
       </div>
     );
   }
@@ -57,10 +61,13 @@ function EventContent() {
   if (!event) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Evento no encontrado</p>
-        <Button variant="outline" asChild className="mt-4">
-          <Link href="/">Volver al inicio</Link>
-        </Button>
+        <p className="text-smoke">Evento no encontrado</p>
+        <Link 
+          href="/" 
+          className="mt-4 inline-block px-4 py-2 border border-slate rounded-lg text-muted hover:bg-surface transition-colors"
+        >
+          Volver al inicio
+        </Link>
       </div>
     );
   }
@@ -68,14 +75,14 @@ function EventContent() {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Información del evento */}
-      <div className="bg-card border rounded-lg p-6 space-y-4">
+      <div className="bg-surface border border-slate rounded-lg p-6 space-y-4">
         <div className="flex items-start gap-4">
           <div className="text-4xl">
             {DISASTER_CONFIGS[event.disasterType]?.icon || '⚠️'}
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{event.title}</h1>
-            <p className="text-muted-foreground">{event.locationName}</p>
+            <h1 className="text-2xl font-bold text-muted">{event.title}</h1>
+            <p className="text-smoke">{event.locationName}</p>
           </div>
         </div>
 
@@ -86,19 +93,19 @@ function EventContent() {
           >
             {getSeverityLabel(event.disasterType, event.severity)}
           </span>
-          <span className="px-3 py-1 rounded-full bg-muted text-sm">
+          <span className="px-3 py-1 rounded-full bg-slate text-smoke text-sm">
             {DISASTER_CONFIGS[event.disasterType]?.nameEs || event.disasterType}
           </span>
         </div>
 
         {event.description && (
-          <p className="text-muted-foreground">{event.description}</p>
+          <p className="text-smoke">{event.description}</p>
         )}
 
-        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate">
           <div>
-            <span className="text-sm text-muted-foreground">Fecha</span>
-            <p className="font-medium">
+            <span className="text-sm text-smoke">Fecha</span>
+            <p className="font-medium text-muted">
               {event.eventTime?.toLocaleDateString('es-ES', {
                 day: 'numeric',
                 month: 'long',
@@ -110,25 +117,25 @@ function EventContent() {
           </div>
           {event.magnitude && (
             <div>
-              <span className="text-sm text-muted-foreground">Magnitud</span>
-              <p className="font-medium">{event.magnitude.toFixed(1)}</p>
+              <span className="text-sm text-smoke">Magnitud</span>
+              <p className="font-medium text-muted">{event.magnitude.toFixed(1)}</p>
             </div>
           )}
           {event.depth && (
             <div>
-              <span className="text-sm text-muted-foreground">Profundidad</span>
-              <p className="font-medium">{event.depth} km</p>
+              <span className="text-sm text-smoke">Profundidad</span>
+              <p className="font-medium text-muted">{event.depth} km</p>
             </div>
           )}
           <div>
-            <span className="text-sm text-muted-foreground">Fuente</span>
-            <p className="font-medium uppercase">{event.source}</p>
+            <span className="text-sm text-smoke">Fuente</span>
+            <p className="font-medium text-muted uppercase">{event.source}</p>
           </div>
         </div>
       </div>
 
       {/* Mapa */}
-      <div className="bg-card border rounded-lg overflow-hidden h-80 lg:h-auto">
+      <div className="bg-surface border border-slate rounded-lg overflow-hidden h-80 lg:h-auto">
         {event.location?.lat && event.location?.lng && (
           <DisasterMap
             events={[event]}
@@ -149,31 +156,31 @@ export default function EventPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-6">
-          <Link href="/" className="text-muted-foreground hover:text-foreground">
+          <Link href="/" className="text-smoke hover:text-muted transition-colors">
             Inicio
           </Link>
-          <span className="mx-2 text-muted-foreground">/</span>
-          <Link href="/" className="text-muted-foreground hover:text-foreground">
+          <span className="mx-2 text-smoke">/</span>
+          <Link href="/" className="text-smoke hover:text-muted transition-colors">
             Eventos
           </Link>
-          <span className="mx-2 text-muted-foreground">/</span>
-          <span className="text-foreground">Detalle del Evento</span>
+          <span className="mx-2 text-smoke">/</span>
+          <span className="text-muted">Detalle del Evento</span>
         </nav>
 
         {/* Botón volver */}
         <div className="mb-6">
-          <Button variant="outline" asChild>
-            <Link href="/">
-              ← Volver al mapa
-            </Link>
-          </Button>
+          <Link 
+            href="/"
+            className="inline-flex items-center px-4 py-2 border border-slate rounded-lg text-muted hover:bg-surface transition-colors"
+          >
+            ← Volver al mapa
+          </Link>
         </div>
 
         {/* Contenido */}
         <Suspense fallback={
           <div className="flex items-center justify-center py-12">
-            <Spinner className="h-8 w-8" />
-            <span className="ml-2">Cargando...</span>
+            <LoadingSpinner text="Cargando..." />
           </div>
         }>
           <EventContent />
@@ -182,4 +189,3 @@ export default function EventPage() {
     </div>
   );
 }
-

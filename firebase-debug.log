@@ -1,0 +1,52 @@
+[debug] [2026-01-07T07:32:23.276Z] ----------------------------------------------------------------------
+[debug] [2026-01-07T07:32:23.278Z] Command:       /Users/chris/.nvm/versions/node/v20.19.5/bin/node /Users/chris/.nvm/versions/node/v20.19.5/bin/firebase deploy
+[debug] [2026-01-07T07:32:23.278Z] CLI Version:   15.1.0
+[debug] [2026-01-07T07:32:23.278Z] Platform:      darwin
+[debug] [2026-01-07T07:32:23.278Z] Node Version:  v20.19.5
+[debug] [2026-01-07T07:32:23.278Z] Time:          Wed Jan 07 2026 04:32:23 GMT-0300 (Chile Summer Time)
+[debug] [2026-01-07T07:32:23.278Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-07T07:32:24.404Z] Object "/hosting" in "firebase.json" has unknown property: {"additionalProperty":"environmentVariables"}
+[debug] [2026-01-07T07:32:24.404Z] Field "/hosting" in "firebase.json" is possibly invalid: must be array
+[debug] [2026-01-07T07:32:24.404Z] Field "/hosting" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[debug] [2026-01-07T07:32:24.407Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-07T07:32:24.407Z] > authorizing via signed-in user (christiangfv@gmail.com)
+[debug] [2026-01-07T07:32:24.407Z] [iam] checking project sentinel-89591 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-01-07T07:32:24.408Z] Checked if tokens are valid: false, expires at: 1767769460082
+[debug] [2026-01-07T07:32:24.408Z] Checked if tokens are valid: false, expires at: 1767769460082
+[debug] [2026-01-07T07:32:24.408Z] > refreshing access token with scopes: []
+[debug] [2026-01-07T07:32:24.409Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-07T07:32:24.409Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-07T07:32:24.522Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-01-07T07:32:24.523Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-07T07:32:24.534Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions [none]
+[debug] [2026-01-07T07:32:24.534Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions x-goog-quota-user=projects/sentinel-89591
+[debug] [2026-01-07T07:32:24.534Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-01-07T07:32:25.595Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions 200
+[debug] [2026-01-07T07:32:25.595Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-01-07T07:32:25.595Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:25.595Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:25.595Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-01-07T07:32:25.595Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-01-07T07:32:26.684Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-01-07T07:32:26.684Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-01-07T07:32:26.685Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:26.685Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:26.685Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591 [none]
+[debug] [2026-01-07T07:32:26.996Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591 200
+[debug] [2026-01-07T07:32:26.996Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591 {"projectId":"sentinel-89591","projectNumber":"638359914064","displayName":"Sentinel","name":"projects/sentinel-89591","resources":{"hostingSite":"sentinel-89591"},"state":"ACTIVE","etag":"1_4f73b1bc-2c0e-44ec-9fa8-98e24b7bd903"}
+[debug] [2026-01-07T07:32:28.637Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:28.637Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:28.637Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites pageToken=&pageSize=10
+[debug] [2026-01-07T07:32:29.802Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites 200
+[debug] [2026-01-07T07:32:29.803Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites {"sites":[{"name":"projects/sentinel-89591/sites/sentinel-89591","defaultUrl":"https://sentinel-89591.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-01-07T07:32:29.803Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:29.803Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:29.804Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites 
+[debug] [2026-01-07T07:32:30.078Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites 200
+[debug] [2026-01-07T07:32:30.078Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites {"sites":[{"name":"projects/sentinel-89591/sites/sentinel-89591","defaultUrl":"https://sentinel-89591.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-01-07T07:32:30.079Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:30.079Z] Checked if tokens are valid: true, expires at: 1767774743523
+[debug] [2026-01-07T07:32:30.079Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/webApps/-/config [none]
+[debug] [2026-01-07T07:32:30.983Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/webApps/-/config 200
+[debug] [2026-01-07T07:32:30.984Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/webApps/-/config {"projectId":"sentinel-89591","appId":"1:638359914064:web:4ad700b8777dbda615f355","storageBucket":"sentinel-89591.firebasestorage.app","apiKey":"AIzaSyArZVsBh-9ANzntpw0hTi9M3yEJLNNOk3E","authDomain":"sentinel-89591.firebaseapp.com","messagingSenderId":"638359914064","measurementId":"G-ZGSTWRR0CV","projectNumber":"638359914064","version":"2"}

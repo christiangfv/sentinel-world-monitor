@@ -205,9 +205,9 @@ export function AlertPreferences({ className = '' }: AlertPreferencesProps) {
                     {/* Estado */}
                     <div className="text-right">
                       {isSaving ? (
-                        <LoadingSpinner size="sm" />
+                        <LoadingSpinner />
                       ) : (
-                        <Badge variant={pref.pushEnabled ? 'secondary' : 'outline'}>
+                        <Badge variant={pref.pushEnabled ? 'success' : 'secondary'}>
                           {pref.pushEnabled ? 'Activo' : 'Inactivo'}
                         </Badge>
                       )}
@@ -222,7 +222,7 @@ export function AlertPreferences({ className = '' }: AlertPreferencesProps) {
                     {Object.entries(config.severityLabels).map(([level, label]) => (
                       <Badge
                         key={level}
-                        variant={parseInt(level) >= pref.minSeverity ? 'outline' : 'secondary'}
+                        variant={parseInt(level) >= pref.minSeverity ? 'plasma' : 'secondary'}
                         className="text-xs"
                       >
                         {label}

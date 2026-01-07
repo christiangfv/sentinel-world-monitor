@@ -1,174 +1,109 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import type { EventFilters } from '@/lib/types';
-import { DisasterType } from '@/lib/types';
-import { DISASTER_TYPES, DISASTER_CONFIGS } from '@/lib/constants/disasters';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { useState } from 'react'
+import type { EventFilters } from '@/lib/types'
+import { DisasterType } from '@/lib/types'
+import { DISASTER_TYPES, DISASTER_CONFIGS } from '@/lib/constants/disasters'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 
-interface EventFiltersProps {
-  filters: EventFilters;
-  onFiltersChange: (filters: EventFilters) => void;
-  className?: string;
+interface EventFiltersComponentProps {
+  filters: EventFilters
+  onFilterChange: (filters: EventFilters) => void
 }
 
-export function EventFilters({
-  filters,
-  onFiltersChange,
-  className = ''
-}: EventFiltersProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+const severities = [
+  { value: 1, label: 'Bajo', color: '#4ADE80' },
+  { value: 2, label: 'Medio', color: '#FBBF24' },
+  { value: 3, label: 'Alto', color: '#D4B57A' },
+  { value: 4, label: 'Crítico', color: '#F87171' },
+]
 
-  const handleSeverityChange = (severity: number) => {
-    onFiltersChange({
-      ...filters,
-      minSeverity: severity as any // Type assertion for now
-    });
-  };
+export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersComponentProps) {
+  const [open, setOpen] = useState(false)
 
-  const handleDisasterTypeToggle = (disasterType: DisasterType) => {
-    const currentTypes = filters.disasterTypes || [];
-    const newTypes = currentTypes.includes(disasterType)
-      ? currentTypes.filter(type => type !== disasterType)
-      : [...currentTypes, disasterType];
+  const toggleType = (type: DisasterType) => {
+    const current = filters.disasterTypes || DISASTER_TYPES
+    const updated = current.includes(type)
+      ? current.filter(t => t !== type)
+      : [...current, type]
+    onFilterChange({ ...filters, disasterTypes: updated.length ? updated : DISASTER_TYPES })
+  }
 
-    onFiltersChange({
-      ...filters,
-      disasterTypes: newTypes.length > 0 ? newTypes : DISASTER_TYPES
-    });
-  };
+  const setSeverity = (s: 1 | 2 | 3 | 4) => {
+    onFilterChange({ ...filters, minSeverity: s })
+  }
 
-  const handleSelectAllTypes = () => {
-    onFiltersChange({
-      ...filters,
-      disasterTypes: DISASTER_TYPES
-    });
-  };
-
-  const handleClearAllTypes = () => {
-    onFiltersChange({
-      ...filters,
-      disasterTypes: []
-    });
-  };
-
-  const activeTypesCount = (filters.disasterTypes || []).length;
-  const totalTypesCount = DISASTER_TYPES.length;
+  const activeCount = (filters.disasterTypes || DISASTER_TYPES).length
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Filtros</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            {isExpanded ? 'Ocultar' : 'Mostrar'} filtros
-          </Button>
+    <div className="bg-[#0D0E14]/95 backdrop-blur-sm border border-[#4A5060]/30 rounded-xl">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-3 flex items-center justify-between text-sm"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-[#D4B57A]">⚙️</span>
+          <span className="text-[#E8E8F0]">Filtros</span>
+          <Badge variant="secondary">{activeCount}/{DISASTER_TYPES.length}</Badge>
         </div>
-      </CardHeader>
+        <svg
+          className={`w-4 h-4 text-[#8890A0] transition-transform ${open ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
 
-      {isExpanded && (
-        <CardContent className="space-y-6">
-          {/* Filtro por severidad */}
+      {open && (
+        <div className="p-4 pt-0 space-y-4 border-t border-[#4A5060]/30">
+          {/* Severidad */}
           <div>
-            <h4 className="font-medium mb-3">Severidad mínima</h4>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((severity) => (
-                <Button
-                  key={severity}
-                  variant={filters.minSeverity === severity ? "solid" : "outline"}
-                  size="sm"
-                  onClick={() => handleSeverityChange(severity)}
-                  className="flex items-center gap-1"
+            <label className="text-xs text-[#8890A0] mb-2 block">Severidad mínima</label>
+            <div className="flex gap-1">
+              {severities.map(s => (
+                <button
+                  key={s.value}
+                  onClick={() => setSeverity(s.value as 1 | 2 | 3 | 4)}
+                  className={`px-3 py-1.5 text-xs rounded-md flex items-center gap-1.5 transition-colors ${
+                    filters.minSeverity === s.value
+                      ? 'bg-[#D4B57A]/20 text-[#D4B57A] border border-[#D4B57A]/30'
+                      : 'bg-[#1A1B22] text-[#8890A0] border border-transparent hover:border-[#4A5060]'
+                  }`}
                 >
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: getSeverityColor(severity) }}
-                  />
-                  {severity}
-                </Button>
+                  <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+                  {s.label}
+                </button>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Mostrar eventos de severidad {filters.minSeverity} o superior
-            </p>
           </div>
 
-          {/* Filtro por tipo de desastre */}
+          {/* Tipos */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium">
-                Tipos de desastre ({activeTypesCount}/{totalTypesCount})
-              </h4>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSelectAllTypes}
-                  disabled={activeTypesCount === totalTypesCount}
-                >
-                  Todos
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearAllTypes}
-                  disabled={activeTypesCount === 0}
-                >
-                  Ninguno
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-              {DISASTER_TYPES.map((type) => {
-                const config = DISASTER_CONFIGS[type];
-                const isActive = (filters.disasterTypes || []).includes(type);
-
+            <label className="text-xs text-[#8890A0] mb-2 block">Tipos de evento</label>
+            <div className="flex flex-wrap gap-1">
+              {DISASTER_TYPES.map(type => {
+                const active = (filters.disasterTypes || DISASTER_TYPES).includes(type)
+                const cfg = DISASTER_CONFIGS[type]
                 return (
-                  <Button
+                  <button
                     key={type}
-                    variant={isActive ? "solid" : "outline"}
-                    size="sm"
-                    onClick={() => handleDisasterTypeToggle(type)}
-                    className="h-auto p-3 flex flex-col items-center gap-1 text-center"
+                    onClick={() => toggleType(type)}
+                    className={`px-2 py-1 text-xs rounded-md flex items-center gap-1 transition-colors ${
+                      active
+                        ? 'bg-[#7088A0]/20 text-[#7088A0] border border-[#7088A0]/30'
+                        : 'bg-[#1A1B22] text-[#8890A0] border border-transparent hover:border-[#4A5060]'
+                    }`}
                   >
-                    <span className="text-lg">{config.icon}</span>
-                    <span className="text-xs">{config.nameEs}</span>
-                  </Button>
-                );
+                    <span>{cfg.icon}</span>
+                    {cfg.nameEs}
+                  </button>
+                )
               })}
             </div>
           </div>
-
-          {/* Filtro por fecha (futuro) */}
-          <div>
-            <h4 className="font-medium mb-3">Rango de fechas</h4>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">Próximamente</Badge>
-              <span className="text-sm text-muted-foreground">
-                Filtro por fechas personalizadas
-              </span>
-            </div>
-          </div>
-        </CardContent>
+        </div>
       )}
-    </Card>
-  );
-}
-
-// Función helper para obtener color de severidad
-function getSeverityColor(severity: number): string {
-  const colors = {
-    1: '#22c55e',
-    2: '#eab308',
-    3: '#f97316',
-    4: '#ef4444'
-  };
-  return colors[severity as keyof typeof colors] || colors[1];
+    </div>
+  )
 }

@@ -1,35 +1,29 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
+'use client'
 
-const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-  {
-    variants: {
-      variant: {
-        default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
-        secondary: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        destructive: 'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
-        severity1: 'border-transparent bg-severity-1 text-white',
-        severity2: 'border-transparent bg-severity-2 text-white',
-        severity3: 'border-transparent bg-severity-3 text-white',
-        severity4: 'border-transparent bg-severity-4 text-white',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  }
-);
+import { cn } from '@/lib/utils'
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
-
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  );
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: 'plasma' | 'mist' | 'success' | 'warning' | 'danger' | 'secondary'
 }
 
-export { Badge, badgeVariants };
+export function Badge({ className, variant = 'plasma', ...props }: BadgeProps) {
+  const variants = {
+    plasma: 'bg-[#D4B57A]/15 text-[#D4B57A] border-[#D4B57A]/30',
+    mist: 'bg-[#7088A0]/15 text-[#7088A0] border-[#7088A0]/30',
+    success: 'bg-[#4ADE80]/15 text-[#4ADE80] border-[#4ADE80]/30',
+    warning: 'bg-[#FBBF24]/15 text-[#FBBF24] border-[#FBBF24]/30',
+    danger: 'bg-[#F87171]/15 text-[#F87171] border-[#F87171]/30',
+    secondary: 'bg-[#4A5060]/30 text-[#8890A0] border-[#4A5060]/40',
+  }
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border',
+        variants[variant],
+        className
+      )}
+      {...props}
+    />
+  )
+}

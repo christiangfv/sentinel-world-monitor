@@ -1,44 +1,29 @@
-import { forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+'use client'
 
-interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
-  size?: 'sm' | 'md' | 'lg';
+interface SpinnerProps {
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
 }
 
-const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
-  ({ className, size = 'md', ...props }, ref) => {
-    const sizeClasses = {
-      sm: 'h-4 w-4',
-      md: 'h-6 w-6',
-      lg: 'h-8 w-8'
-    };
-
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'animate-spin rounded-full border-2 border-border border-t-primary-500',
-          sizeClasses[size],
-          className
-        )}
-        {...props}
-      />
-    );
+export function Spinner({ size = 'md', className = '' }: SpinnerProps) {
+  const sizes = {
+    sm: 'w-4 h-4 border-2',
+    md: 'w-6 h-6 border-2',
+    lg: 'w-8 h-8 border-3',
   }
-);
-Spinner.displayName = 'Spinner';
 
-interface LoadingSpinnerProps {
-  text?: string;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
+  return (
+    <div
+      className={`${sizes[size]} border-[#D4B57A] border-t-transparent rounded-full animate-spin ${className}`}
+    />
+  )
 }
 
-const LoadingSpinner = ({ text = 'Cargando...', size = 'md', className }: LoadingSpinnerProps) => (
-  <div className={cn('flex flex-col items-center justify-center gap-2', className)}>
-    <Spinner size={size} />
-    {text && <p className="text-sm text-muted-foreground">{text}</p>}
-  </div>
-);
-
-export { Spinner, LoadingSpinner };
+export function LoadingSpinner({ text }: { text?: string }) {
+  return (
+    <div className="flex flex-col items-center gap-3 py-8">
+      <Spinner size="lg" />
+      {text && <p className="text-[#8890A0] text-sm">{text}</p>}
+    </div>
+  )
+}

@@ -191,7 +191,7 @@ export function ZoneForm({ initialData, onSubmit, onCancel, title }: ZoneFormPro
                 disabled={isGettingLocation}
               >
                 {isGettingLocation ? (
-                  <LoadingSpinner size="sm" />
+                  <LoadingSpinner />
                 ) : (
                   '📍 Mi ubicación'
                 )}
@@ -273,7 +273,7 @@ export function ZoneForm({ initialData, onSubmit, onCancel, title }: ZoneFormPro
             disabled={isSubmitting}
             className="flex-1"
           >
-            {isSubmitting ? <LoadingSpinner size="sm" /> : null}
+            {isSubmitting ? <LoadingSpinner /> : null}
             {initialData ? 'Actualizar Zona' : 'Crear Zona'}
           </Button>
         </div>

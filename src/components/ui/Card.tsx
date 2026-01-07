@@ -1,51 +1,35 @@
-import { Card as ChakraCard } from '@chakra-ui/react'
-import { forwardRef } from 'react'
+'use client'
+
 import { cn } from '@/lib/utils'
 
-const Card = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Root>>(
-  ({ className, ...props }, ref) => (
-    <ChakraCard.Root
-      ref={ref}
-      className={cn('shadow-soft', className)}
+export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        'bg-[#1A1B22] border border-[#4A5060]/30 rounded-xl transition-all duration-300 hover:border-[#4A5060]/50',
+        className
+      )}
       {...props}
     />
   )
-)
-Card.displayName = 'Card'
+}
 
-const CardHeader = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Header>>(
-  ({ className, ...props }, ref) => (
-    <ChakraCard.Header ref={ref} className={className} {...props} />
-  )
-)
-CardHeader.displayName = 'CardHeader'
+export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('p-6 pb-2', className)} {...props} />
+}
 
-const CardTitle = forwardRef<HTMLHeadingElement, React.ComponentProps<typeof ChakraCard.Title>>(
-  ({ className, ...props }, ref) => (
-    <ChakraCard.Title ref={ref} className={className} {...props} />
-  )
-)
-CardTitle.displayName = 'CardTitle'
+export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return <h3 className={cn('text-[#E8E8F0] font-semibold', className)} {...props} />
+}
 
-const CardDescription = forwardRef<HTMLParagraphElement, React.ComponentProps<typeof ChakraCard.Description>>(
-  ({ className, ...props }, ref) => (
-    <ChakraCard.Description ref={ref} className={className} {...props} />
-  )
-)
-CardDescription.displayName = 'CardDescription'
+export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn('text-[#8890A0] text-sm mt-1', className)} {...props} />
+}
 
-const CardContent = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Body>>(
-  ({ className, ...props }, ref) => (
-    <ChakraCard.Body ref={ref} className={className} {...props} />
-  )
-)
-CardContent.displayName = 'CardContent'
+export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('p-6 pt-4', className)} {...props} />
+}
 
-const CardFooter = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Footer>>(
-  ({ className, ...props }, ref) => (
-    <ChakraCard.Footer ref={ref} className={className} {...props} />
-  )
-)
-CardFooter.displayName = 'CardFooter'
-
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('p-6 pt-0 flex gap-2', className)} {...props} />
+}

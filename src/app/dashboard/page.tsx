@@ -58,15 +58,15 @@ export default function DashboardPage() {
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span>Sismos</span>
-                    <Badge variant="severity1">Activado</Badge>
+                    <Badge variant="success">Activado</Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span>Incendios</span>
-                    <Badge variant="severity1">Activado</Badge>
+                    <Badge variant="success">Activado</Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span>Inundaciones</span>
-                    <Badge variant="severity1">Activado</Badge>
+                    <Badge variant="success">Activado</Badge>
                   </div>
                 </div>
               </CardContent>

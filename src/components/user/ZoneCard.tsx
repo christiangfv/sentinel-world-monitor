@@ -27,7 +27,7 @@ export function ZoneCard({ zone, onEdit, onDelete, onToggle, className = '' }: Z
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="font-semibold text-lg">{zone.name}</h3>
-              <Badge variant={zone.isActive ? 'secondary' : 'outline'}>
+              <Badge variant={zone.isActive ? 'success' : 'secondary'}>
                 {zone.isActive ? 'Activa' : 'Inactiva'}
               </Badge>
             </div>
@@ -48,7 +48,7 @@ export function ZoneCard({ zone, onEdit, onDelete, onToggle, className = '' }: Z
           <div className="flex gap-2 ml-4">
             <Button
               size="sm"
-              variant={zone.isActive ? "solid" : "outline"}
+              variant={zone.isActive ? "plasma" : "outline"}
               onClick={onToggle}
               className="min-w-[80px]"
             >
