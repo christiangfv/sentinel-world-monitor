@@ -8,6 +8,11 @@ initializeApp();
 // Exportar todas las funciones
 export { fetchUSGSEvents } from './fetchUSGS';
 export { fetchGDACSEvents } from './fetchGDACS';
+export { fetchCSNEvents } from './fetchCSN';
+export { fetchEMSCvents } from './fetchEMSC';
+export { fetchBOMEvents } from './fetchBOM';
+export { fetchNHCEvents } from './fetchNHC';
+export { fetchJMAEvents } from './fetchJMA';
 
 // Funciones de utilidad que pueden ser útiles
 export const testConnection = async () => {
