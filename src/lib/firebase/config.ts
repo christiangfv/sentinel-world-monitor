@@ -13,12 +13,28 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Validar configuración antes de inicializar
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error('Firebase config incomplete:', {
+    hasApiKey: !!firebaseConfig.apiKey,
+    hasProjectId: !!firebaseConfig.projectId,
+    hasAuthDomain: !!firebaseConfig.authDomain,
+  });
+  throw new Error('Firebase configuration is incomplete. Check environment variables.');
+}
+
 // Inicializar Firebase solo si no está ya inicializado
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 // Servicios de Firebase
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+console.log('Firebase initialized:', {
+  projectId: firebaseConfig.projectId,
+  hasAuth: !!auth,
+  hasDb: !!db,
+});
 
 // Messaging solo en navegador (se inicializará dinámicamente)
 export const messaging = null; // Se inicializará en runtime si es soportado

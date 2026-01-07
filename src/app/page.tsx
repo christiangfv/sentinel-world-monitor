@@ -8,12 +8,30 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
+  // Debug: verificar variables de entorno
+  useEffect(() => {
+    console.log('Environment check:', {
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      hasProjectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    });
+  }, []);
   const { user } = useAuth();
-  const { events, loading: eventsLoading } = useEvents();
+  const { events, loading: eventsLoading, error: eventsError } = useEvents();
   const { zones: userZones } = useUserZones();
   const router = useRouter();
+
+  // Debug: mostrar errores en consola
+  useEffect(() => {
+    if (eventsError) {
+      console.error('Events error:', eventsError);
+    }
+    console.log('Events loaded:', events.length, 'Loading:', eventsLoading);
+  }, [events, eventsLoading, eventsError]);
 
   const handleEventClick = (event: any) => {
     router.push(`/event/${event.id}`);
