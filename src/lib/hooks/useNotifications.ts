@@ -168,3 +168,4 @@ export function useRecentNotifications(hours: number = 24) {
     error
   };
 }
+

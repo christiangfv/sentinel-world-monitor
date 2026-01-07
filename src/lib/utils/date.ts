@@ -93,3 +93,4 @@ export function getDefaultDateRange(): { start: Date; end: Date } {
 
   return { start, end };
 }
+

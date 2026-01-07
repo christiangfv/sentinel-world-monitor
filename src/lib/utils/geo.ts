@@ -89,3 +89,4 @@ export function formatLocationName(locationName: string): string {
     .replace(/\s+to\s+/i, ' a ') // Traducir "to" a "a"
     .trim();
 }
+

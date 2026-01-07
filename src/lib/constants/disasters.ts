@@ -130,3 +130,4 @@ export const POLLING_CONFIG = {
     endpoint: 'https://www.gdacs.org/xml/rss.xml'
   }
 } as const;
+

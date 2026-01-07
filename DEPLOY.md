@@ -226,3 +226,4 @@ Si tienes problemas durante el deploy:
 ---
 
 **¡Tu aplicación Sentinel está lista para salvar vidas monitoreando desastres naturales en tiempo real!** 🌍⚡🔔
+

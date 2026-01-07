@@ -185,3 +185,4 @@ export function isAuthenticated(): boolean {
 export function getCurrentUser(): FirebaseUser | null {
   return auth.currentUser;
 }
+

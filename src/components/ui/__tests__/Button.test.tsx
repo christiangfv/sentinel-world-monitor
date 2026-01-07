@@ -64,3 +64,4 @@ describe('Button', () => {
     expect(button).toHaveAttribute('type', 'button')
   })
 })
+

@@ -89,3 +89,4 @@ export function meetsSeverityPreference(
 ): boolean {
   return eventSeverity >= userMinSeverity;
 }
+
