@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { DisasterEvent, EventFilters } from '@/lib/types';
 import { getEvents, subscribeToEvents, getEventById } from '@/lib/firebase/firestore';
 
-export function useEvents(filters: EventFilters = {}) {
+export function useEvents(filters: EventFilters = { disasterTypes: [], minSeverity: 1 }) {
   const [events, setEvents] = useState<DisasterEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +120,7 @@ export function useEvent(eventId: string | null) {
 // Hook para eventos recientes (últimos N eventos)
 export function useRecentEvents(limit: number = 10) {
   const filters: EventFilters = {
+    disasterTypes: [],
     minSeverity: 1,
     dateRange: {
       start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Últimos 7 días

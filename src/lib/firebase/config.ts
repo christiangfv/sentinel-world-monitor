@@ -20,10 +20,8 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Messaging solo en navegador y si está soportado
-export const messaging = typeof window !== 'undefined' && isSupported()
-  ? getMessaging(app)
-  : null;
+// Messaging solo en navegador (se inicializará dinámicamente)
+export const messaging = null; // Se inicializará en runtime si es soportado
 
 // VAPID Key para FCM (obtener de Firebase Console > Project Settings > Cloud Messaging)
 export const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;

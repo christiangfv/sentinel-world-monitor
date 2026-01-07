@@ -35,7 +35,7 @@ export const fetchUSGSEvents = onSchedule({
   region: 'southamerica-east1',
   timeoutSeconds: 60,
   memory: '256MiB',
-}, async () => {
+}, async (): Promise<void> => {
   logger.info('🚀 Iniciando fetch de eventos del USGS');
 
   try {
@@ -139,13 +139,7 @@ export const fetchUSGSEvents = onSchedule({
     }
 
     logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
-
-    return {
-      success: true,
-      processed: processedCount,
-      skipped: skippedCount,
-      total: data.features.length
-    };
+    logger.info('✅ Fetch USGS completado exitosamente');
 
   } catch (error) {
     logger.error('❌ Error en fetchUSGSEvents:', error);

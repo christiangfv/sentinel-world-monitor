@@ -116,7 +116,6 @@ export async function showTestNotification(): Promise<void> {
       body: 'Esta es una notificación de prueba de Sentinel',
       icon: '/icons/icon-192.png',
       badge: '/icons/badge-72.png',
-      vibrate: [200, 100, 200],
       tag: 'sentinel-test'
     });
   } else {

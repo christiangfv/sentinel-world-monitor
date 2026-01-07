@@ -10,6 +10,7 @@ interface EventCardProps {
   event: DisasterEvent;
   compact?: boolean;
   showMapLink?: boolean;
+  onClick?: () => void;
   className?: string;
 }
 
@@ -17,6 +18,7 @@ export function EventCard({
   event,
   compact = false,
   showMapLink = true,
+  onClick,
   className = ''
 }: EventCardProps) {
   const config = DISASTER_CONFIGS[event.disasterType];
@@ -25,7 +27,7 @@ export function EventCard({
 
   if (compact) {
     return (
-      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${className}`}>
+      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${className}`} onClick={onClick}>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <div className="text-2xl">{config.icon}</div>
@@ -54,7 +56,7 @@ export function EventCard({
   }
 
   return (
-    <Link href={`/event/${event.id}`}>
+    <Link href={`/event/${event.id}`} onClick={onClick}>
       <Card className={`hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 ${className}`}
             style={{ borderLeftColor: severityColor }}>
         <CardContent className="p-6">

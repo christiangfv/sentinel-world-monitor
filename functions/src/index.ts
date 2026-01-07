@@ -26,7 +26,7 @@ export const testConnection = async () => {
     return { success: true, message: 'All connections OK' };
   } catch (error) {
     console.error('❌ Connection test failed:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 };
 
@@ -56,7 +56,7 @@ export const cleanupExpiredEvents = async () => {
     return { cleaned: expiredEvents.size };
   } catch (error) {
     console.error('❌ Error cleaning up expired events:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error('Unknown error');
   }
 };
 
@@ -79,6 +79,6 @@ export const getSystemStats = async () => {
     };
   } catch (error) {
     console.error('❌ Error getting system stats:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error('Unknown error');
   }
 };

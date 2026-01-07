@@ -13,7 +13,7 @@ export const sendNotifications = onDocumentCreated({
   region: 'southamerica-east1',
   timeoutSeconds: 60,
   memory: '256MiB',
-}, async (event) => {
+}, async (event): Promise<void> => {
   const eventData = event.data?.data();
   if (!eventData) {
     logger.error('No event data received');
@@ -141,11 +141,11 @@ export const sendNotifications = onDocumentCreated({
               }
             },
             android: {
-              priority: 'high',
+              priority: 'high' as const,
               notification: {
                 sound: 'default',
                 channelId: 'disaster-alerts',
-                priority: 'high',
+                priority: 'high' as const,
                 defaultVibrateTimings: true,
                 defaultSound: true
               }
@@ -203,11 +203,7 @@ export const sendNotifications = onDocumentCreated({
       logger.info(`ℹ️ No se enviaron notificaciones para evento ${eventId}`);
     }
 
-    return {
-      success: true,
-      notificationsSent: totalNotifications,
-      eventId
-    };
+    logger.info('✅ Envío de notificaciones completado');
 
   } catch (error) {
     logger.error('❌ Error en sendNotifications:', error);

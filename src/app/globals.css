@@ -187,25 +187,23 @@ body {
   @apply focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
-/* Improved focus styles for better accessibility */
-/* .focus-visible class removed due to compatibility issues */
 
 /* Better button focus states */
-button:focus-visible,
-[role="button"]:focus-visible {
-  @apply focus-visible;
+button:focus,
+[role="button"]:focus {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 /* Link focus states */
-a:focus-visible {
-  @apply focus-visible;
+a:focus {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 /* Input focus states */
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  @apply focus-visible;
+input:focus,
+textarea:focus,
+select:focus {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 /* Print styles */

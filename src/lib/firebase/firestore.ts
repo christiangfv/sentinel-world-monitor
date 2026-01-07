@@ -32,7 +32,7 @@ import {
 /**
  * Obtiene eventos con filtros aplicados
  */
-export async function getEvents(filters: EventFilters = {}): Promise<DisasterEvent[]> {
+export async function getEvents(filters: EventFilters = { disasterTypes: [], minSeverity: 1 }): Promise<DisasterEvent[]> {
   try {
     const constraints: QueryConstraint[] = [];
 
@@ -112,7 +112,7 @@ export async function getEventById(eventId: string): Promise<DisasterEvent | nul
  */
 export function subscribeToEvents(
   callback: (events: DisasterEvent[]) => void,
-  filters: EventFilters = {}
+  filters: EventFilters = { disasterTypes: [], minSeverity: 1 }
 ) {
   const constraints: QueryConstraint[] = [];
 

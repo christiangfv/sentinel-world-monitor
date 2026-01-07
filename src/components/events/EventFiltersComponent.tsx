@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { EventFilters, DisasterType } from '@/lib/types';
+import type { EventFilters } from '@/lib/types';
+import { DisasterType } from '@/lib/types';
 import { DISASTER_TYPES, DISASTER_CONFIGS } from '@/lib/constants/disasters';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -23,7 +24,7 @@ export function EventFilters({
   const handleSeverityChange = (severity: number) => {
     onFiltersChange({
       ...filters,
-      minSeverity: severity
+      minSeverity: severity as any // Type assertion for now
     });
   };
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DisasterEvent, EventFilters, DisasterType } from '@/lib/types';
 import { DISASTER_TYPES } from '@/lib/constants/disasters';
 import { EventCard } from './EventCard';
-import { EventFilters as EventFiltersComponent } from './EventFilters';
+import { EventFilters as EventFiltersComponent } from './EventFiltersComponent';
 import { LoadingSpinner } from '@/components/ui/Spinner';
 import { Button } from '@/components/ui/Button';
 

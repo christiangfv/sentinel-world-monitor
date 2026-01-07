@@ -52,7 +52,7 @@ export const fetchGDACSEvents = onSchedule({
   region: 'southamerica-east1',
   timeoutSeconds: 60,
   memory: '256MiB',
-}, async () => {
+}, async (): Promise<void> => {
   logger.info('🚀 Iniciando fetch de eventos del GDACS');
 
   try {
@@ -144,13 +144,7 @@ export const fetchGDACSEvents = onSchedule({
     }
 
     logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
-
-    return {
-      success: true,
-      processed: processedCount,
-      skipped: skippedCount,
-      total: events.length
-    };
+    logger.info('✅ Fetch GDACS completado exitosamente');
 
   } catch (error) {
     logger.error('❌ Error en fetchGDACSEvents:', error);
@@ -158,45 +152,42 @@ export const fetchGDACSEvents = onSchedule({
   }
 });
 
-// Parser básico de XML GDACS
+// Parser simplificado de XML GDACS
 function parseGDACSXML(xmlText: string): any[] {
   const events: any[] = [];
 
   try {
-    // Extraer items del RSS usando expresiones regulares
-    const itemRegex = /<item>(.*?)<\/item>/gs;
-    const titleRegex = /<title><!\[CDATA\[(.*?)\]\]><\/title>/;
-    const descriptionRegex = /<description><!\[CDATA\[(.*?)\]\]><\/description>/;
-    const linkRegex = /<link>(.*?)<\/link>/;
-    const guidRegex = /<guid>(.*?)<\/guid>/;
-    const pubDateRegex = /<pubDate>(.*?)<\/pubDate>/;
-    const latRegex = /<geo:lat>(.*?)<\/geo:lat>/;
-    const lngRegex = /<geo:long>(.*?)<\/geo:long>/;
+    // Método simplificado: buscar patrones básicos sin flag 's'
+    const items = xmlText.split('<item>').slice(1);
 
-    // GDACS specific fields
-    const alertLevelRegex = /<gdacs:alertlevel>(.*?)<\/gdacs:alertlevel>/;
-    const eventTypeRegex = /<gdacs:eventtype>(.*?)<\/gdacs:eventtype>/;
-    const countryRegex = /<gdacs:country>(.*?)<\/gdacs:country>/;
-    const glideRegex = /<gdacs:glide>(.*?)<\/gdacs:glide>/;
-    const versionRegex = /<gdacs:version>(.*?)<\/gdacs:version>/;
+    for (const item of items) {
+      const endIndex = item.indexOf('</item>');
+      if (endIndex === -1) continue;
 
-    let match;
-    while ((match = itemRegex.exec(xmlText)) !== null) {
-      const itemXml = match[1];
+      const itemContent = item.substring(0, endIndex);
 
-      const title = titleRegex.exec(itemXml)?.[1] || '';
-      const description = descriptionRegex.exec(itemXml)?.[1] || '';
-      const link = linkRegex.exec(itemXml)?.[1] || '';
-      const guid = guidRegex.exec(itemXml)?.[1] || '';
-      const pubDate = pubDateRegex.exec(itemXml)?.[1] || '';
-      const lat = parseFloat(latRegex.exec(itemXml)?.[1] || '0');
-      const lng = parseFloat(lngRegex.exec(itemXml)?.[1] || '0');
+      // Extraer datos básicos
+      const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
+      const descriptionMatch = itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/);
+      const linkMatch = itemContent.match(/<link>(.*?)<\/link>/);
+      const guidMatch = itemContent.match(/<guid>(.*?)<\/guid>/);
+      const pubDateMatch = itemContent.match(/<pubDate>(.*?)<\/pubDate>/);
+      const latMatch = itemContent.match(/<geo:lat>(.*?)<\/geo:lat>/);
+      const lngMatch = itemContent.match(/<geo:long>(.*?)<\/geo:long>/);
 
-      const alertLevel = alertLevelRegex.exec(itemXml)?.[1] || 'Green';
-      const eventType = eventTypeRegex.exec(itemXml)?.[1] || '';
-      const country = countryRegex.exec(itemXml)?.[1] || '';
-      const glide = glideRegex.exec(itemXml)?.[1] || '';
-      const version = parseInt(versionRegex.exec(itemXml)?.[1] || '1');
+      const alertLevelMatch = itemContent.match(/<gdacs:alertlevel>(.*?)<\/gdacs:alertlevel>/);
+      const countryMatch = itemContent.match(/<gdacs:country>(.*?)<\/gdacs:country>/);
+
+      const title = titleMatch?.[1] || '';
+      const description = descriptionMatch?.[1] || '';
+      const link = linkMatch?.[1] || '';
+      const guid = guidMatch?.[1] || '';
+      const pubDate = pubDateMatch?.[1] || '';
+      const lat = parseFloat(latMatch?.[1] || '0');
+      const lng = parseFloat(lngMatch?.[1] || '0');
+
+      const alertLevel = alertLevelMatch?.[1] || 'Green';
+      const country = countryMatch?.[1] || '';
 
       if (lat && lng && title) {
         events.push({
@@ -208,10 +199,8 @@ function parseGDACSXML(xmlText: string): any[] {
           lat,
           lng,
           alertLevel,
-          eventType,
           country,
-          glide,
-          version
+          version: 1
         });
       }
     }
