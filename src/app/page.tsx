@@ -1,3 +1,5 @@
+'use client';
+
 import { Header } from "@/components/layout/Header";
 import { DisasterMap } from "@/components/map/DisasterMap";
 import { useEvents } from "@/lib/hooks/useEvents";
