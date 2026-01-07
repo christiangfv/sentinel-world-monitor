@@ -81,7 +81,7 @@ export function EventFilters({
               {[1, 2, 3, 4].map((severity) => (
                 <Button
                   key={severity}
-                  variant={filters.minSeverity === severity ? "default" : "outline"}
+                  variant={filters.minSeverity === severity ? "solid" : "outline"}
                   size="sm"
                   onClick={() => handleSeverityChange(severity)}
                   className="flex items-center gap-1"
@@ -133,7 +133,7 @@ export function EventFilters({
                 return (
                   <Button
                     key={type}
-                    variant={isActive ? "default" : "outline"}
+                    variant={isActive ? "solid" : "outline"}
                     size="sm"
                     onClick={() => handleDisasterTypeToggle(type)}
                     className="h-auto p-3 flex flex-col items-center gap-1 text-center"

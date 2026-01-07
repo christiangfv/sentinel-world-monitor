@@ -1,72 +1,51 @@
-import { forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import { Card as ChakraCard } from '@chakra-ui/react'
+import { forwardRef } from 'react'
+import { cn } from '@/lib/utils'
 
-const Card = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+const Card = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Root>>(
   ({ className, ...props }, ref) => (
-    <div
+    <ChakraCard.Root
       ref={ref}
-      className={cn(
-        'rounded-lg border bg-card text-card-foreground shadow-sm',
-        className
-      )}
+      className={cn('shadow-soft', className)}
       {...props}
     />
   )
-);
-Card.displayName = 'Card';
+)
+Card.displayName = 'Card'
 
-const CardHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+const CardHeader = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Header>>(
   ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('flex flex-col space-y-1.5 p-6', className)}
-      {...props}
-    />
+    <ChakraCard.Header ref={ref} className={className} {...props} />
   )
-);
-CardHeader.displayName = 'CardHeader';
+)
+CardHeader.displayName = 'CardHeader'
 
-const CardTitle = forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
+const CardTitle = forwardRef<HTMLHeadingElement, React.ComponentProps<typeof ChakraCard.Title>>(
   ({ className, ...props }, ref) => (
-    <h3
-      ref={ref}
-      className={cn(
-        'text-2xl font-semibold leading-none tracking-tight',
-        className
-      )}
-      {...props}
-    />
+    <ChakraCard.Title ref={ref} className={className} {...props} />
   )
-);
-CardTitle.displayName = 'CardTitle';
+)
+CardTitle.displayName = 'CardTitle'
 
-const CardDescription = forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
+const CardDescription = forwardRef<HTMLParagraphElement, React.ComponentProps<typeof ChakraCard.Description>>(
   ({ className, ...props }, ref) => (
-    <p
-      ref={ref}
-      className={cn('text-sm text-muted-foreground', className)}
-      {...props}
-    />
+    <ChakraCard.Description ref={ref} className={className} {...props} />
   )
-);
-CardDescription.displayName = 'CardDescription';
+)
+CardDescription.displayName = 'CardDescription'
 
-const CardContent = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+const CardContent = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Body>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+    <ChakraCard.Body ref={ref} className={className} {...props} />
   )
-);
-CardContent.displayName = 'CardContent';
+)
+CardContent.displayName = 'CardContent'
 
-const CardFooter = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+const CardFooter = forwardRef<HTMLDivElement, React.ComponentProps<typeof ChakraCard.Footer>>(
   ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('flex items-center p-6 pt-0', className)}
-      {...props}
-    />
+    <ChakraCard.Footer ref={ref} className={className} {...props} />
   )
-);
-CardFooter.displayName = 'CardFooter';
+)
+CardFooter.displayName = 'CardFooter'
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

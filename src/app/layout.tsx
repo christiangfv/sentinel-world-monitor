@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/hooks/useAuth";
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
+import { Provider } from "@/components/ui/provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -103,10 +104,12 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-background text-foreground`}>
-        <AuthProvider>
-          {children}
-          <PWAInstallPrompt />
-        </AuthProvider>
+        <Provider>
+          <AuthProvider>
+            {children}
+            <PWAInstallPrompt />
+          </AuthProvider>
+        </Provider>
       </body>
     </html>
   );

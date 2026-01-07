@@ -47,8 +47,8 @@ export function MapControls({
     <div className={`absolute top-4 right-4 z-[1000] space-y-2 ${className}`}>
       {/* Botón de ubicación actual */}
       <Button
-        size="icon"
-        variant="secondary"
+        size="sm"
+        variant="subtle"
         className="bg-surface border border-border shadow-lg hover:bg-accent"
         onClick={handleMyLocation}
         title="Mi ubicación"
@@ -59,8 +59,8 @@ export function MapControls({
       {/* Botón de mostrar/ocultar zonas */}
       {onToggleZones && (
         <Button
-          size="icon"
-          variant={showZones ? "default" : "secondary"}
+          size="sm"
+          variant={showZones ? "solid" : "subtle"}
           className="bg-surface border border-border shadow-lg"
           onClick={onToggleZones}
           title={showZones ? "Ocultar zonas" : "Mostrar zonas"}
@@ -71,8 +71,8 @@ export function MapControls({
 
       {/* Botón de filtros */}
       <Button
-        size="icon"
-        variant="secondary"
+        size="sm"
+        variant="subtle"
         className="bg-surface border border-border shadow-lg"
         onClick={() => setShowFilters(!showFilters)}
         title="Filtros"

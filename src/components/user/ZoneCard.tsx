@@ -48,7 +48,7 @@ export function ZoneCard({ zone, onEdit, onDelete, onToggle, className = '' }: Z
           <div className="flex gap-2 ml-4">
             <Button
               size="sm"
-              variant={zone.isActive ? "default" : "outline"}
+              variant={zone.isActive ? "solid" : "outline"}
               onClick={onToggle}
               className="min-w-[80px]"
             >
