@@ -33,8 +33,8 @@ exports.sendNotifications = (0, firestore_1.onDocumentCreated)({
             firebase_functions_1.logger.warn(`⚠️ Evento ${eventId} tiene coordenadas inválidas, omitiendo notificaciones`);
             return;
         }
-        // Solo procesar eventos de severidad 3 o superior para reducir carga
-        if (eventData.severity < 3) {
+        // Solo procesar eventos de severidad 4 o superior (críticos/catastróficos) para reducir carga
+        if (eventData.severity < 4) {
             firebase_functions_1.logger.info(`ℹ️ Evento ${eventId} severidad ${eventData.severity} insuficiente, omitiendo notificaciones`);
             return;
         }
