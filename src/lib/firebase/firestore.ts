@@ -57,12 +57,17 @@ export async function getEvents(filters: EventFilters = { disasterTypes: [], min
 
     return snapshot.docs.map(doc => {
       const data = doc.data();
+      // Manejar tanto GeoPoint (.latitude/.longitude) como objeto simple (.lat/.lng)
+      const location = data.location;
+      const lat = location?.latitude ?? location?.lat;
+      const lng = location?.longitude ?? location?.lng;
+      
       return {
         id: doc.id,
         ...data,
         location: {
-          lat: data.location.latitude,
-          lng: data.location.longitude
+          lat,
+          lng
         },
         eventTime: data.eventTime.toDate(),
         expiresAt: data.expiresAt?.toDate(),
@@ -86,12 +91,17 @@ export async function getEventById(eventId: string): Promise<DisasterEvent | nul
 
     if (docSnap.exists()) {
       const data = docSnap.data();
+      // Manejar tanto GeoPoint (.latitude/.longitude) como objeto simple (.lat/.lng)
+      const location = data.location;
+      const lat = location?.latitude ?? location?.lat;
+      const lng = location?.longitude ?? location?.lng;
+      
       return {
         id: docSnap.id,
         ...data,
         location: {
-          lat: data.location.latitude,
-          lng: data.location.longitude
+          lat,
+          lng
         },
         eventTime: data.eventTime.toDate(),
         expiresAt: data.expiresAt?.toDate(),
@@ -135,12 +145,17 @@ export function subscribeToEvents(
   return onSnapshot(q, (snapshot) => {
     const events = snapshot.docs.map(doc => {
       const data = doc.data();
+      // Manejar tanto GeoPoint (.latitude/.longitude) como objeto simple (.lat/.lng)
+      const location = data.location;
+      const lat = location?.latitude ?? location?.lat;
+      const lng = location?.longitude ?? location?.lng;
+      
       return {
         id: doc.id,
         ...data,
         location: {
-          lat: data.location.latitude,
-          lng: data.location.longitude
+          lat,
+          lng
         },
         eventTime: data.eventTime.toDate(),
         expiresAt: data.expiresAt?.toDate(),

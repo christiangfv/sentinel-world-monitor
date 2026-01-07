@@ -15,7 +15,7 @@ exports.sendNotifications = (0, firestore_1.onDocumentCreated)({
     timeoutSeconds: 60,
     memory: '256MiB',
 }, async (event) => {
-    var _a;
+    var _a, _b, _c;
     const eventData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
     if (!eventData) {
         firebase_functions_1.logger.error('No event data received');
@@ -26,20 +26,55 @@ exports.sendNotifications = (0, firestore_1.onDocumentCreated)({
     try {
         const eventLocation = eventData.location;
         const eventRadiusKm = eventData.radiusKm || 100;
+        // Validar que el evento tenga coordenadas válidas
+        if (!eventLocation || typeof eventLocation.latitude !== 'number' ||
+            typeof eventLocation.longitude !== 'number' ||
+            isNaN(eventLocation.latitude) || isNaN(eventLocation.longitude)) {
+            firebase_functions_1.logger.warn(`⚠️ Evento ${eventId} tiene coordenadas inválidas, omitiendo notificaciones`);
+            return;
+        }
+        // Solo procesar eventos de severidad 3 o superior para reducir carga
+        if (eventData.severity < 3) {
+            firebase_functions_1.logger.info(`ℹ️ Evento ${eventId} severidad ${eventData.severity} insuficiente, omitiendo notificaciones`);
+            return;
+        }
+        // Verificar que el evento esté en una región poblada (aproximadamente dentro de -60° a 20° lat, -90° a -30° lng para Sudamérica)
+        const { latitude, longitude } = eventLocation;
+        if (latitude < -60 || latitude > 20 || longitude < -90 || longitude > -30) {
+            firebase_functions_1.logger.info(`ℹ️ Evento ${eventId} fuera de región relevante (${latitude}, ${longitude}), omitiendo notificaciones`);
+            return;
+        }
+        // Verificar que el evento no sea muy antiguo (más de 1 hora)
+        const eventTime = ((_c = (_b = eventData.eventTime) === null || _b === void 0 ? void 0 : _b.toDate) === null || _c === void 0 ? void 0 : _c.call(_b)) || new Date(eventData.eventTime);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - eventTime.getTime()) / (1000 * 60 * 60);
+        if (hoursDiff > 1) {
+            firebase_functions_1.logger.info(`ℹ️ Evento ${eventId} muy antiguo (${hoursDiff.toFixed(1)}h), omitiendo notificaciones`);
+            return;
+        }
         // Obtener configuración de desastres
         const disasterConfig = getDisasterConfig(eventData.disasterType);
         if (!disasterConfig) {
             firebase_functions_1.logger.warn(`Configuración no encontrada para tipo de desastre: ${eventData.disasterType}`);
             return;
         }
-        // Buscar usuarios con zonas activas que intersecten con el evento
+        // Verificar primero si hay usuarios con tokens FCM antes de hacer consultas complejas
         const usersSnapshot = await db.collection('users')
             .where('fcmToken', '!=', null)
+            .limit(1) // Solo verificar si existe al menos uno
             .get();
-        firebase_functions_1.logger.info(`👥 Encontrados ${usersSnapshot.size} usuarios con tokens FCM`);
+        if (usersSnapshot.empty) {
+            firebase_functions_1.logger.info(`ℹ️ No hay usuarios con tokens FCM registrados, omitiendo notificaciones`);
+            return;
+        }
+        // Ahora sí buscar todos los usuarios con tokens
+        const allUsersSnapshot = await db.collection('users')
+            .where('fcmToken', '!=', null)
+            .get();
+        firebase_functions_1.logger.info(`👥 Encontrados ${allUsersSnapshot.size} usuarios con tokens FCM`);
         const notifications = [];
         let totalNotifications = 0;
-        for (const userDoc of usersSnapshot.docs) {
+        for (const userDoc of allUsersSnapshot.docs) {
             try {
                 const userData = userDoc.data();
                 const userId = userDoc.id;

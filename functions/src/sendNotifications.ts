@@ -27,6 +27,37 @@ export const sendNotifications = onDocumentCreated({
     const eventLocation = eventData.location;
     const eventRadiusKm = eventData.radiusKm || 100;
 
+    // Validar que el evento tenga coordenadas válidas
+    if (!eventLocation || typeof eventLocation.latitude !== 'number' ||
+        typeof eventLocation.longitude !== 'number' ||
+        isNaN(eventLocation.latitude) || isNaN(eventLocation.longitude)) {
+      logger.warn(`⚠️ Evento ${eventId} tiene coordenadas inválidas, omitiendo notificaciones`);
+      return;
+    }
+
+    // Solo procesar eventos de severidad 3 o superior para reducir carga
+    if (eventData.severity < 3) {
+      logger.info(`ℹ️ Evento ${eventId} severidad ${eventData.severity} insuficiente, omitiendo notificaciones`);
+      return;
+    }
+
+    // Verificar que el evento esté en una región poblada (aproximadamente dentro de -60° a 20° lat, -90° a -30° lng para Sudamérica)
+    const { latitude, longitude } = eventLocation;
+    if (latitude < -60 || latitude > 20 || longitude < -90 || longitude > -30) {
+      logger.info(`ℹ️ Evento ${eventId} fuera de región relevante (${latitude}, ${longitude}), omitiendo notificaciones`);
+      return;
+    }
+
+    // Verificar que el evento no sea muy antiguo (más de 1 hora)
+    const eventTime = eventData.eventTime?.toDate?.() || new Date(eventData.eventTime);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - eventTime.getTime()) / (1000 * 60 * 60);
+
+    if (hoursDiff > 1) {
+      logger.info(`ℹ️ Evento ${eventId} muy antiguo (${hoursDiff.toFixed(1)}h), omitiendo notificaciones`);
+      return;
+    }
+
     // Obtener configuración de desastres
     const disasterConfig = getDisasterConfig(eventData.disasterType);
     if (!disasterConfig) {
@@ -34,17 +65,28 @@ export const sendNotifications = onDocumentCreated({
       return;
     }
 
-    // Buscar usuarios con zonas activas que intersecten con el evento
+    // Verificar primero si hay usuarios con tokens FCM antes de hacer consultas complejas
     const usersSnapshot = await db.collection('users')
+      .where('fcmToken', '!=', null)
+      .limit(1) // Solo verificar si existe al menos uno
+      .get();
+
+    if (usersSnapshot.empty) {
+      logger.info(`ℹ️ No hay usuarios con tokens FCM registrados, omitiendo notificaciones`);
+      return;
+    }
+
+    // Ahora sí buscar todos los usuarios con tokens
+    const allUsersSnapshot = await db.collection('users')
       .where('fcmToken', '!=', null)
       .get();
 
-    logger.info(`👥 Encontrados ${usersSnapshot.size} usuarios con tokens FCM`);
+    logger.info(`👥 Encontrados ${allUsersSnapshot.size} usuarios con tokens FCM`);
 
     const notifications: Promise<any>[] = [];
     let totalNotifications = 0;
 
-    for (const userDoc of usersSnapshot.docs) {
+    for (const userDoc of allUsersSnapshot.docs) {
       try {
         const userData = userDoc.data();
         const userId = userDoc.id;
