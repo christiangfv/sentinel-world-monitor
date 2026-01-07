@@ -1,6 +1,30 @@
 import { Header } from "@/components/layout/Header";
+import { DisasterMap } from "@/components/map/DisasterMap";
+import { useEvents } from "@/lib/hooks/useEvents";
+import { useUserZones } from "@/lib/hooks/useUserZones";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { user } = useAuth();
+  const { events, loading: eventsLoading } = useEvents();
+  const { zones: userZones } = useUserZones();
+  const router = useRouter();
+
+  const handleEventClick = (event: any) => {
+    router.push(`/event/${event.id}`);
+  };
+
+  const handleZoneClick = (zone: any) => {
+    if (user) {
+      router.push('/settings');
+    } else {
+      router.push('/login');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -15,58 +39,97 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Placeholder para el mapa principal */}
-        <div className="bg-surface border border-border rounded-lg p-8 text-center">
-          <div className="text-6xl mb-4">🌍</div>
-          <h2 className="text-2xl font-semibold mb-4">Mapa Interactivo</h2>
-          <p className="text-muted-foreground mb-6">
-            Próximamente: Mapa con eventos de desastres naturales en tiempo real
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="p-4 bg-severity-4/10 rounded-lg">
-              <div className="text-2xl mb-2">🌋</div>
-              <div className="text-sm font-medium">Severo</div>
-            </div>
-            <div className="p-4 bg-severity-3/10 rounded-lg">
-              <div className="text-2xl mb-2">🔥</div>
-              <div className="text-sm font-medium">Alto</div>
-            </div>
-            <div className="p-4 bg-severity-2/10 rounded-lg">
-              <div className="text-2xl mb-2">🌊</div>
-              <div className="text-sm font-medium">Moderado</div>
-            </div>
-            <div className="p-4 bg-severity-1/10 rounded-lg">
-              <div className="text-2xl mb-2">⚠️</div>
-              <div className="text-sm font-medium">Bajo</div>
-            </div>
-          </div>
+        {/* Mapa principal */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                🌍 Mapa de Eventos
+                {events.length > 0 && (
+                  <Badge variant="secondary">{events.length} eventos</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                Eventos de desastres naturales reportados en las últimas 24 horas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DisasterMap
+                events={events}
+                userZones={userZones}
+                height="500px"
+                onEventClick={handleEventClick}
+                onZoneClick={handleZoneClick}
+              />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Información del proyecto */}
-        <div className="mt-12 grid md:grid-cols-3 gap-6">
-          <div className="bg-surface border border-border rounded-lg p-6">
-            <div className="text-3xl mb-4">🔔</div>
-            <h3 className="text-lg font-semibold mb-2">Alertas en Tiempo Real</h3>
-            <p className="text-muted-foreground text-sm">
-              Recibe notificaciones push cuando ocurra un desastre cerca de tus zonas configuradas.
-            </p>
-          </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="text-3xl mb-4">🔔</div>
+              <CardTitle>Alertas en Tiempo Real</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-sm">
+                Recibe notificaciones push cuando ocurra un desastre cerca de tus zonas configuradas.
+              </CardDescription>
+            </CardContent>
+          </Card>
 
-          <div className="bg-surface border border-border rounded-lg p-6">
-            <div className="text-3xl mb-4">📱</div>
-            <h3 className="text-lg font-semibold mb-2">Aplicación PWA</h3>
-            <p className="text-muted-foreground text-sm">
-              Instálala en tu dispositivo y funciona sin conexión a internet.
-            </p>
-          </div>
+          <Card>
+            <CardHeader>
+              <div className="text-3xl mb-4">📱</div>
+              <CardTitle>Aplicación PWA</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-sm">
+                Instálala en tu dispositivo y funciona sin conexión a internet.
+              </CardDescription>
+            </CardContent>
+          </Card>
 
-          <div className="bg-surface border border-border rounded-lg p-6">
-            <div className="text-3xl mb-4">🎯</div>
-            <h3 className="text-lg font-semibold mb-2">Zonas Personalizadas</h3>
-            <p className="text-muted-foreground text-sm">
-              Configura zonas geográficas de interés y recibe alertas específicas.
-            </p>
-          </div>
+          <Card>
+            <CardHeader>
+              <div className="text-3xl mb-4">🎯</div>
+              <CardTitle>Zonas Personalizadas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-sm">
+                Configura zonas geográficas de interés y recibe alertas específicas.
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Estadísticas rápidas */}
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-severity-4">{events.filter(e => e.severity === 4).length}</div>
+              <div className="text-xs text-muted-foreground">Severidad 4</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-severity-3">{events.filter(e => e.severity === 3).length}</div>
+              <div className="text-xs text-muted-foreground">Severidad 3</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-severity-2">{events.filter(e => e.severity === 2).length}</div>
+              <div className="text-xs text-muted-foreground">Severidad 2</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-severity-1">{events.filter(e => e.severity === 1).length}</div>
+              <div className="text-xs text-muted-foreground">Severidad 1</div>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
