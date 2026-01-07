@@ -26,24 +26,33 @@ export function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-primary-200/20 bg-white/95 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 shadow-soft">
+      <div className="container flex h-18 items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500">
-            <span className="text-lg">🌍</span>
+        <Link href="/" className="flex items-center space-x-3 group">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-glow group-hover:shadow-lg transition-all duration-300">
+            <span className="text-lg">🛰️</span>
           </div>
-          <span className="font-bold text-xl">Sentinel</span>
+          <div>
+            <span className="font-display font-bold text-xl bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+              Sentinel
+            </span>
+            <div className="text-xs text-primary-600/70 font-medium">
+              Monitoreo Global
+            </div>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-2">
           {filteredNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm font-medium transition-colors hover:text-primary-600 ${
-                isActive(item.href) ? 'text-primary-600' : 'text-muted-foreground'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-primary-50 hover:text-primary-700 ${
+                isActive(item.href)
+                  ? 'bg-primary-100 text-primary-700 shadow-soft'
+                  : 'text-surface-600 hover:text-primary-600'
               }`}
             >
               {item.label}

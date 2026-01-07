@@ -29,9 +29,9 @@ function calculateEventRadius(magnitude: number): number {
   return Math.max(50, Math.round(magnitude * 20));
 }
 
-// Cron job: Fetch USGS cada 5 minutos
+// Cron job: Fetch USGS cada 15 minutos (optimizado para reducir costos)
 export const fetchUSGSEvents = onSchedule({
-  schedule: 'every 5 minutes',
+  schedule: 'every 15 minutes',
   region: 'southamerica-east1',
   timeoutSeconds: 60,
   memory: '256MiB',

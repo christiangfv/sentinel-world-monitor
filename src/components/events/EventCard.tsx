@@ -27,8 +27,8 @@ export function EventCard({
 
   if (compact) {
     return (
-      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${className}`} onClick={onClick}>
-        <CardContent className="p-4">
+      <Card className={`hover:shadow-medium transition-all duration-300 cursor-pointer bg-white border-l-4 hover:scale-[1.02] animate-slide-up ${className}`} onClick={onClick} style={{ borderLeftColor: severityColor }}>
+        <CardContent className="p-5">
           <div className="flex items-start gap-3">
             <div className="text-2xl">{config.icon}</div>
             <div className="flex-1 min-w-0">
@@ -57,7 +57,7 @@ export function EventCard({
 
   return (
     <Link href={`/event/${event.id}`} onClick={onClick}>
-      <Card className={`hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 ${className}`}
+      <Card className={`hover:shadow-large transition-all duration-300 cursor-pointer border-l-4 bg-white hover:scale-[1.02] hover:-translate-y-1 ${className}`}
             style={{ borderLeftColor: severityColor }}>
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-4">

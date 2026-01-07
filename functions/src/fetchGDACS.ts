@@ -47,9 +47,9 @@ function determineDisasterType(title: string, description: string): string {
   return 'earthquake'; // Default
 }
 
-// Cron job: Fetch GDACS cada 15 minutos
+// Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
 export const fetchGDACSEvents = onSchedule({
-  schedule: 'every 15 minutes',
+  schedule: 'every 30 minutes',
   region: 'southamerica-east1',
   timeoutSeconds: 60,
   memory: '256MiB',

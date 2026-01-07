@@ -10,67 +10,96 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Colores principales
+        // Paleta moderna y profesional
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6', // Azul principal
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9', // Azul cielo moderno
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
         },
-        // Colores de severidad
+        // Colores de severidad mejorados
         severity: {
-          1: '#22c55e', // Verde - Menor
-          2: '#eab308', // Amarillo - Leve
-          3: '#f97316', // Naranja - Moderado
-          4: '#ef4444', // Rojo - Severo
+          1: '#10b981', // Verde esmeralda
+          2: '#f59e0b', // Ámbar
+          3: '#f97316', // Naranja vibrante
+          4: '#ef4444', // Rojo coral
         },
-        // Colores de desastres
+        // Colores de desastres con mejor contraste
         disaster: {
-          earthquake: '#FF6B6B',
-          tsunami: '#4ECDC4',
-          volcano: '#FF8C42',
-          wildfire: '#F4722B',
-          flood: '#1A535C',
-          storm: '#6B5B95',
-          landslide: '#8B4513',
+          earthquake: '#dc2626', // Rojo más profesional
+          tsunami: '#0891b2', // Cyan profesional
+          volcano: '#ea580c', // Naranja rojizo
+          wildfire: '#c2410c', // Rojo anaranjado
+          flood: '#0369a1', // Azul profundo
+          storm: '#7c3aed', // Violeta
+          landslide: '#92400e', // Marrón rojizo
         },
-        // Fondo oscuro/claro
+        // Gradientes de fondo modernos
         background: {
-          dark: '#0F172A',
-          light: '#F8FAFC',
+          dark: '#0f172a',
+          light: '#fafafa',
+          gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         },
         surface: {
-          dark: '#1E293B',
-          light: '#FFFFFF',
+          dark: '#1e293b',
+          light: '#ffffff',
+          elevated: '#f8fafc',
         },
+        // Colores de estado
+        success: '#10b981',
+        warning: '#f59e0b',
+        error: '#ef4444',
+        info: '#3b82f6',
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       animation: {
-        'fade-in': 'fadeIn 0.3s ease-in-out',
-        'slide-in': 'slideIn 0.3s ease-out',
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         'bounce-soft': 'bounceSoft 0.6s ease-in-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        'float': 'float 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
-        slideIn: {
-          '0%': { transform: 'translateY(-10px)', opacity: '0' },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         bounceSoft: {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-5px)' },
+          '50%': { transform: 'translateY(-8px)' },
         },
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        glow: {
+          '0%': { boxShadow: '0 0 20px rgba(14, 165, 233, 0.2)' },
+          '100%': { boxShadow: '0 0 30px rgba(14, 165, 233, 0.4)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+      },
+      boxShadow: {
+        'soft': '0 2px 15px rgba(0, 0, 0, 0.08)',
+        'medium': '0 4px 25px rgba(0, 0, 0, 0.12)',
+        'large': '0 8px 40px rgba(0, 0, 0, 0.16)',
+        'glow': '0 0 20px rgba(14, 165, 233, 0.3)',
+        'inner-light': 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
       },
     },
   },
