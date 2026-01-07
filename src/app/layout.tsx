@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/hooks/useAuth";
+import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -58,21 +59,53 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* PWA Meta Tags */}
         <meta name="application-name" content="Sentinel" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Sentinel" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+        <meta name="theme-color" content="#3B82F6" />
+        <meta name="color-scheme" content="light dark" />
+
+        {/* Microsoft */}
         <meta name="msapplication-TileColor" content="#3B82F6" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+
+        {/* Apple */}
+        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        <link rel="apple-touch-startup-image" href="/icons/icon-512.svg" />
+
+        {/* Favicon */}
+        <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.svg" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.svg" />
+
+        {/* Service Worker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then(function(registration) {
+                      console.log('✅ Service Worker registrado:', registration);
+                    })
+                    .catch(function(error) {
+                      console.log('❌ Error registrando Service Worker:', error);
+                    });
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-background text-foreground`}>
         <AuthProvider>
           {children}
+          <PWAInstallPrompt />
         </AuthProvider>
       </body>
     </html>

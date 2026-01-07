@@ -5,21 +5,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function LoginPage() {
   return (
     <AuthGuard requireAuth={false} redirectTo="/dashboard">
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-500">
-                <span className="text-3xl">🌍</span>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-background to-secondary-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardHeader className="text-center pb-2">
+            <div className="flex justify-center mb-6">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-500 shadow-lg">
+                <span className="text-4xl">🌍</span>
               </div>
             </div>
-            <CardTitle className="text-2xl">Bienvenido a Sentinel</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl md:text-3xl mb-2">Bienvenido a Sentinel</CardTitle>
+            <CardDescription className="text-base">
               Monitorea desastres naturales en tiempo real y recibe alertas personalizadas
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 pt-6">
             <div className="space-y-4">
               <div className="text-center">
                 <h3 className="text-lg font-medium mb-2">Inicia sesión para continuar</h3>
@@ -28,20 +28,44 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <div className="flex justify-center">
+              <div className="flex justify-center pt-4">
                 <LoginButton />
               </div>
             </div>
 
-            <div className="border-t pt-4">
-              <div className="text-center space-y-2">
-                <h4 className="text-sm font-medium">¿Qué puedes hacer con Sentinel?</h4>
-                <ul className="text-xs text-muted-foreground space-y-1">
-                  <li>• Ver eventos de desastres en tiempo real</li>
-                  <li>• Configurar zonas de monitoreo personalizadas</li>
-                  <li>• Recibir notificaciones push de alertas</li>
-                  <li>• Acceder desde cualquier dispositivo</li>
-                </ul>
+            <div className="border-t pt-6">
+              <div className="text-center space-y-3">
+                <h4 className="text-sm font-semibold text-foreground">¿Qué puedes hacer con Sentinel?</h4>
+                <div className="grid grid-cols-1 gap-3 text-left">
+                  <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-lg">🌍</span>
+                    <div>
+                      <div className="text-sm font-medium">Mapa Interactivo</div>
+                      <div className="text-xs text-muted-foreground">Ver eventos en tiempo real</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-lg">📍</span>
+                    <div>
+                      <div className="text-sm font-medium">Zonas Personalizadas</div>
+                      <div className="text-xs text-muted-foreground">Configura áreas de interés</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-lg">🔔</span>
+                    <div>
+                      <div className="text-sm font-medium">Alertas Push</div>
+                      <div className="text-xs text-muted-foreground">Notificaciones inteligentes</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-lg">📱</span>
+                    <div>
+                      <div className="text-sm font-medium">PWA Offline</div>
+                      <div className="text-xs text-muted-foreground">Funciona sin conexión</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
