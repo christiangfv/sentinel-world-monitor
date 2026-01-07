@@ -2,6 +2,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { geohashForLocation } from 'geofire-common';
+import { sendCriticalNotifications } from './index';
 
 const db = getFirestore();
 
@@ -53,6 +54,7 @@ export const fetchUSGSEvents = onSchedule({
     const batch = db.batch();
     let processedCount = 0;
     let skippedCount = 0;
+    const criticalEvents: any[] = []; // Eventos de severidad 4+ para notificaciones
 
     for (const feature of data.features) {
       try {
@@ -86,7 +88,9 @@ export const fetchUSGSEvents = onSchedule({
 
         // Crear documento del evento
         const eventRef = db.collection('events').doc();
+        const eventId = eventRef.id;
         const eventData = {
+          id: eventId,
           disasterType: 'earthquake',
           source: 'usgs',
           externalId: id,
@@ -94,8 +98,8 @@ export const fetchUSGSEvents = onSchedule({
           description: formatLocation(properties.place),
           severity,
           location: {
-            lat,
-            lng
+            latitude: lat,
+            longitude: lng
           },
           geohash,
           locationName: formatLocation(properties.place),
@@ -131,6 +135,11 @@ export const fetchUSGSEvents = onSchedule({
         batch.set(eventRef, eventData);
         processedCount++;
 
+        // Agregar a lista de eventos críticos si severidad >= 4
+        if (severity >= 4) {
+          criticalEvents.push(eventData);
+        }
+
         logger.info(`✅ Procesado evento USGS: ${id} - M${magnitude.toFixed(1)} - ${properties.title}`);
 
       } catch (error) {
@@ -143,6 +152,21 @@ export const fetchUSGSEvents = onSchedule({
     if (processedCount > 0) {
       await batch.commit();
       logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
+
+      // Enviar notificaciones para eventos críticos
+      if (criticalEvents.length > 0) {
+        logger.info(`🚨 Enviando notificaciones para ${criticalEvents.length} eventos críticos...`);
+        for (const criticalEvent of criticalEvents) {
+          try {
+            const result = await sendCriticalNotifications(criticalEvent);
+            if (result.sent > 0) {
+              logger.info(`📤 Enviadas ${result.sent} notificaciones para evento crítico ${criticalEvent.externalId}`);
+            }
+          } catch (error) {
+            logger.error(`❌ Error enviando notificaciones para evento ${criticalEvent.externalId}:`, error);
+          }
+        }
+      }
     }
 
     logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);

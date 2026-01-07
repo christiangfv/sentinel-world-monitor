@@ -34,7 +34,7 @@ export default function Home() {
   }, [events, eventsLoading, eventsError]);
 
   const handleEventClick = (event: any) => {
-    router.push(`/event/${event.id}`);
+    router.push(`/event?id=${event.id}`);
   };
 
   const handleZoneClick = (zone: any) => {

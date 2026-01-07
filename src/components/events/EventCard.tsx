@@ -56,7 +56,7 @@ export function EventCard({
   }
 
   return (
-    <Link href={`/event/${event.id}`} onClick={onClick}>
+    <Link href={`/event?id=${event.id}`} onClick={onClick}>
       <Card className={`hover:shadow-large transition-all duration-300 cursor-pointer border-l-4 bg-white hover:scale-[1.02] hover:-translate-y-1 ${className}`}
             style={{ borderLeftColor: severityColor }}>
         <CardContent className="p-6">
