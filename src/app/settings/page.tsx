@@ -1,5 +1,7 @@
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Header } from "@/components/layout/Header";
+import { ZoneManager } from "@/components/user/ZoneManager";
+import { AlertPreferences } from "@/components/user/AlertPreferences";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -20,106 +22,10 @@ export default function SettingsPage() {
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Zonas de monitoreo */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  📍 Zonas de Monitoreo
-                </CardTitle>
-                <CardDescription>
-                  Configura las áreas geográficas que quieres monitorear
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <div className="text-4xl mb-4">🗺️</div>
-                  <p>No tienes zonas configuradas</p>
-                  <Button className="mt-4">
-                    Agregar Primera Zona
-                  </Button>
-                </div>
-
-                <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Próximamente:</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Seleccionar ubicación en mapa interactivo</li>
-                    <li>• Configurar radio de alerta (km)</li>
-                    <li>• Nombrar zonas personalizadas</li>
-                    <li>• Activar/desactivar zonas</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            <ZoneManager />
 
             {/* Preferencias de alertas */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  🔔 Preferencias de Alertas
-                </CardTitle>
-                <CardDescription>
-                  Configura qué tipos de eventos quieres monitorear
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">🌍</span>
-                      <div>
-                        <div className="font-medium">Sismos</div>
-                        <div className="text-xs text-muted-foreground">
-                          Terremotos y actividad sísmica
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant="severity1">Severidad 1+</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">🌊</span>
-                      <div>
-                        <div className="font-medium">Tsunamis</div>
-                        <div className="text-xs text-muted-foreground">
-                          Alertas de tsunami
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant="severity1">Severidad 1+</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">🔥</span>
-                      <div>
-                        <div className="font-medium">Incendios</div>
-                        <div className="text-xs text-muted-foreground">
-                          Incendios forestales
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant="severity1">Severidad 1+</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">💧</span>
-                      <div>
-                        <div className="font-medium">Inundaciones</div>
-                        <div className="text-xs text-muted-foreground">
-                          Inundaciones y crecidas
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant="severity1">Severidad 1+</Badge>
-                  </div>
-                </div>
-
-                <Button variant="outline" className="w-full">
-                  Configurar Preferencias Detalladas
-                </Button>
-              </CardContent>
-            </Card>
+            <AlertPreferences />
 
             {/* Configuración general */}
             <Card>
