@@ -13,6 +13,7 @@ export { fetchEMSCvents } from './fetchEMSC';
 export { fetchBOMEvents } from './fetchBOM';
 export { fetchNHCEvents } from './fetchNHC';
 export { fetchJMAEvents } from './fetchJMA';
+export { testDataSources } from './testSources';
 
 // Funciones de utilidad que pueden ser útiles
 export const testConnection = async () => {

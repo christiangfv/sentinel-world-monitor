@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendCriticalNotifications = exports.getSystemStats = exports.cleanupExpiredEvents = exports.testConnection = exports.fetchJMAEvents = exports.fetchNHCEvents = exports.fetchBOMEvents = exports.fetchEMSCvents = exports.fetchCSNEvents = exports.fetchGDACSEvents = exports.fetchUSGSEvents = void 0;
+exports.sendCriticalNotifications = exports.getSystemStats = exports.cleanupExpiredEvents = exports.testConnection = exports.testDataSources = exports.fetchJMAEvents = exports.fetchNHCEvents = exports.fetchBOMEvents = exports.fetchEMSCvents = exports.fetchCSNEvents = exports.fetchGDACSEvents = exports.fetchUSGSEvents = void 0;
 const app_1 = require("firebase-admin/app");
 const firestore_1 = require("firebase-admin/firestore");
 const messaging_1 = require("firebase-admin/messaging");
@@ -21,6 +21,8 @@ var fetchNHC_1 = require("./fetchNHC");
 Object.defineProperty(exports, "fetchNHCEvents", { enumerable: true, get: function () { return fetchNHC_1.fetchNHCEvents; } });
 var fetchJMA_1 = require("./fetchJMA");
 Object.defineProperty(exports, "fetchJMAEvents", { enumerable: true, get: function () { return fetchJMA_1.fetchJMAEvents; } });
+var testSources_1 = require("./testSources");
+Object.defineProperty(exports, "testDataSources", { enumerable: true, get: function () { return testSources_1.testDataSources; } });
 // Funciones de utilidad que pueden ser útiles
 const testConnection = async () => {
     try {
