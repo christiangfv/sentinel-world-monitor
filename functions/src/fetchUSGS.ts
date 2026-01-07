@@ -59,6 +59,13 @@ export const fetchUSGSEvents = onSchedule({
         const { id, properties, geometry } = feature;
         const [lng, lat, depth] = geometry.coordinates;
 
+        // Validar coordenadas
+        if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+          logger.warn(`⚠️ Evento ${id} tiene coordenadas inválidas: lat=${lat}, lng=${lng}`);
+          skippedCount++;
+          continue;
+        }
+
         // Verificar si el evento ya existe
         const existingDoc = await db.collection('events')
           .where('source', '==', 'usgs')

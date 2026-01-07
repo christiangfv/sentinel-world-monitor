@@ -184,26 +184,29 @@ function parseGDACSXML(xmlText: string): any[] {
       const link = linkMatch?.[1] || '';
       const guid = guidMatch?.[1] || '';
       const pubDate = pubDateMatch?.[1] || '';
-      const lat = parseFloat(latMatch?.[1] || '0');
-      const lng = parseFloat(lngMatch?.[1] || '0');
+      const lat = latMatch?.[1] ? parseFloat(latMatch[1]) : null;
+      const lng = lngMatch?.[1] ? parseFloat(lngMatch[1]) : null;
 
       const alertLevel = alertLevelMatch?.[1] || 'Green';
       const country = countryMatch?.[1] || '';
 
-      if (lat && lng && title) {
-        events.push({
-          title,
-          description,
-          link,
-          guid,
-          pubDate,
-          lat,
-          lng,
-          alertLevel,
-          country,
-          version: 1
-        });
+      // Validar coordenadas: deben existir, ser números válidos y no ser 0,0
+      if (!lat || !lng || isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0) || !title) {
+        continue; // Saltar eventos con coordenadas inválidas
       }
+
+      events.push({
+        title,
+        description,
+        link,
+        guid,
+        pubDate,
+        lat,
+        lng,
+        alertLevel,
+        country,
+        version: 1
+      });
     }
   } catch (error) {
     logger.error('Error parsing GDACS XML:', error);

@@ -24,6 +24,13 @@ interface EventMarkerProps {
 }
 
 export function EventMarker({ event, onClick }: EventMarkerProps) {
+  // Validar que las coordenadas existan y sean válidas
+  if (!event.location || typeof event.location.lat !== 'number' || typeof event.location.lng !== 'number' ||
+      isNaN(event.location.lat) || isNaN(event.location.lng)) {
+    console.warn('EventMarker: Invalid coordinates for event:', event.id, event.location);
+    return null; // No renderizar el marker si las coordenadas son inválidas
+  }
+
   const markerIcon = useMemo(() => {
     const config = DISASTER_CONFIGS[event.disasterType];
     const severityColor = getSeverityColor(event.severity);

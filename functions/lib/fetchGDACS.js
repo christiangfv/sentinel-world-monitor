@@ -50,9 +50,9 @@ function determineDisasterType(title, description) {
         return 'landslide';
     return 'earthquake'; // Default
 }
-// Cron job: Fetch GDACS cada 15 minutos
+// Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
 exports.fetchGDACSEvents = (0, scheduler_1.onSchedule)({
-    schedule: 'every 15 minutes',
+    schedule: 'every 30 minutes',
     region: 'southamerica-east1',
     timeoutSeconds: 60,
     memory: '256MiB',
@@ -167,24 +167,26 @@ function parseGDACSXML(xmlText) {
             const link = (linkMatch === null || linkMatch === void 0 ? void 0 : linkMatch[1]) || '';
             const guid = (guidMatch === null || guidMatch === void 0 ? void 0 : guidMatch[1]) || '';
             const pubDate = (pubDateMatch === null || pubDateMatch === void 0 ? void 0 : pubDateMatch[1]) || '';
-            const lat = parseFloat((latMatch === null || latMatch === void 0 ? void 0 : latMatch[1]) || '0');
-            const lng = parseFloat((lngMatch === null || lngMatch === void 0 ? void 0 : lngMatch[1]) || '0');
+            const lat = (latMatch === null || latMatch === void 0 ? void 0 : latMatch[1]) ? parseFloat(latMatch[1]) : null;
+            const lng = (lngMatch === null || lngMatch === void 0 ? void 0 : lngMatch[1]) ? parseFloat(lngMatch[1]) : null;
             const alertLevel = (alertLevelMatch === null || alertLevelMatch === void 0 ? void 0 : alertLevelMatch[1]) || 'Green';
             const country = (countryMatch === null || countryMatch === void 0 ? void 0 : countryMatch[1]) || '';
-            if (lat && lng && title) {
-                events.push({
-                    title,
-                    description,
-                    link,
-                    guid,
-                    pubDate,
-                    lat,
-                    lng,
-                    alertLevel,
-                    country,
-                    version: 1
-                });
+            // Validar coordenadas: deben existir, ser números válidos y no ser 0,0
+            if (!lat || !lng || isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0) || !title) {
+                continue; // Saltar eventos con coordenadas inválidas
             }
+            events.push({
+                title,
+                description,
+                link,
+                guid,
+                pubDate,
+                lat,
+                lng,
+                alertLevel,
+                country,
+                version: 1
+            });
         }
     }
     catch (error) {

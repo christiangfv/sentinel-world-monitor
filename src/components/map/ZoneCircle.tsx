@@ -21,6 +21,13 @@ interface ZoneCircleProps {
 }
 
 export function ZoneCircle({ zone, onClick, isSelected = false }: ZoneCircleProps) {
+  // Validar que las coordenadas existan y sean válidas
+  if (!zone.location || typeof zone.location.lat !== 'number' || typeof zone.location.lng !== 'number' ||
+      isNaN(zone.location.lat) || isNaN(zone.location.lng)) {
+    console.warn('ZoneCircle: Invalid coordinates for zone:', zone.id, zone.location);
+    return null; // No renderizar el círculo si las coordenadas son inválidas
+  }
+
   const circleOptions = {
     color: isSelected ? '#ef4444' : zone.isActive ? '#3b82f6' : '#94a3b8',
     fillColor: isSelected ? '#ef4444' : zone.isActive ? '#3b82f6' : '#94a3b8',

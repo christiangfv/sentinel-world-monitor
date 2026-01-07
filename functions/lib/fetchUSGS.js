@@ -30,9 +30,9 @@ function calculateEventRadius(magnitude) {
     // Radio mínimo de 50km, aumenta con la magnitud
     return Math.max(50, Math.round(magnitude * 20));
 }
-// Cron job: Fetch USGS cada 5 minutos
+// Cron job: Fetch USGS cada 15 minutos (optimizado para reducir costos)
 exports.fetchUSGSEvents = (0, scheduler_1.onSchedule)({
-    schedule: 'every 5 minutes',
+    schedule: 'every 15 minutes',
     region: 'southamerica-east1',
     timeoutSeconds: 60,
     memory: '256MiB',
@@ -52,6 +52,12 @@ exports.fetchUSGSEvents = (0, scheduler_1.onSchedule)({
             try {
                 const { id, properties, geometry } = feature;
                 const [lng, lat, depth] = geometry.coordinates;
+                // Validar coordenadas
+                if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+                    firebase_functions_1.logger.warn(`⚠️ Evento ${id} tiene coordenadas inválidas: lat=${lat}, lng=${lng}`);
+                    skippedCount++;
+                    continue;
+                }
                 // Verificar si el evento ya existe
                 const existingDoc = await db.collection('events')
                     .where('source', '==', 'usgs')
