@@ -28,7 +28,7 @@ export function EventFeed({ events, selectedEvent, onEventSelect }: EventFeedPro
           compact
           showMapLink={false}
           onClick={() => onEventSelect?.(event)}
-          className={selectedEvent?.id === event.id ? 'ring-1 ring-[#D4B57A]/50' : ''}
+          className={selectedEvent?.id === event.id ? 'ring-2 ring-[#D4B57A]/50 bg-[#D4B57A]/5' : ''}
         />
       ))}
     </div>

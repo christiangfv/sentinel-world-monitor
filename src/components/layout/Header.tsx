@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { LoginButton } from '@/components/auth/LoginButton'
 import { UserMenu } from '@/components/auth/UserMenu'
+import { SentinelLogo } from '@/components/icons/DisasterIcons'
 
 export function Header() {
   const { user } = useAuth()
@@ -27,10 +28,10 @@ export function Header() {
       <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#D4B57A] to-[#A8925A] flex items-center justify-center shadow-[0_0_15px_rgba(212,181,122,0.2)]">
-            <span className="text-base">🛰️</span>
+          <div className="w-9 h-9 flex items-center justify-center transition-transform group-hover:scale-105">
+            <SentinelLogo size={36} className="drop-shadow-[0_0_10px_rgba(212,181,122,0.3)]" />
           </div>
-          <span className="font-semibold text-[#D4B57A] hidden sm:block">Sentinel</span>
+          <span className="font-semibold text-[#D4B57A] tracking-wider hidden sm:block">SENTINEL</span>
         </Link>
 
         {/* Nav */}

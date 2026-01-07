@@ -88,9 +88,9 @@ export default function HomePage() {
       {/* Estadísticas flotantes - esquina inferior derecha (sobre el panel si está abierto) */}
       <div className="absolute bottom-4 right-4 z-20 flex gap-2">
         {[
-          { icon: '🚨', count: events.filter(e => e.severity === 4).length, label: 'Críticos', color: '#F87171' },
-          { icon: '⚠️', count: events.filter(e => e.severity === 3).length, label: 'Altos', color: '#D4B57A' },
-          { icon: '📊', count: events.filter(e => e.severity <= 2).length, label: 'Otros', color: '#4ADE80' },
+          { icon: '🚨', count: events.filter(e => e.severity === 4).length, label: 'Críticos', color: '#E8E8F0' },
+          { icon: '⚠️', count: events.filter(e => e.severity === 3).length, label: 'Altos', color: '#A07888' },
+          { icon: '📊', count: events.filter(e => e.severity <= 2).length, label: 'Otros', color: '#7088A0' },
         ].map((stat, i) => (
           <div
             key={i}
@@ -141,19 +141,19 @@ export default function HomePage() {
         </div>
       </aside>
 
-      {/* Leyenda flotante - esquina inferior izquierda, arriba de filtros */}
-      <div className="absolute bottom-24 left-4 z-20">
-        <div className="bg-[#0D0E14]/80 backdrop-blur-md border border-[#4A5060]/30 rounded-xl p-3">
-          <div className="text-[10px] text-[#8890A0] mb-2 uppercase tracking-wider">Severidad</div>
-          <div className="flex gap-3 text-xs">
+      {/* Leyenda flotante - encima del header */}
+      <div className="absolute bottom-4 left-[26rem] z-20 hidden lg:block">
+        <div className="bg-[#0D0E14]/80 backdrop-blur-md border border-[#4A5060]/30 rounded-xl px-4 py-2">
+          <div className="flex items-center gap-4 text-xs">
+            <span className="text-[10px] text-[#8890A0] uppercase tracking-wider">Severidad</span>
             {[
-              { color: '#F87171', label: '4' },
-              { color: '#D4B57A', label: '3' },
-              { color: '#FBBF24', label: '2' },
-              { color: '#4ADE80', label: '1' },
+              { color: '#E8E8F0', label: '4' },
+              { color: '#A07888', label: '3' },
+              { color: '#D4B57A', label: '2' },
+              { color: '#7088A0', label: '1' },
             ].map((s) => (
-              <div key={s.label} className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+              <div key={s.label} className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />
                 <span className="text-[#8890A0]">{s.label}</span>
               </div>
             ))}

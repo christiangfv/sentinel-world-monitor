@@ -13,13 +13,14 @@ export function magnitudeToSeverity(magnitude: number): SeverityLevel {
 
 /**
  * Obtiene el color correspondiente a una severidad
+ * Brand Book: mist (low) → plasma (medium) → sakura (high) → muted (critical)
  */
 export function getSeverityColor(severity: SeverityLevel): string {
   const colors = {
-    1: '#22c55e', // Verde
-    2: '#eab308', // Amarillo
-    3: '#f97316', // Naranja
-    4: '#ef4444', // Rojo
+    1: '#7088A0', // Mist - Severidad baja
+    2: '#D4B57A', // Plasma - Severidad media
+    3: '#A07888', // Sakura - Severidad alta
+    4: '#E8E8F0', // Muted - Severidad crítica
   };
 
   return colors[severity];

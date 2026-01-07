@@ -1,12 +1,23 @@
 import { DisasterType, DisasterConfig } from '@/lib/types';
 
+// Brand Book Colors
+export const BRAND_COLORS = {
+  abyss: '#0D0E14',
+  shadow: '#1A1B22',
+  plasma: '#D4B57A',
+  mist: '#7088A0',
+  sakura: '#A07888',
+  smoke: '#8890A0',
+  muted: '#E8E8F0',
+} as const;
+
 export const DISASTER_CONFIGS: Record<DisasterType, DisasterConfig> = {
   earthquake: {
     id: 'earthquake',
     name: 'Earthquake',
     nameEs: 'Sismo',
     icon: '🌍',
-    color: '#FF6B6B',
+    color: BRAND_COLORS.plasma,
     severityLabels: {
       1: 'Menor (< 4.0)',
       2: 'Leve (4.0 - 5.0)',
@@ -19,7 +30,7 @@ export const DISASTER_CONFIGS: Record<DisasterType, DisasterConfig> = {
     name: 'Tsunami',
     nameEs: 'Tsunami',
     icon: '🌊',
-    color: '#4ECDC4',
+    color: BRAND_COLORS.mist,
     severityLabels: {
       1: 'Vigilancia',
       2: 'Aviso',
@@ -32,7 +43,7 @@ export const DISASTER_CONFIGS: Record<DisasterType, DisasterConfig> = {
     name: 'Volcanic Eruption',
     nameEs: 'Erupción Volcánica',
     icon: '🌋',
-    color: '#FF8C42',
+    color: BRAND_COLORS.sakura,
     severityLabels: {
       1: 'Verde',
       2: 'Amarillo',
@@ -45,7 +56,7 @@ export const DISASTER_CONFIGS: Record<DisasterType, DisasterConfig> = {
     name: 'Wildfire',
     nameEs: 'Incendio Forestal',
     icon: '🔥',
-    color: '#F4722B',
+    color: BRAND_COLORS.plasma,
     severityLabels: {
       1: 'Controlado',
       2: 'Activo',
@@ -58,7 +69,7 @@ export const DISASTER_CONFIGS: Record<DisasterType, DisasterConfig> = {
     name: 'Flood',
     nameEs: 'Inundación',
     icon: '💧',
-    color: '#1A535C',
+    color: BRAND_COLORS.mist,
     severityLabels: {
       1: 'Menor',
       2: 'Moderada',
@@ -71,7 +82,7 @@ export const DISASTER_CONFIGS: Record<DisasterType, DisasterConfig> = {
     name: 'Storm/Hurricane',
     nameEs: 'Tormenta/Huracán',
     icon: '🌀',
-    color: '#6B5B95',
+    color: BRAND_COLORS.smoke,
     severityLabels: {
       1: 'Tormenta Tropical',
       2: 'Categoría 1-2',
@@ -84,7 +95,7 @@ export const DISASTER_CONFIGS: Record<DisasterType, DisasterConfig> = {
     name: 'Landslide',
     nameEs: 'Aluvión/Deslizamiento',
     icon: '⛰️',
-    color: '#8B4513',
+    color: BRAND_COLORS.smoke,
     severityLabels: {
       1: 'Menor',
       2: 'Moderado',
