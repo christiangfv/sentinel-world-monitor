@@ -6,6 +6,7 @@ import { geohashForLocation } from 'geofire-common';
 const db = getFirestore();
 
 // Mapeo de tipos GDACS a nuestros tipos de desastre
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const GDACS_TYPE_MAPPING: Record<string, string> = {
   'EQ': 'earthquake',     // Earthquake
   'TC': 'storm',          // Tropical Cyclone

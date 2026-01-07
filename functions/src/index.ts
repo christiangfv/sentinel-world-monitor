@@ -14,9 +14,11 @@ export { sendNotifications } from './sendNotifications';
 export const testConnection = async () => {
   try {
     const db = getFirestore();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const messaging = getMessaging();
 
     // Verificar conexión a Firestore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const testDoc = await db.collection('test').doc('connection').get();
     console.log('✅ Firestore connection OK');
 
