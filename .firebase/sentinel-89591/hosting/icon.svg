@@ -1,0 +1,41 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ondas de señal animadas -->
+  <circle cx="90" cy="65" r="55" stroke="#D4B57A" stroke-width="1" opacity="0.1"/>
+  <circle cx="90" cy="65" r="40" stroke="#D4B57A" stroke-width="1.5" opacity="0.2"/>
+  <circle cx="90" cy="65" r="25" stroke="#D4B57A" stroke-width="2" opacity="0.35"/>
+  
+  <!-- Escudo elegante -->
+  <path d="M90 22 C90 22 148 38 148 88 C148 135 118 162 90 172 C62 162 32 135 32 88 C32 38 90 22 90 22 Z" 
+        fill="url(#shield-gradient)" stroke="#D4B57A" stroke-width="2"/>
+  
+  <!-- Torre del faro -->
+  <path d="M80 165 L84 100 L96 100 L100 165" fill="#0D0E14" stroke="#7088A0" stroke-width="1.5"/>
+  <rect x="78" y="94" width="24" height="10" rx="2" fill="#1A1B22" stroke="#7088A0" stroke-width="1.5"/>
+  
+  <!-- Luz cálida -->
+  <circle cx="90" cy="65" r="16" fill="url(#light-gradient)"/>
+  <circle cx="90" cy="65" r="8" fill="#D4B57A"/>
+  <circle cx="90" cy="65" r="3" fill="#E8E8F0"/>
+  
+  <!-- Rayos de luz -->
+  <line x1="90" y1="42" x2="90" y2="32" stroke="#D4B57A" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <line x1="108" y1="50" x2="115" y2="43" stroke="#D4B57A" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="72" y1="50" x2="65" y2="43" stroke="#D4B57A" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="115" y1="65" x2="123" y2="65" stroke="#D4B57A" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <line x1="65" y1="65" x2="57" y2="65" stroke="#D4B57A" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  
+  <!-- Check de seguridad -->
+  <path d="M78 135 L86 145 L104 125" stroke="#A07888" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <defs>
+    <linearGradient id="shield-gradient" x1="90" y1="22" x2="90" y2="172" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1A1B22"/>
+      <stop offset="100%" stop-color="#0D0E14"/>
+    </linearGradient>
+    <radialGradient id="light-gradient" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#E8E8F0"/>
+      <stop offset="40%" stop-color="#D4B57A"/>
+      <stop offset="100%" stop-color="#A07888" stop-opacity="0.5"/>
+    </radialGradient>
+  </defs>
+</svg>

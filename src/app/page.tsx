@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
+
 import Link from 'next/link'
 import { EventFeed } from '@/components/events/EventFeed'
 import { EventFiltersComponent } from '@/components/events/EventFiltersComponent'
@@ -58,7 +60,14 @@ export default function HomePage() {
           href="/"
           className="flex items-center gap-2.5 bg-[#1A1B22]/95 backdrop-blur-xl border border-[#D4B57A]/20 rounded-xl px-4 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-[#D4B57A]/40 transition-all"
         >
-          <span className="text-xl">🛰️</span>
+          <div className="relative w-8 h-8">
+            <Image
+              src="/logo.svg"
+              alt="Sentinel Logo"
+              fill
+              className="object-contain"
+            />
+          </div>
           <span className="font-semibold text-[#D4B57A] tracking-tight">Sentinel</span>
         </Link>
       </div>
@@ -182,6 +191,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }

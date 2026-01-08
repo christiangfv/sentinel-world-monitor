@@ -14,6 +14,11 @@ export const metadata: Metadata = {
   title: 'Sentinel – World Monitor',
   description: 'Monitoreo de eventos naturales en tiempo real',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -36,10 +41,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={inter.variable}>
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
-      </head>
       <body className="min-h-screen bg-[#0D0E14] text-[#E8E8F0] antialiased">
         <Provider>
           <AuthProvider>

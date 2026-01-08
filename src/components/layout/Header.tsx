@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { LoginButton } from '@/components/auth/LoginButton'
 import { UserMenu } from '@/components/auth/UserMenu'
-import { SentinelLogo } from '@/components/icons/DisasterIcons'
 
 export function Header() {
   const { user } = useAuth()
@@ -28,8 +28,13 @@ export function Header() {
       <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 flex items-center justify-center transition-transform group-hover:scale-105">
-            <SentinelLogo size={36} className="drop-shadow-[0_0_10px_rgba(212,181,122,0.3)]" />
+          <div className="relative w-9 h-9 transition-transform group-hover:scale-105">
+            <Image
+              src="/logo.svg"
+              alt="Sentinel Logo"
+              fill
+              className="object-contain drop-shadow-[0_0_10px_rgba(212,181,122,0.3)]"
+            />
           </div>
           <span className="font-semibold text-[#D4B57A] tracking-wider hidden sm:block">SENTINEL</span>
         </Link>
@@ -40,11 +45,10 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-                isActive(item.href)
-                  ? 'bg-[#D4B57A]/10 text-[#D4B57A]'
-                  : 'text-[#8890A0] hover:text-[#E8E8F0] hover:bg-[#1A1B22]'
-              }`}
+              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${isActive(item.href)
+                ? 'bg-[#D4B57A]/10 text-[#D4B57A]'
+                : 'text-[#8890A0] hover:text-[#E8E8F0] hover:bg-[#1A1B22]'
+                }`}
             >
               {item.label}
             </Link>
@@ -54,7 +58,7 @@ export function Header() {
         {/* Right */}
         <div className="flex items-center gap-3">
           {user ? <UserMenu /> : <LoginButton />}
-          
+
           <button
             onClick={() => setOpen(!open)}
             className="md:hidden p-2 text-[#8890A0] hover:text-[#E8E8F0]"
@@ -79,11 +83,10 @@ export function Header() {
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className={`block px-3 py-2 rounded-md text-sm ${
-                isActive(item.href)
-                  ? 'bg-[#D4B57A]/10 text-[#D4B57A]'
-                  : 'text-[#8890A0] hover:text-[#E8E8F0]'
-              }`}
+              className={`block px-3 py-2 rounded-md text-sm ${isActive(item.href)
+                ? 'bg-[#D4B57A]/10 text-[#D4B57A]'
+                : 'text-[#8890A0] hover:text-[#E8E8F0]'
+                }`}
             >
               {item.label}
             </Link>
