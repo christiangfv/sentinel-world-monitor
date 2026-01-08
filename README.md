@@ -1,20 +1,8 @@
-# Sentinel - App de Monitoreo de Desastres Naturales (Versión Segura)
+# Sentinel - App de Monitoreo de Desastres Naturales
 
 Aplicación web PWA para monitorear desastres naturales en tiempo real (sismos, tsunamis, incendios, etc.). Los usuarios pueden registrarse con Google, configurar zonas geográficas de interés, y recibir notificaciones push cuando ocurra un evento cerca de sus zonas.
 
-## 🔒 SEGURIDAD - CRÍTICO
-
-**Esta versión ha sido completamente revisada y corregida para eliminar vulnerabilidades de seguridad críticas.**
-
-### ✅ Correcciones Implementadas
-- ✅ Eliminadas claves API hardcodeadas de `firebase.json`
-- ✅ Service Worker seguro con configuración dinámica
-- ✅ Variables de entorno segregadas por ambiente
-- ✅ Autenticación mock deshabilitada en producción
-- ✅ Configuración de Firebase segura por ambiente
-
-### 🚨 NO USAR LA VERSIÓN ANTERIOR
-La versión anterior contenía vulnerabilidades críticas de seguridad que han sido corregidas en esta versión.
+Esta versión incluye implementación segura con mejores prácticas de desarrollo.
 
 ## 🚀 Características Principales
 
@@ -32,12 +20,12 @@ La versión anterior contenía vulnerabilidades críticas de seguridad que han s
 - **Mapas**: Leaflet + React-Leaflet + OpenStreetMap
 - **Geolocalización**: geofire-common para queries geoespaciales
 
-## 📦 Instalación y Configuración Segura
+## 📦 Instalación y Configuración
 
-### 1. Clonar el repositorio seguro
+### 1. Clonar el repositorio
 ```bash
-git clone git@github.com:christiangfv/sentinel-world-monitor-secure.git
-cd sentinel-world-monitor-secure
+git clone git@github.com:christiangfv/sentinel-world-monitor.git
+cd sentinel-world-monitor
 ```
 
 ### 2. Instalar dependencias
@@ -45,24 +33,18 @@ cd sentinel-world-monitor-secure
 npm install
 ```
 
-### 3. Configurar ambientes Firebase
+### 3. Configurar variables de entorno
 
-#### Crear proyectos Firebase (ya creados)
-- **Producción**: `sentinel-prod-9c937`
-- **Testing**: `sentinel-89591`
-
-### 4. Configurar variables de entorno
-
-#### Para Testing (`.env.testing`):
+#### Para Testing (Desarrollo) (`.env.testing`):
 ```env
-# Firebase Testing Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=your_testing_api_key_here
+# Firebase Testing Configuration (Development Environment)
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyArZVsBh-9ANzntpw0hTi9M3yEJLNNOk3E
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-89591.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-89591
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-89591.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_testing_sender_id_here
-NEXT_PUBLIC_FIREBASE_APP_ID=your_testing_app_id_here
-NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_testing_vapid_key_here
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-89591.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=638359914064
+NEXT_PUBLIC_FIREBASE_APP_ID=1:638359914064:web:4ad700b8777dbda615f355
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=BBL9i3ARw_RB1eozgOqbJOfe4CmbogsmoK3aIct5b1gZ27A5RntkixCueemSEWZPZ_Njf5HQ1h0wxzrgIzwvbSU
 
 NODE_ENV=development
 ```
@@ -70,18 +52,18 @@ NODE_ENV=development
 #### Para Producción (`.env.production`):
 ```env
 # Firebase Production Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=your_production_api_key_here
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyDp2z1FBMgNWJeAhOuOXgrglx9yFf_ras8
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-prod-9c937.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-prod-9c937
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-prod-9c937.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_production_sender_id_here
-NEXT_PUBLIC_FIREBASE_APP_ID=your_production_app_id_here
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-prod-9c937.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=846642937822
+NEXT_PUBLIC_FIREBASE_APP_ID=1:846642937822:web:b0db6f6c5f3db4c3d3274f
 NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_production_vapid_key_here
 
 NODE_ENV=production
 ```
 
-### 5. Configurar Firebase CLI
+### 4. Configurar Firebase CLI
 ```bash
 # Instalar Firebase CLI (si no está instalado)
 npm install -g firebase-tools
@@ -105,19 +87,6 @@ firebase use testing
 ./deploy-production.sh
 ```
 
-## 🔧 Desarrollo Local
-
-```bash
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno para desarrollo
-cp .env.testing .env.local
-
-# Ejecutar en modo desarrollo
-npm run dev
-```
-
 ## 📱 Uso de la Aplicación
 
 1. **Registro**: Los usuarios se registran con Google
@@ -137,14 +106,6 @@ npm run dev
 - **Cloud Functions**: Procesamiento de eventos y envío de notificaciones
 - **Authentication**: Autenticación con Google
 - **Hosting**: Despliegue estático de la aplicación
-
-### Seguridad Implementada
-- ✅ Autenticación segura con Firebase Auth
-- ✅ Reglas de Firestore que protegen datos de usuario
-- ✅ Validación de entrada en Cloud Functions
-- ✅ Service Worker seguro sin credenciales hardcodeadas
-- ✅ Variables de entorno segregadas por ambiente
-- ✅ Rate limiting y validaciones en backend
 
 ## 🤝 Contribución
 
