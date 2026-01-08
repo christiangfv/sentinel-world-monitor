@@ -17,6 +17,11 @@ const DisasterMap = dynamic(() => import('@/components/map/DisasterMap').then(m 
   loading: () => <div className="fixed inset-0 bg-[#0D0E14]" />
 })
 
+const DisasterGlobe = dynamic(() => import('@/components/map/DisasterGlobe').then(m => ({ default: m.DisasterGlobe })), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 bg-[#0D0E14] flex items-center justify-center text-[#D4B57A]">Cargando Esfera...</div>
+})
+
 export default function HomePage() {
   const { user } = useAuth()
   const [selectedEvent, setSelectedEvent] = useState<DisasterEvent | null>(null)
@@ -25,18 +30,26 @@ export default function HomePage() {
     minSeverity: 1
   })
   const [showEvents, setShowEvents] = useState(true)
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d')
 
   const { events, loading } = useEvents(eventFilters)
 
   return (
     <div className="h-screen w-screen overflow-hidden relative">
       {/* Mapa de fondo - ocupa toda la pantalla */}
-      <div className="absolute inset-0 z-0">
-        <DisasterMap
-          events={events}
-          onEventClick={setSelectedEvent}
-          showControls={false}
-        />
+      <div className="absolute inset-0 z-0 bg-[#0D0E14]">
+        {viewMode === '2d' ? (
+          <DisasterMap
+            events={events}
+            onEventClick={setSelectedEvent}
+            showControls={false}
+          />
+        ) : (
+          <DisasterGlobe
+            events={events}
+            onEventClick={setSelectedEvent}
+          />
+        )}
       </div>
 
       {/* Header flotante */}
@@ -58,11 +71,20 @@ export default function HomePage() {
 
       {/* Controles del mapa - esquina superior derecha */}
       <div className="absolute top-20 right-4 z-20 space-y-2">
+        {/* Toggle 2D/3D */}
+        <button
+          onClick={() => setViewMode(prev => prev === '2d' ? '3d' : '2d')}
+          className="w-10 h-10 bg-[#D4B57A] text-[#0D0E14] font-bold rounded-xl flex items-center justify-center shadow-lg hover:scale-105 transition-all"
+          title={viewMode === '2d' ? 'Ver en 3D' : 'Ver en 2D'}
+        >
+          {viewMode === '2d' ? '3D' : '2D'}
+        </button>
+
         <button
           onClick={() => setShowEvents(!showEvents)}
           className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showEvents
-              ? 'bg-[#D4B57A] text-[#0D0E14]'
-              : 'bg-[#0D0E14]/80 backdrop-blur-md border border-[#4A5060]/30 text-[#E8E8F0]'
+            ? 'bg-[#1A1B22]/80 backdrop-blur-md border border-[#D4B57A]/50 text-[#D4B57A]'
+            : 'bg-[#0D0E14]/80 backdrop-blur-md border border-[#4A5060]/30 text-[#E8E8F0]'
             }`}
           title={showEvents ? 'Ocultar panel' : 'Mostrar panel'}
         >

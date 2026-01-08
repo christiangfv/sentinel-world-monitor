@@ -36,6 +36,32 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
 
   const activeCount = (filters.disasterTypes || DISASTER_TYPES).length
 
+  // Helper for time ranges
+  const timeRanges = [
+    { label: '24h', days: 1 },
+    { label: '7d', days: 7 },
+    { label: '30d', days: 30 },
+  ]
+
+  const setTimeRange = (days: number) => {
+    const end = new Date()
+    const start = new Date()
+    start.setDate(start.getDate() - days)
+
+    onFilterChange({
+      ...filters,
+      dateRange: { start, end }
+    })
+  }
+
+  // Determine active range label
+  const getCurrentRangeLabel = () => {
+    if (!filters.dateRange) return '24h' // Default
+    const diffTime = Math.abs(filters.dateRange.end.getTime() - filters.dateRange.start.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return `${diffDays}d`
+  }
+
   return (
     <div className="glass-strong rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden">
       <button
@@ -48,7 +74,13 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
           </div>
-          <span className="text-[#E8E8F0] font-medium">Filtros</span>
+          <div className="flex flex-col items-start leading-tight">
+            <span className="text-[#E8E8F0] font-medium">Filtros</span>
+            <span className="text-[10px] text-[#D4B57A] font-bold tracking-wide">
+              🕒 {getCurrentRangeLabel()}
+            </span>
+          </div>
+
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#D4B57A]/10 text-[#D4B57A] text-xs font-medium">
             <span>{activeCount}</span>
             <span className="text-[#8890A0]">/</span>
@@ -63,8 +95,36 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
         </svg>
       </button>
 
-      <div className={`overflow-hidden transition-all duration-300 ease-out ${open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="p-4 pt-2 space-y-5 border-t border-[#4A5060]/30">
+      <div className={`overflow-hidden transition-all duration-300 ease-out ${open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="p-4 pt-2 space-y-5 border-t border-[#4A5060]/30 custom-scrollbar overflow-y-auto max-h-[400px]">
+
+          {/* Rango de tiempo */}
+          <div>
+            <label className="text-xs text-[#8890A0] mb-3 block uppercase tracking-wider font-medium">
+              Rango de tiempo
+            </label>
+            <div className="flex gap-2">
+              {timeRanges.map(range => {
+                const isActive = getCurrentRangeLabel() === range.label || (getCurrentRangeLabel() === '1d' && range.label === '24h');
+                return (
+                  <button
+                    key={range.label}
+                    onClick={() => setTimeRange(range.days)}
+                    className={`
+                        flex-1 px-3 py-2 text-xs rounded-lg font-medium transition-all
+                        ${isActive
+                        ? 'bg-[#D4B57A] text-[#0D0E14] shadow-lg scale-105'
+                        : 'bg-[#1A1B22]/50 text-[#8890A0] hover:bg-[#1A1B22] hover:text-[#E8E8F0]'
+                      }
+                        `}
+                  >
+                    {range.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Severidad */}
           <div>
             <label className="text-xs text-[#8890A0] mb-3 block uppercase tracking-wider font-medium">
