@@ -34,6 +34,9 @@ console.log('Firebase initialized:', {
   projectId: firebaseConfig.projectId,
   hasAuth: !!auth,
   hasDb: !!db,
+  apiKey: firebaseConfig.apiKey ? 'Set' : 'Not set',
+  authDomain: firebaseConfig.authDomain,
+  initialized: true
 });
 
 // Messaging solo en navegador (se inicializará dinámicamente)

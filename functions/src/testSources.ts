@@ -103,6 +103,32 @@ export const testFetchConnectivity = async () => {
       timeout: 15000
     }
   ];
+    {
+      name: 'USGS',
+      url: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson',
+      timeout: 10000
+    },
+    {
+      name: 'GDACS',
+      url: 'https://www.gdacs.org/xml/rss.xml',
+      timeout: 10000
+    },
+    {
+      name: 'CSN Chile',
+      url: 'https://sismologia.cl/',
+      timeout: 10000
+    },
+    {
+      name: 'NHC Atlantic',
+      url: 'https://www.nhc.noaa.gov/index-at.xml',
+      timeout: 10000
+    },
+    {
+      name: 'NASA EONET',
+      url: 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5&days=7',
+      timeout: 15000
+    }
+  ];
 
   const results = [];
 
@@ -162,6 +188,7 @@ export const testFetchConnectivity = async () => {
   const errorCount = results.filter(r => r.status === 'error').length;
 
   logger.info(`🌐 Conectividad: ${successCount} OK, ${warningCount} advertencias, ${errorCount} errores`);
+  logger.info(`📊 Total de APIs probadas: ${apis.length}`);
 
   return {
     total: apis.length,
@@ -171,6 +198,52 @@ export const testFetchConnectivity = async () => {
     results
   };
 };
+
+// Función específica para probar NASA EONET
+export const testNASA = onRequest({
+  region: 'southamerica-east1',
+  memory: '256MiB',
+  timeoutSeconds: 60,
+}, async (req, res) => {
+  try {
+    logger.info('🛰️ Probando NASA EONET específicamente...');
+
+    const nasaUrl = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5&days=7';
+    logger.info(`🔗 URL: ${nasaUrl}`);
+
+    const response = await fetch(nasaUrl, {
+      headers: {
+        'User-Agent': 'World-Monitor-Test/1.0'
+      }
+    });
+
+    const data = await response.json();
+    logger.info(`📊 Respuesta: HTTP ${response.status}, Eventos: ${data.events?.length || 0}`);
+
+    if (data.events && data.events.length > 0) {
+      logger.info('✅ NASA EONET funcionando correctamente');
+      logger.info(`📝 Primer evento: ${data.events[0].title}`);
+    }
+
+    res.status(200).json({
+      timestamp: new Date().toISOString(),
+      nasaTest: {
+        url: nasaUrl,
+        status: response.status,
+        eventsCount: data.events?.length || 0,
+        firstEvent: data.events?.[0]?.title || null,
+        success: response.ok && data.events?.length > 0
+      }
+    });
+
+  } catch (error) {
+    logger.error('❌ Error probando NASA:', error);
+    res.status(500).json({
+      error: 'Error probando NASA EONET',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
 // Función HTTP para pruebas manuales
 export const testDataSources = onRequest({

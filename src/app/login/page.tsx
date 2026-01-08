@@ -2,7 +2,9 @@
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { LoginButton } from "@/components/auth/LoginButton";
 import { MockLoginButton } from "@/components/auth/MockLoginButton";
+import { OnboardingModal } from "@/components/auth/OnboardingModal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const features = [
   {
@@ -44,6 +46,14 @@ const features = [
 ];
 
 export default function LoginPage() {
+  const { user, loading } = useAuth();
+
+  const handleOnboardingComplete = () => {
+    // Una vez completado el onboarding, redirigir a la página principal
+    window.location.href = '/';
+  };
+
+
   return (
     <AuthGuard requireAuth={false} redirectTo="/">
       <div className="min-h-screen bg-[#0D0E14] flex items-center justify-center p-4 relative overflow-hidden">
@@ -116,6 +126,11 @@ export default function LoginPage() {
           </CardContent>
         </Card>
       </div>
+
+      <OnboardingModal
+        user={user}
+        onComplete={handleOnboardingComplete}
+      />
     </AuthGuard>
   );
 }

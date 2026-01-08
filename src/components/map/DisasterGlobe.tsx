@@ -40,12 +40,15 @@ export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterG
         }
     }, [selectedEvent]);
 
-    // Color logic matching Leaflet map
+    // Color logic using CSS variables for theme support
     const getEventColor = (severity: number) => {
-        if (severity >= 4) return '#E8E8F0'; // Critical
-        if (severity === 3) return '#A07888'; // High
-        if (severity === 2) return '#D4B57A'; // Medium
-        return '#7088A0'; // Low
+        const root = document.documentElement;
+        const computedStyle = getComputedStyle(root);
+
+        if (severity >= 4) return computedStyle.getPropertyValue('--severity-critical').trim() || '#E8E8F0'; // Critical
+        if (severity === 3) return computedStyle.getPropertyValue('--severity-high').trim() || '#A07888'; // High
+        if (severity === 2) return computedStyle.getPropertyValue('--severity-medium').trim() || '#D4B57A'; // Medium
+        return computedStyle.getPropertyValue('--severity-low').trim() || '#7088A0'; // Low
     };
 
     const getEventAltitude = (severity: number) => {
@@ -61,7 +64,7 @@ export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterG
     if (!mounted) return null;
 
     return (
-        <div className="w-full h-full cursor-move">
+        <div className="w-full h-full cursor-move globe-container">
             <Globe
                 ref={globeEl}
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
@@ -80,19 +83,32 @@ export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterG
                 pointAltitude={d => getEventAltitude((d as DisasterEvent).severity)}
                 pointRadius={d => getEventRadius((d as DisasterEvent).severity)}
                 pointsMerge={true}
-                pointLabel={d => `
-          <div style="background: rgba(13, 14, 20, 0.9); color: #E8E8F0; padding: 4px 8px; border-radius: 4px; border: 1px solid #4A5060;">
+                pointLabel={d => {
+                    const root = document.documentElement;
+                    const computedStyle = getComputedStyle(root);
+                    const bgColor = computedStyle.getPropertyValue('--card').trim() || 'rgba(13, 14, 20, 0.9)';
+                    const textColor = computedStyle.getPropertyValue('--card-foreground').trim() || '#E8E8F0';
+                    const borderColor = computedStyle.getPropertyValue('--border').trim() || '#4A5060';
+                    const mutedColor = computedStyle.getPropertyValue('--muted-foreground').trim() || '#8890A0';
+
+                    return `
+          <div style="background: ${bgColor}; color: ${textColor}; padding: 4px 8px; border-radius: 4px; border: 1px solid ${borderColor};">
             <div style="font-weight: bold;">${(d as DisasterEvent).title}</div>
-            <div style="font-size: 10px; color: #8890A0;">${(d as DisasterEvent).disasterType}</div>
+            <div style="font-size: 10px; color: ${mutedColor};">${(d as DisasterEvent).disasterType}</div>
           </div>
-        `}
+        `;
+                }}
                 onPointClick={(d) => onEventClick?.(d as DisasterEvent)}
 
                 // Rings (Critical Events)
                 ringsData={ringsData}
                 ringLat={d => (d as DisasterEvent).location.lat}
                 ringLng={d => (d as DisasterEvent).location.lng}
-                ringColor={() => '#F87171'}
+                ringColor={() => {
+                    const root = document.documentElement;
+                    const computedStyle = getComputedStyle(root);
+                    return computedStyle.getPropertyValue('--severity-critical').trim() || '#F87171';
+                }}
                 ringMaxRadius={d => 5 * (d as DisasterEvent).severity}
                 ringPropagationSpeed={2}
                 ringRepeatPeriod={1000}

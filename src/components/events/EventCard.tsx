@@ -60,42 +60,42 @@ export function EventCard({
         onClick={onClick}
         style={{ borderLeftColor: severityColor }}
       >
-        <CardContent className="p-4">
-          <div className="flex items-start gap-4">
+        <CardContent className="p-3">
+          <div className="flex items-start gap-3">
             <div className={`
-              shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
-              bg-[#D4B57A]/10 border border-[#D4B57A]/20
-              ${isCritical ? 'animate-pulse-dot shadow-[0_0_15px_rgba(212,181,122,0.3)]' : ''}
+              shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
+              bg-plasma/10 border border-plasma/20
+              ${isCritical ? 'animate-pulse-dot shadow-glow-sm' : ''}
             `}>
-              <IconComponent size={24} className="text-[#D4B57A]" />
+              <IconComponent size={18} className="text-plasma" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <h3 className="font-bold text-sm text-[#E8E8F0] tracking-tight leading-snug line-clamp-1 flex-1">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3 className="font-semibold text-sm text-foreground tracking-tight leading-tight line-clamp-1 flex-1">
                   {event.title}
                 </h3>
-                <Badge variant={severityVariant(event.severity)} className="shrink-0 h-5 px-2 text-[10px] font-black tracking-widest uppercase">
+                <Badge variant={severityVariant(event.severity)} className="shrink-0 h-4 px-1.5 text-[9px] font-black tracking-widest uppercase">
                   S{event.severity}
                 </Badge>
               </div>
-              <p className="text-xs text-[#8890A0] leading-relaxed mb-3 font-medium flex items-center gap-1.5">
+              <p className="text-[11px] text-muted-foreground leading-tight mb-2 font-medium flex items-center gap-1">
                 <span className="opacity-50">📍</span> {event.locationName}
               </p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-[10px]">
-                  <span className="text-[#8890A0]/70 font-bold uppercase tracking-widest">{formatTimeAgo(event.eventTime)}</span>
-                  <span className="w-1 h-1 rounded-full bg-[#4A5060]/40" />
-                  <span className="text-[#D4B57A] font-bold uppercase tracking-widest">{config.nameEs}</span>
+                <div className="flex items-center gap-2 text-[9px]">
+                  <span className="text-muted-foreground/70 font-bold uppercase tracking-widest">{formatTimeAgo(event.eventTime)}</span>
+                  <span className="w-0.5 h-0.5 rounded-full bg-border" />
+                  <span className="text-plasma font-bold uppercase tracking-widest">{config.nameEs}</span>
                 </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onShowContext?.(event);
                   }}
-                  className="p-1.5 bg-[#D4B57A]/10 hover:bg-[#D4B57A]/20 rounded-lg transition-all active:scale-95"
+                  className="p-1 bg-plasma/10 hover:bg-plasma/20 rounded-md transition-all active:scale-95"
                   title="Noticias y más info"
                 >
-                  <span className="text-xs">📰</span>
+                  <span className="text-[10px]">📰</span>
                 </button>
               </div>
             </div>

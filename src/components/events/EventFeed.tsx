@@ -7,11 +7,13 @@ import { EventCard } from './EventCard'
 interface EventFeedProps {
   events: DisasterEvent[]
   selectedEvent?: DisasterEvent | null
+  newEventIds?: Set<string>
   onEventSelect?: (event: DisasterEvent) => void
   onShowContext?: (event: DisasterEvent) => void
+  onMarkEventAsSeen?: (eventId: string) => void
 }
 
-export function EventFeed({ events, selectedEvent, onEventSelect, onShowContext }: EventFeedProps) {
+export function EventFeed({ events, selectedEvent, newEventIds, onEventSelect, onShowContext, onMarkEventAsSeen }: EventFeedProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll logic
@@ -33,20 +35,37 @@ export function EventFeed({ events, selectedEvent, onEventSelect, onShowContext 
     )
   }
 
+  const handleEventClick = (event: DisasterEvent) => {
+    onEventSelect?.(event);
+    onMarkEventAsSeen?.(event.id);
+  };
+
   return (
-    <div ref={scrollContainerRef} className="p-4 space-y-3">
-      {events.map((event) => (
-        <div id={`event-card-${event.id}`} key={event.id}>
-          <EventCard
-            event={event}
-            compact
-            showMapLink={false}
-            onClick={() => onEventSelect?.(event)}
-            onShowContext={onShowContext}
-            className={selectedEvent?.id === event.id ? 'ring-2 ring-[#D4B57A]/50 bg-[#D4B57A]/5 shadow-[0_0_15px_rgba(212,181,122,0.1)]' : ''}
-          />
-        </div>
-      ))}
+    <div ref={scrollContainerRef} className="p-4 space-y-2">
+      {events.map((event) => {
+        const isNew = newEventIds?.has(event.id);
+        const isSelected = selectedEvent?.id === event.id;
+
+        let cardClass = '';
+        if (isSelected) {
+          cardClass = 'ring-2 ring-plasma/50 bg-plasma/5 shadow-glow-sm';
+        } else if (isNew) {
+          cardClass = 'ring-2 ring-success/50 bg-success/5 shadow-[0_0_10px_rgba(34,197,94,0.2)] animate-pulse';
+        }
+
+        return (
+          <div id={`event-card-${event.id}`} key={event.id}>
+            <EventCard
+              event={event}
+              compact
+              showMapLink={false}
+              onClick={() => handleEventClick(event)}
+              onShowContext={onShowContext}
+              className={cardClass}
+            />
+          </div>
+        );
+      })}
     </div>
   )
 }

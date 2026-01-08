@@ -35,8 +35,8 @@ export default function HomePage() {
     disasterTypes: DISASTER_TYPES,
     minSeverity: 1
   })
-  const [showEvents, setShowEvents] = useState(true)
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d')
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   // Auto-trigger insight card on selection
   useEffect(() => {
@@ -46,7 +46,19 @@ export default function HomePage() {
     }
   }, [selectedEvent])
 
-  const { events, loading } = useEvents(eventFilters)
+  // Aplicar tema al elemento html
+  useEffect(() => {
+    const root = document.documentElement
+    if (theme === 'light') {
+      root.classList.add('light')
+      root.classList.remove('dark')
+    } else {
+      root.classList.add('dark')
+      root.classList.remove('light')
+    }
+  }, [theme])
+
+  const { events, loading, error, newEventIds, markEventAsSeen } = useEvents(eventFilters)
 
   return (
     <div className="h-screen w-screen overflow-hidden relative">
@@ -72,7 +84,7 @@ export default function HomePage() {
       <div className="absolute top-4 left-4 z-50">
         <Link
           href="/"
-          className="flex items-center gap-2.5 bg-[#1A1B22]/95 backdrop-blur-xl border border-[#D4B57A]/20 rounded-xl px-4 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-[#D4B57A]/40 transition-all ring-1 ring-white/5"
+          className="flex items-center gap-2.5 bg-shadow/95 backdrop-blur-xl border border-plasma/20 rounded-xl px-4 py-2.5 shadow-lg hover:border-plasma/40 transition-all ring-1 ring-white-5"
         >
           <div className="relative w-8 h-8">
             <Image
@@ -82,7 +94,7 @@ export default function HomePage() {
               className="object-contain"
             />
           </div>
-          <span className="font-black text-[#D4B57A] tracking-tighter text-lg uppercase">Sentinel</span>
+          <span className="font-black text-plasma tracking-tighter text-lg uppercase font-display">Sentinel</span>
         </Link>
       </div>
 
@@ -91,7 +103,7 @@ export default function HomePage() {
           {user ? (
             <UserMenu />
           ) : (
-            <Link href="/login" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#E8E8F0] hover:text-[#D4B57A] transition-colors">
+            <Link href="/login" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted hover:text-plasma transition-colors font-display">
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -104,24 +116,62 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Controles del mapa - esquina superior derecha */}
-      <div className="absolute top-20 right-4 z-20 space-y-2">
-        <button
-          onClick={() => setViewMode(prev => prev === '2d' ? '3d' : '2d')}
-          className="w-10 h-10 bg-[#D4B57A] text-[#0D0E14] font-black rounded-xl flex items-center justify-center shadow-lg hover:scale-105 transition-all"
-        >
-          {viewMode === '2d' ? '3D' : '2D'}
-        </button>
+      {/* Controles del mapa - esquina superior izquierda */}
+      <div className="absolute top-20 left-4 z-20 space-y-2">
+        {/* Switch flotante para vista 3D/2D */}
+        <div className="bg-card/95 backdrop-blur-xl border border-border rounded-2xl p-1 shadow-lg ring-1 ring-white-5">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setViewMode('2d')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all duration-200 ${
+                viewMode === '2d'
+                  ? 'bg-plasma text-abyss shadow-sm'
+                  : 'text-muted-foreground hover:text-muted hover:bg-shadow/50'
+              }`}
+            >
+              2D
+            </button>
+            <button
+              onClick={() => setViewMode('3d')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all duration-200 ${
+                viewMode === '3d'
+                  ? 'bg-plasma text-abyss shadow-sm'
+                  : 'text-muted-foreground hover:text-muted hover:bg-shadow/50'
+              }`}
+            >
+              3D
+            </button>
+          </div>
+        </div>
 
-        <button
-          onClick={() => setShowEvents(!showEvents)}
-          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showEvents
-            ? 'bg-[#D4B57A] text-[#0D0E14] shadow-[0_0_20px_rgba(212,181,122,0.3)]'
-            : 'bg-[#1A1B22]/80 backdrop-blur-md border border-[#D4B57A]/20 text-[#E8E8F0]'
-            }`}
-        >
-          📋
-        </button>
+        {/* Switch flotante para tema Light/Dark */}
+        <div className="bg-card/95 backdrop-blur-xl border border-border rounded-2xl p-1 shadow-lg ring-1 ring-white-5">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setTheme('light')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all duration-200 ${
+                theme === 'light'
+                  ? 'bg-plasma text-abyss shadow-sm'
+                  : 'text-muted-foreground hover:text-muted hover:bg-shadow/50'
+              }`}
+              title="Modo Claro"
+            >
+              ☀️
+            </button>
+            <button
+              onClick={() => setTheme('dark')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all duration-200 ${
+                theme === 'dark'
+                  ? 'bg-plasma text-abyss shadow-sm'
+                  : 'text-muted-foreground hover:text-muted hover:bg-shadow/50'
+              }`}
+              title="Modo Oscuro"
+            >
+              🌙
+            </button>
+          </div>
+        </div>
+
       </div>
 
       {/* Controles y Filtros Izquierda */}
@@ -153,43 +203,15 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Estadísticas flotantes */}
-      <div className={`absolute bottom-6 right-6 z-40 flex gap-3 transition-all duration-500 ${showEvents ? 'translate-x-[-340px] opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto md:translate-x-[-340px]' : 'translate-x-0'}`}>
-        {[
-          { icon: '🚨', count: events.filter(e => e.severity === 4).length, label: 'Crítico', color: '#E8E8F0' },
-          { icon: '⚠️', count: events.filter(e => e.severity === 3).length, label: 'Alto', color: '#A07888' },
-          { icon: '📊', count: events.filter(e => e.severity <= 2).length, label: 'Otros', color: '#7088A0' },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className="bg-[#1A1B22]/90 backdrop-blur-xl border border-[#D4B57A]/10 rounded-2xl px-4 py-3 text-center min-w-[75px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] ring-1 ring-white/5 ring-inset hover:border-[#D4B57A]/30 transition-all group"
-          >
-            <div className="text-xl mb-1 group-hover:scale-110 transition-transform">{stat.icon}</div>
-            <div className="text-lg font-black tracking-tight" style={{ color: stat.color }}>{stat.count}</div>
-            <div className="text-[9px] text-[#D4B57A]/60 font-black uppercase tracking-widest">{stat.label}</div>
-          </div>
-        ))}
-      </div>
 
       {/* Panel de eventos flotante - lado derecho */}
-      <aside
-        className={`absolute top-20 bottom-24 right-6 z-30 w-[calc(100vw-3rem)] md:w-80 transition-transform duration-500 ${showEvents ? 'translate-x-0' : 'translate-x-[calc(100%+3rem)]'
-          }`}
-      >
-        <div className="h-full bg-[#1A1B22]/95 backdrop-blur-2xl border border-[#D4B57A]/10 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col ring-1 ring-white/5">
-          <div className="p-5 border-b border-[#D4B57A]/10 flex items-center justify-between">
+      <aside className="absolute top-20 bottom-24 right-6 z-30 w-[calc(100vw-3rem)] md:w-80">
+        <div className="h-full bg-card/95 backdrop-blur-2xl border border-border rounded-3xl shadow-xl overflow-hidden flex flex-col ring-1 ring-white-5">
+          <div className="p-5 border-b border-border">
             <div>
-              <h2 className="text-[#E8E8F0] font-black tracking-tight uppercase text-xs opacity-90">Protocolos Activos</h2>
-              <p className="text-[#D4B57A] text-[10px] font-black uppercase tracking-widest mt-1 animate-pulse">{events.length} Nodos detectados</p>
+              <h2 className="text-card-foreground font-black tracking-tight uppercase text-xs opacity-90 font-display">Protocolos Activos</h2>
+              <p className="text-plasma text-[10px] font-black uppercase tracking-widest mt-1 animate-pulse font-display">{events.length} Nodos detectados</p>
             </div>
-            <button
-              onClick={() => setShowEvents(false)}
-              className="text-[#8890A0] hover:text-[#E8E8F0] p-2 hover:bg-[#4A5060]/20 rounded-xl transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -203,7 +225,9 @@ export default function HomePage() {
               <EventFeed
                 events={events}
                 selectedEvent={selectedEvent}
+                newEventIds={newEventIds}
                 onEventSelect={setSelectedEvent}
+                onMarkEventAsSeen={markEventAsSeen}
                 onShowContext={(e) => {
                   setContextEvent(e)
                   setIsContextOpen(true)

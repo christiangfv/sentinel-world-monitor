@@ -72,6 +72,27 @@ export function DisasterMap({
   onFilterChange,
   className = ''
 }: DisasterMapProps) {
+  // Detectar tema actual
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const root = document.documentElement;
+      setIsLightMode(root.classList.contains('light'));
+    };
+
+    // Verificar tema inicial
+    checkTheme();
+
+    // Escuchar cambios en el DOM
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
   const [isClient, setIsClient] = useState(false);
   const [showUserZones, setShowUserZones] = useState(showZones);
 
@@ -103,10 +124,14 @@ export function DisasterMap({
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
+        className="leaflet-container-themed"
       >
         <MapController selectedEvent={selectedEvent} />
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url={isLightMode
+            ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          }
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
         />
 

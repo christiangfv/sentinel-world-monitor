@@ -25,8 +25,13 @@ export function AuthGuard({
         // Usuario no autenticado, redirigir a login
         router.push(redirectTo);
       } else if (!requireAuth && user) {
-        // Usuario autenticado en página pública, redirigir a inicio
-        router.push('/');
+        // Usuario autenticado en página pública
+        // No redirigir si necesita completar onboarding
+        const needsOnboarding = !user.settings?.onboardingCompleted;
+        if (!needsOnboarding) {
+          router.push('/');
+        }
+        // Si necesita onboarding, permanecer en la página actual
       }
     }
   }, [user, loading, requireAuth, redirectTo, router]);

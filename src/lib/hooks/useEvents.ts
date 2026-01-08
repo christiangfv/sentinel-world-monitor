@@ -8,6 +8,8 @@ export function useEvents(filters: EventFilters = { disasterTypes: [], minSeveri
   const [events, setEvents] = useState<DisasterEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [newEventIds, setNewEventIds] = useState<Set<string>>(new Set());
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     setLoading(true);
@@ -15,23 +17,71 @@ export function useEvents(filters: EventFilters = { disasterTypes: [], minSeveri
 
     // Cargar eventos iniciales
     getEvents(filters)
-      .then(setEvents)
+      .then((initialEvents) => {
+        setEvents(initialEvents);
+        setIsInitialLoad(false); // Marcar que ya se completó la carga inicial
+      })
       .catch((err) => {
         console.error('Error loading events:', err);
         setError('Error al cargar eventos');
+        setIsInitialLoad(false);
       })
       .finally(() => setLoading(false));
 
     // Suscribirse a cambios en tiempo real
     const unsubscribe = subscribeToEvents(
       (updatedEvents) => {
+        // Solo detectar eventos nuevos después de la carga inicial
+        if (!isInitialLoad) {
+          const existingIds = new Set(events.map(e => e.id));
+          const newIds = new Set<string>();
+
+          updatedEvents.forEach(event => {
+            if (!existingIds.has(event.id)) {
+              newIds.add(event.id);
+            }
+          });
+
+          // Agregar nuevos eventos al conjunto de destacados
+          if (newIds.size > 0) {
+            setNewEventIds(prev => new Set([...prev, ...newIds]));
+          }
+        }
+
         setEvents(updatedEvents);
         setError(null);
       },
       filters
     );
 
-    return unsubscribe;
+    // Auto-refresh cada 2 minutos además de la suscripción en tiempo real
+    const refreshInterval = setInterval(async () => {
+      try {
+        const freshEvents = await getEvents(filters);
+        const existingIds = new Set(events.map(e => e.id));
+        const newIds = new Set<string>();
+
+        freshEvents.forEach(event => {
+          if (!existingIds.has(event.id)) {
+            newIds.add(event.id);
+          }
+        });
+
+        // Solo marcar como nuevos después de la carga inicial
+        if (!isInitialLoad && newIds.size > 0) {
+          setNewEventIds(prev => new Set([...prev, ...newIds]));
+        }
+
+        setEvents(freshEvents);
+      } catch (err) {
+        console.error('Auto-refresh error:', err);
+      }
+    }, 2 * 60 * 1000); // 2 minutos
+
+    return () => {
+      unsubscribe();
+      clearInterval(refreshInterval);
+    };
   }, [
     filters.disasterTypes?.join(','),
     filters.minSeverity,
@@ -56,11 +106,21 @@ export function useEvents(filters: EventFilters = { disasterTypes: [], minSeveri
     }
   }, [filters]);
 
+  const markEventAsSeen = useCallback((eventId: string) => {
+    setNewEventIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(eventId);
+      return newSet;
+    });
+  }, []);
+
   return {
     events,
     loading,
     error,
-    refresh
+    refresh,
+    newEventIds,
+    markEventAsSeen
   };
 }
 

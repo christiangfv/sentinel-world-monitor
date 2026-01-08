@@ -25,7 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedMockUser = localStorage.getItem('sentinel_mock_user');
     if (savedMockUser) {
       try {
-        setUser(JSON.parse(savedMockUser));
+        const mockUser = JSON.parse(savedMockUser);
+        setUser(mockUser);
         setLoading(false);
         // Si hay mock user, no inicializamos el listener de Firebase por ahora
         return;

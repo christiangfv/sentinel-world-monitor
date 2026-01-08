@@ -1,282 +1,428 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Bai+Jamjuree:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
-/*
- * CYBERPUNK ZEN
- * Neones apagados. Dorado perlado sobre negro profundo.
- * ship > talk
- */
+@custom-variant dark (&:is(.dark *));
 
 :root {
+  /* ============================================
+     SENTINEL DESIGN SYSTEM
+     ============================================ */
+
+  /* Core Palette */
   --abyss: #0D0E14;
   --shadow: #1A1B22;
-  --slate: #4A5060;
+  --elevated: #22232C;
+  --plasma: #D4B57A;
+  --plasma-hover: #E5C68B;
+  --mist: #7088A0;
+  --mist-hover: #8BA0B8;
+  --sakura: #A07888;
   --smoke: #8890A0;
   --muted: #E8E8F0;
-  --plasma: #D4B57A;
-  --plasma-dark: #A8925A;
-  --mist: #7088A0;
-  --sakura: #A07888;
 
-  --success: #4ADE80;
-  --warning: #FBBF24;
-  --danger: #F87171;
+  /* Alpha Variants */
+  --plasma-10: rgba(212, 181, 122, 0.1);
+  --plasma-20: rgba(212, 181, 122, 0.2);
+  --plasma-30: rgba(212, 181, 122, 0.3);
+  --sakura-10: rgba(160, 120, 136, 0.1);
+  --sakura-20: rgba(160, 120, 136, 0.2);
+  --mist-10: rgba(112, 136, 160, 0.1);
+  --mist-20: rgba(112, 136, 160, 0.2);
+  --white-5: rgba(255, 255, 255, 0.05);
+  --white-10: rgba(255, 255, 255, 0.1);
 
-  /* Shadows & Effects */
-  --glow-plasma: 0 0 20px rgba(212, 181, 122, 0.15), 0 0 40px rgba(212, 181, 122, 0.05);
-  --glow-danger: 0 0 20px rgba(248, 113, 113, 0.2), 0 0 40px rgba(248, 113, 113, 0.1);
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  /* Semantic Colors - Dark Mode Default */
+  --background: var(--abyss);
+  --foreground: var(--muted);
+  --card: var(--shadow);
+  --card-foreground: var(--muted);
+  --popover: var(--shadow);
+  --popover-foreground: var(--muted);
+  --primary: var(--plasma);
+  --primary-foreground: var(--abyss);
+  --secondary: var(--mist);
+  --secondary-foreground: var(--abyss);
+  --muted-bg: var(--shadow);
+  --muted-foreground: var(--smoke);
+  --accent: var(--sakura);
+  --accent-foreground: var(--muted);
+  --destructive: var(--sakura);
+  --destructive-foreground: var(--muted);
+  --border: rgba(212, 181, 122, 0.1);
+  --border-strong: rgba(212, 181, 122, 0.2);
+  --input: var(--shadow);
+  --input-border: rgba(212, 181, 122, 0.15);
+  --ring: var(--plasma);
+
+  /* Severity Colors */
+  --severity-low: var(--mist);
+  --severity-medium: var(--plasma);
+  --severity-high: var(--sakura);
+  --severity-critical: var(--muted);
+
+  /* Chart Colors */
+  --chart-1: var(--plasma);
+  --chart-2: var(--mist);
+  --chart-3: var(--sakura);
+  --chart-4: var(--smoke);
+  --chart-5: var(--muted);
+
+  /* Sidebar */
+  --sidebar: var(--shadow);
+  --sidebar-foreground: var(--muted);
+  --sidebar-primary: var(--plasma);
+  --sidebar-primary-foreground: var(--abyss);
+  --sidebar-accent: var(--elevated);
+  --sidebar-accent-foreground: var(--muted);
+  --sidebar-border: rgba(212, 181, 122, 0.08);
+  --sidebar-ring: var(--plasma);
+
+  /* Border Radius */
+  --radius: 0.75rem;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px rgba(212, 181, 122, 0.15);
+  --shadow-glow-sm: 0 0 20px rgba(212, 181, 122, 0.1);
+
+  /* Typography */
+  --font-display: "Bai Jamjuree", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   color-scheme: dark;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@theme inline {
+  /* Core Colors */
+  --color-abyss: var(--abyss);
+  --color-shadow: var(--shadow);
+  --color-elevated: var(--elevated);
+  --color-plasma: var(--plasma);
+  --color-plasma-hover: var(--plasma-hover);
+  --color-mist: var(--mist);
+  --color-mist-hover: var(--mist-hover);
+  --color-sakura: var(--sakura);
+  --color-smoke: var(--smoke);
+  --color-muted: var(--muted);
+
+  /* Alpha Variants */
+  --color-plasma-10: var(--plasma-10);
+  --color-plasma-20: var(--plasma-20);
+  --color-plasma-30: var(--plasma-30);
+  --color-sakura-10: var(--sakura-10);
+  --color-sakura-20: var(--sakura-20);
+  --color-mist-10: var(--mist-10);
+  --color-mist-20: var(--mist-20);
+  --color-white-5: var(--white-5);
+  --color-white-10: var(--white-10);
+
+  /* Semantic Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-bg: var(--muted-bg);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-input-border: var(--input-border);
+  --color-ring: var(--ring);
+
+  /* Severity */
+  --color-severity-low: var(--severity-low);
+  --color-severity-medium: var(--severity-medium);
+  --color-severity-high: var(--severity-high);
+  --color-severity-critical: var(--severity-critical);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Border Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 12px);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Typography */
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
-html, body {
-  background: var(--abyss);
-  color: var(--muted);
-  font-family: var(--font-inter), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    @apply font-sans antialiased;
+  }
+
+  /* Headings use Bai Jamjuree */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+
+  /* Specific heading styles */
+  h1 {
+    @apply text-4xl font-bold;
+  }
+
+  h2 {
+    @apply text-3xl font-semibold;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold;
+  }
+
+  h4 {
+    @apply text-xl font-medium;
+  }
+
+  /* Buttons and table headers use Bai Jamjuree */
+  button, th {
+    @apply font-display font-semibold;
+  }
+
+  /* Code and technical data */
+  code, pre, kbd, samp, .font-mono {
+    @apply font-mono;
+  }
+
+  /* Links */
+  a {
+    @apply text-mist hover:text-mist-hover transition-colors;
+  }
+
+  /* Focus states */
+  :focus-visible {
+    @apply outline-none ring-2 ring-plasma ring-offset-2 ring-offset-background;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-plasma/30 text-foreground;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-abyss;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-shadow rounded-full hover:bg-elevated;
+  }
 }
 
-::selection {
-  background: rgba(212, 181, 122, 0.3);
-  color: var(--plasma);
+/* ============================================
+   COMPONENT UTILITIES
+   ============================================ */
+
+@layer utilities {
+  /* Glow effects */
+  .glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glow-sm {
+    box-shadow: var(--shadow-glow-sm);
+  }
+
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all duration-300;
+  }
+
+  .card-hover:hover {
+    @apply border-border-strong;
+    box-shadow: var(--shadow-glow-sm);
+  }
+
+  /* Text gradients */
+  .text-gradient-plasma {
+    @apply bg-gradient-to-r from-plasma to-plasma-hover bg-clip-text text-transparent;
+  }
+
+  .text-gradient-mist {
+    @apply bg-gradient-to-r from-mist to-mist-hover bg-clip-text text-transparent;
+  }
+
+  /* Severity badge backgrounds */
+  .severity-low {
+    @apply bg-mist-10 text-mist border border-mist/20;
+  }
+
+  .severity-medium {
+    @apply bg-plasma-10 text-plasma border border-plasma/20;
+  }
+
+  .severity-high {
+    @apply bg-sakura-10 text-sakura border border-sakura/20;
+  }
+
+  .severity-critical {
+    @apply bg-white-10 text-muted border border-white-10;
+  }
+
+  /* Map background */
+  .bg-map {
+    background: linear-gradient(135deg, #0a1520 0%, #152030 100%);
+  }
+
+  /* Animated pulse for markers */
+  .pulse-marker {
+    animation: pulse-marker 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-marker {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.5;
+    }
+  }
+
+  /* Letter spacing for logo */
+  .tracking-logo {
+    letter-spacing: 0.15em;
+  }
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--abyss); }
-::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 3px; }
+/* ============================================
+   LIGHT MODE (Optional)
+   ============================================ */
 
-*:focus-visible {
-  outline: 2px solid var(--plasma);
-  outline-offset: 2px;
+.light {
+  --background: #F8F8FC;
+  --foreground: var(--abyss);
+  --card: #FFFFFF;
+  --card-foreground: var(--abyss);
+  --popover: #FFFFFF;
+  --popover-foreground: var(--abyss);
+  --primary: var(--plasma);
+  --primary-foreground: var(--abyss);
+  --secondary: var(--mist);
+  --secondary-foreground: #FFFFFF;
+  --muted-bg: #F0F0F5;
+  --muted-foreground: var(--smoke);
+  --border: rgba(13, 14, 20, 0.1);
+  --border-strong: rgba(13, 14, 20, 0.2);
+  --input: #FFFFFF;
+  --input-border: rgba(13, 14, 20, 0.15);
+
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: var(--abyss);
+  --sidebar-border: rgba(13, 14, 20, 0.08);
 }
 
-/* Leaflet */
-.leaflet-container { 
-  background: var(--abyss) !important; 
-  z-index: 0 !important;
+/* ============================================
+   DARK MODE (Default for Sentinel)
+   ============================================ */
+
+.dark {
+  --background: var(--abyss);
+  --foreground: var(--muted);
+  --card: var(--shadow);
+  --card-foreground: var(--muted);
+  --popover: var(--shadow);
+  --popover-foreground: var(--muted);
+
+  --sidebar: var(--shadow);
+  --sidebar-foreground: var(--muted);
+  --sidebar-primary: var(--plasma);
+  --sidebar-primary-foreground: var(--abyss);
+  --sidebar-accent: var(--elevated);
+  --sidebar-accent-foreground: var(--muted);
+  --sidebar-border: rgba(212, 181, 122, 0.08);
+  --sidebar-ring: var(--plasma);
 }
-.leaflet-pane { z-index: 1 !important; }
-.leaflet-top, .leaflet-bottom { z-index: 10 !important; }
-.leaflet-popup-content-wrapper { background: var(--shadow); color: var(--muted); border-radius: 8px; border: 1px solid var(--slate); }
-.leaflet-popup-tip { background: var(--shadow); }
-.leaflet-control-zoom { border: none !important; }
-.leaflet-control-zoom a { 
-  background: var(--shadow) !important; 
-  color: var(--muted) !important; 
-  border: 1px solid rgba(74,80,96,0.5) !important;
-  width: 32px !important;
-  height: 32px !important;
-  line-height: 32px !important;
-  font-size: 16px !important;
+
+/* ============================================
+   MAP STYLES FOR THEME SUPPORT
+   ============================================ */
+
+/* Leaflet Map Theme Support */
+.leaflet-container-themed .leaflet-container {
+  background: var(--abyss) !important;
 }
-.leaflet-control-zoom a:hover { background: var(--slate) !important; }
-.leaflet-control-zoom-in { border-radius: 8px 8px 0 0 !important; }
-.leaflet-control-zoom-out { border-radius: 0 0 8px 8px !important; border-top: none !important; }
+
+.light .leaflet-container-themed .leaflet-container {
+  background: var(--background) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--card) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--elevated) !important;
+}
+
 .leaflet-control-attribution {
-  background: rgba(13,14,20,0.85) !important;
-  color: var(--smoke) !important;
-  font-size: 10px !important;
-}
-.leaflet-control-attribution a { color: var(--mist) !important; }
-
-/* Custom disaster markers */
-.custom-event-marker { background: transparent !important; border: none !important; }
-.disaster-marker:hover { transform: scale(1.15); }
-.disaster-marker svg { transition: all 0.2s ease; }
-
-/* ========================================
-   PROFESSIONAL ANIMATIONS & EFFECTS
-   ======================================== */
-
-/* Fade animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  background: var(--card)/0.85 !important;
+  color: var(--muted-foreground) !important;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.leaflet-control-attribution a {
+  color: var(--plasma) !important;
 }
 
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* React Globe Theme Support */
+.globe-container {
+  background: var(--abyss) !important;
 }
 
-/* Pulse for critical events */
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(248, 113, 113, 0);
-  }
-}
-
-@keyframes pulseDot {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.7;
-  }
-}
-
-/* Shimmer loading effect */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-/* Float animation */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-/* Utility classes */
-.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-.animate-fadeInUp { animation: fadeInUp 0.4s ease-out; }
-.animate-fadeInScale { animation: fadeInScale 0.3s ease-out; }
-.animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
-.animate-pulse-dot { animation: pulseDot 1.5s ease-in-out infinite; }
-.animate-float { animation: float 3s ease-in-out infinite; }
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--shadow) 0%,
-    var(--slate) 50%,
-    var(--shadow) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Glassmorphism */
-.glass {
-  background: rgba(26, 27, 34, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(74, 80, 96, 0.3);
-}
-
-.glass-strong {
-  background: rgba(26, 27, 34, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(74, 80, 96, 0.4);
-}
-
-/* Card hover effects */
-.card-lift {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.card-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-elevated);
-}
-
-/* Severity indicators - Brand Book Colors */
-.severity-critical {
-  border-left-color: var(--muted) !important;
-  animation: pulseGlow 2s ease-in-out infinite;
-}
-
-.severity-high {
-  border-left-color: var(--sakura) !important;
-}
-
-.severity-medium {
-  border-left-color: var(--plasma) !important;
-}
-
-.severity-low {
-  border-left-color: var(--mist) !important;
-}
-
-/* Badge pulse for critical */
-.badge-critical::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  animation: pulseGlow 2s ease-in-out infinite;
-}
-
-/* Gradient text */
-.text-gradient-plasma {
-  background: linear-gradient(135deg, var(--plasma) 0%, var(--plasma-dark) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Smooth scrollbar */
-.smooth-scroll {
-  scroll-behavior: smooth;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--slate);
-  border-radius: 2px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--smoke);
-}
-
-/* Button hover glow */
-.btn-glow {
-  position: relative;
-  overflow: hidden;
-}
-.btn-glow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent 40%, rgba(212, 181, 122, 0.1) 50%, transparent 60%);
-  transform: translateX(-100%);
-  transition: transform 0.5s ease;
-}
-.btn-glow:hover::after {
-  transform: translateX(100%);
-}
-
-/* Interactive states */
-.interactive {
-  transition: all 0.2s ease;
-}
-.interactive:hover {
-  background: rgba(74, 80, 96, 0.2);
-}
-.interactive:active {
-  transform: scale(0.98);
+.light .globe-container {
+  background: var(--background) !important;
 }

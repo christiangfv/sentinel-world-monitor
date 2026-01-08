@@ -8,9 +8,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Usuarios - solo el propio usuario puede leer/escribir
+    // Usuarios - solo el propio usuario puede leer/escribir (temporal: permitir escritura para debugging)
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      // Temporal: permitir escritura para nuevos usuarios durante desarrollo
+      allow create: if true;
 
       match /zones/{zoneId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
