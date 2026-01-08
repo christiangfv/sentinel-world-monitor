@@ -45,7 +45,7 @@ const features = [
 
 export default function LoginPage() {
   return (
-    <AuthGuard requireAuth={false} redirectTo="/dashboard">
+    <AuthGuard requireAuth={false} redirectTo="/">
       <div className="min-h-screen bg-[#0D0E14] flex items-center justify-center p-4 relative overflow-hidden">
         {/* Background gradient effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">

@@ -25,8 +25,8 @@ export function AuthGuard({
         // Usuario no autenticado, redirigir a login
         router.push(redirectTo);
       } else if (!requireAuth && user) {
-        // Usuario autenticado en página pública, redirigir a dashboard
-        router.push('/dashboard');
+        // Usuario autenticado en página pública, redirigir a inicio
+        router.push('/');
       }
     }
   }, [user, loading, requireAuth, redirectTo, router]);
