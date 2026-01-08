@@ -63,6 +63,9 @@ export interface UserSettings {
   language: 'es' | 'en';
   darkMode: boolean;
   soundEnabled: boolean;
+  country?: string;
+  minMagnitude?: number;
+  onboardingCompleted?: boolean;
 }
 
 // Zona de monitoreo del usuario

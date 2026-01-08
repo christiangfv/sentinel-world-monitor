@@ -99,7 +99,7 @@ export function GeneralSettings() {
                         </Button>
                     </div>
 
-                    {/* Dark Mode - For now just a dummy or db toggle, assuming app respects it globally if implemented */}
+                    {/* Dark Mode */}
                     <div className="flex items-center justify-between">
                         <span className="font-medium">Modo Oscuro</span>
                         <Button
@@ -110,6 +110,43 @@ export function GeneralSettings() {
                         >
                             {currentSettings.darkMode ? 'On' : 'Off'}
                         </Button>
+                    </div>
+
+                    <div className="border-t border-[#4A5060]/20 pt-4 mt-4">
+                        <h4 className="text-sm font-bold text-[#D4B57A] uppercase tracking-wider mb-4">Preferencias de Notificación</h4>
+
+                        {/* Country */}
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="font-medium">País de Monitoreo</span>
+                            <select
+                                value={currentSettings.country || 'Global'}
+                                onChange={(e) => handleUpdateSetting('country', e.target.value)}
+                                className="bg-[#0D0E14] border border-[#4A5060]/30 rounded-lg px-3 py-1.5 text-sm text-[#E8E8F0]"
+                                disabled={loading}
+                            >
+                                {["Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Ecuador", "España", "Estados Unidos", "México", "Perú", "Uruguay", "Venezuela", "Global"].map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Magnitude */}
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                                <span className="font-medium">Umbral Mín. Sismos</span>
+                                <span className="text-[#D4B57A] font-bold">M{(currentSettings.minMagnitude || 4.5).toFixed(1)}</span>
+                            </div>
+                            <input
+                                type="range"
+                                min="3"
+                                max="8.5"
+                                step="0.1"
+                                value={currentSettings.minMagnitude || 4.5}
+                                onChange={(e) => handleUpdateSetting('minMagnitude', parseFloat(e.target.value))}
+                                className="w-full h-2 bg-[#4A5060]/30 rounded-lg appearance-none cursor-pointer accent-[#D4B57A]"
+                                disabled={loading}
+                            />
+                        </div>
                     </div>
                 </div>
             </CardContent>

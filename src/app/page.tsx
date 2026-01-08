@@ -14,6 +14,7 @@ import { UserMenu } from '@/components/auth/UserMenu'
 import { DISASTER_TYPES } from '@/lib/constants/disasters'
 import { DisasterEvent, EventFilters } from '@/lib/types'
 import { EventContextModal } from '@/components/events/EventContextModal'
+import { OnboardingModal } from '@/components/auth/OnboardingModal'
 
 const DisasterMap = dynamic(() => import('@/components/map/DisasterMap').then(m => ({ default: m.DisasterMap })), {
   ssr: false,
@@ -213,6 +214,13 @@ export default function HomePage() {
         event={contextEvent}
         isOpen={isContextOpen}
         onClose={() => setIsContextOpen(false)}
+      />
+
+      <OnboardingModal
+        user={user}
+        onComplete={() => {
+          console.log('Onboarding completed');
+        }}
       />
     </div >
   )

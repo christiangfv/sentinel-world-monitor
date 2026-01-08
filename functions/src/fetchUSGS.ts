@@ -156,8 +156,9 @@ export async function processUSGSFetch(): Promise<void> {
         batch.set(eventRef, eventData);
         processedCount++;
 
-        // Agregar a lista de eventos críticos si severidad >= 4
-        if (severity >= 4) {
+        // Agregar a lista de eventos críticos si severidad >= 2 (M4.0+)
+        // El filtrado final se hace en sendCriticalNotifications según las preferencias del usuario
+        if (severity >= 2) {
           criticalEvents.push(eventData);
         }
 

@@ -153,10 +153,40 @@ export const sendCriticalNotifications = async (eventData: any) => {
         if (!alertPref?.pushEnabled) continue;
         if (eventData.severity < (alertPref.minSeverity || 1)) continue;
 
+        // --- FILTRADO POR PREFERENCIAS DE USUARIO (PAÍS Y MAGNITUD) ---
+        const userSettings = userData.settings || {};
+
+        // 1. Filtrado por Magnitud (solo para sismos)
+        if (eventData.disasterType === 'earthquake' && eventData.magnitude) {
+          const minMag = userSettings.minMagnitude || 4.5;
+          if (eventData.magnitude < minMag) continue;
+        }
+
+        // 2. Filtrado por País/Región
+        const userCountry = userSettings.country || 'Global';
+        if (userCountry !== 'Global') {
+          const eventText = (eventData.locationName + ' ' + eventData.title).toLowerCase();
+          if (!eventText.includes(userCountry.toLowerCase())) {
+            // Si no coincide el país, verificamos si está en la zona de monitoreo (se mantiene lógica de zonas)
+          }
+        }
+
         // Verificar si alguna zona intersecta con el evento
         let shouldNotify = false;
         let closestZone = null;
         let minDistance = Infinity;
+
+        // Si el usuario tiene un país específico y el evento coincide con ese país, 
+        // podríamos notificar incluso si no tiene una "zona" definida allí, 
+        // pero la lógica actual requiere zonas. Mantenemos el requisito de zonas pero 
+        // relajamos el límite geográfico de Sudamérica si el usuario configuró otro país.
+
+        const isSouthAmerica = latitude >= -60 && latitude <= 20 && longitude >= -90 && longitude <= -30;
+        const matchesCountry = userCountry !== 'Global' &&
+          (eventData.locationName + ' ' + eventData.title).toLowerCase().includes(userCountry.toLowerCase());
+
+        // Si el evento no está en Sudamérica Y no coincide con el país del usuario, lo ignoramos para ahorrar procesos
+        if (!isSouthAmerica && !matchesCountry && userCountry !== 'Global') continue;
 
         for (const zoneDoc of zonesSnapshot.docs) {
           const zone = zoneDoc.data();
