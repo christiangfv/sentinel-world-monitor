@@ -29,12 +29,12 @@ echo "✅ Build exitoso. Iniciando deploy a producción..."
 
 # Deploy a producción
 firebase use production
-firebase deploy --project sentinel-production-2025
+firebase deploy --project sentinel-prod-9c937
 
 if [ $? -eq 0 ]; then
     echo ""
     echo "🎉 DEPLOY A PRODUCCIÓN COMPLETADO EXITOSAMENTE!"
-    echo "🌐 Tu app estará disponible en: https://sentinel-production-2025.web.app"
+    echo "🌐 Tu app estará disponible en: https://sentinel-prod-9c937.web.app"
     echo ""
     echo "📱 Funcionalidades disponibles:"
     echo "   • Monitoreo de desastres naturales en tiempo real"
@@ -51,5 +51,5 @@ else
     echo "   1. Verifica que Cloud Functions API esté habilitado en producción"
     echo "   2. Verifica que Firestore esté configurado en producción"
     echo "   3. Revisa las variables de entorno en .env.production"
-    echo "   4. Ejecuta: firebase functions:log --project sentinel-production-2025"
+    echo "   4. Ejecuta: firebase functions:log --project sentinel-prod-9c937"
 fi

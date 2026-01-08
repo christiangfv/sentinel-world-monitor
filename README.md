@@ -48,8 +48,8 @@ npm install
 ### 3. Configurar ambientes Firebase
 
 #### Crear proyectos Firebase (ya creados)
-- **Producción**: `sentinel-production-2025`
-- **Testing**: `sentinel-testing-2025`
+- **Producción**: `sentinel-prod-9c937`
+- **Testing**: `sentinel-89591`
 
 ### 4. Configurar variables de entorno
 
@@ -57,9 +57,9 @@ npm install
 ```env
 # Firebase Testing Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=your_testing_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-testing-2025.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-testing-2025
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-testing-2025.appspot.com
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-89591.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-89591
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-89591.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_testing_sender_id_here
 NEXT_PUBLIC_FIREBASE_APP_ID=your_testing_app_id_here
 NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_testing_vapid_key_here
@@ -71,9 +71,9 @@ NODE_ENV=development
 ```env
 # Firebase Production Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=your_production_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-production-2025.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-production-2025
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-production-2025.appspot.com
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-prod-9c937.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-prod-9c937
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-prod-9c937.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_production_sender_id_here
 NEXT_PUBLIC_FIREBASE_APP_ID=your_production_app_id_here
 NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_production_vapid_key_here

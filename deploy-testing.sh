@@ -29,12 +29,12 @@ echo "✅ Build exitoso. Iniciando deploy a testing..."
 
 # Deploy a testing
 firebase use testing
-firebase deploy --project sentinel-testing-2025
+firebase deploy --project sentinel-89591
 
 if [ $? -eq 0 ]; then
     echo ""
     echo "🎉 DEPLOY A TESTING COMPLETADO EXITOSAMENTE!"
-    echo "🧪 Tu app de testing estará disponible en: https://sentinel-testing-2025.web.app"
+    echo "🧪 Tu app de testing estará disponible en: https://sentinel-89591.web.app"
     echo ""
     echo "📱 Funcionalidades disponibles:"
     echo "   • Monitoreo de desastres naturales en tiempo real"
@@ -51,5 +51,5 @@ else
     echo "   1. Verifica que Cloud Functions API esté habilitado en testing"
     echo "   2. Verifica que Firestore esté configurado en testing"
     echo "   3. Revisa las variables de entorno en .env.testing"
-    echo "   4. Ejecuta: firebase functions:log --project sentinel-testing-2025"
+    echo "   4. Ejecuta: firebase functions:log --project sentinel-89591"
 fi
