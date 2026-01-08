@@ -14,6 +14,7 @@ interface EventCardProps {
   compact?: boolean
   showMapLink?: boolean
   onClick?: () => void
+  onShowContext?: (event: DisasterEvent) => void
   className?: string
 }
 
@@ -37,6 +38,7 @@ export function EventCard({
   compact = false,
   showMapLink = true,
   onClick,
+  onShowContext,
   className = ''
 }: EventCardProps) {
   const config = DISASTER_CONFIGS[event.disasterType]
@@ -80,9 +82,21 @@ export function EventCard({
                   <span className="opacity-70">🕒</span>
                   <span>{formatTimeAgo(event.eventTime)}</span>
                 </div>
-                <span className="px-2 py-0.5 bg-[#4A5060]/15 rounded-md text-[9px] font-bold uppercase tracking-wider text-[#7088A0]">
-                  {config.nameEs}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onShowContext?.(event);
+                    }}
+                    className="p-1 hover:bg-[#D4B57A]/10 rounded transition-colors"
+                    title="Noticias y más info"
+                  >
+                    📰
+                  </button>
+                  <span className="px-2 py-0.5 bg-[#4A5060]/15 rounded-md text-[9px] font-bold uppercase tracking-wider text-[#7088A0]">
+                    {config.nameEs}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -166,10 +180,22 @@ export function EventCard({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </span>
-              <div className="w-6 h-6 rounded bg-[#D4B57A]/10 flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-[#D4B57A]" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clipRule="evenodd" />
-                </svg>
+              <div className="flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onShowContext?.(event);
+                  }}
+                  className="px-3 py-1 bg-[#D4B57A]/10 text-[#D4B57A] rounded-lg text-xs font-bold hover:bg-[#D4B57A]/20 transition-colors flex items-center gap-1.5"
+                >
+                  📰 Noticias
+                </button>
+                <div className="w-6 h-6 rounded bg-[#D4B57A]/10 flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-[#D4B57A]" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clipRule="evenodd" />
+                  </svg>
+                </div>
               </div>
             </div>
           )}

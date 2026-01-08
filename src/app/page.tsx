@@ -13,6 +13,7 @@ import { LoginButton } from '@/components/auth/LoginButton'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { DISASTER_TYPES } from '@/lib/constants/disasters'
 import { DisasterEvent, EventFilters } from '@/lib/types'
+import { EventContextModal } from '@/components/events/EventContextModal'
 
 const DisasterMap = dynamic(() => import('@/components/map/DisasterMap').then(m => ({ default: m.DisasterMap })), {
   ssr: false,
@@ -27,6 +28,8 @@ const DisasterGlobe = dynamic(() => import('@/components/map/DisasterGlobe').the
 export default function HomePage() {
   const { user } = useAuth()
   const [selectedEvent, setSelectedEvent] = useState<DisasterEvent | null>(null)
+  const [contextEvent, setContextEvent] = useState<DisasterEvent | null>(null)
+  const [isContextOpen, setIsContextOpen] = useState(false)
   const [eventFilters, setEventFilters] = useState<EventFilters>({
     disasterTypes: DISASTER_TYPES,
     minSeverity: 1
@@ -43,12 +46,14 @@ export default function HomePage() {
         {viewMode === '2d' ? (
           <DisasterMap
             events={events}
+            selectedEvent={selectedEvent}
             onEventClick={setSelectedEvent}
             showControls={false}
           />
         ) : (
           <DisasterGlobe
             events={events}
+            selectedEvent={selectedEvent}
             onEventClick={setSelectedEvent}
           />
         )}
@@ -164,6 +169,10 @@ export default function HomePage() {
                 events={events}
                 selectedEvent={selectedEvent}
                 onEventSelect={setSelectedEvent}
+                onShowContext={(e) => {
+                  setContextEvent(e)
+                  setIsContextOpen(true)
+                }}
               />
             )}
           </div>
@@ -191,6 +200,12 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      <EventContextModal
+        event={contextEvent}
+        isOpen={isContextOpen}
+        onClose={() => setIsContextOpen(false)}
+      />
     </div >
   )
 }

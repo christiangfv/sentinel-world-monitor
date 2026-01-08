@@ -28,11 +28,20 @@ const ZoneCircle = dynamic(
   { ssr: false }
 );
 
+const MapController = dynamic(
+  () => import('./MapController').then(mod => ({ default: mod.MapController })),
+  { ssr: false }
+);
+
 // Importar leaflet CSS
 import 'leaflet/dist/leaflet.css';
 
+// Componente interno para manejar movimientos del mapa
+
+
 interface DisasterMapProps {
   events: DisasterEvent[];
+  selectedEvent?: DisasterEvent | null;
   userZones?: UserZone[];
   center?: [number, number];
   zoom?: number;
@@ -49,6 +58,7 @@ interface DisasterMapProps {
 
 export function DisasterMap({
   events,
+  selectedEvent,
   userZones = [],
   center = [-33.45, -70.65], // Santiago, Chile por defecto
   zoom = 5,
@@ -94,6 +104,7 @@ export function DisasterMap({
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
       >
+        <MapController selectedEvent={selectedEvent} />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'

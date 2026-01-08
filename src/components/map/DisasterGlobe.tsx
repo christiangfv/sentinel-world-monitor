@@ -6,10 +6,11 @@ import { DisasterEvent } from '@/lib/types';
 
 interface DisasterGlobeProps {
     events: DisasterEvent[];
+    selectedEvent?: DisasterEvent | null;
     onEventClick?: (event: DisasterEvent) => void;
 }
 
-export function DisasterGlobe({ events, onEventClick }: DisasterGlobeProps) {
+export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterGlobeProps) {
     const globeEl = useRef<any>(undefined);
     const [mounted, setMounted] = useState(false);
 
@@ -25,9 +26,23 @@ export function DisasterGlobe({ events, onEventClick }: DisasterGlobeProps) {
         }
     }, [mounted]);
 
+    // Fly to selected event
+    useEffect(() => {
+        if (globeEl.current && selectedEvent) {
+            // Stop auto-rotate when focusing on an event
+            globeEl.current.controls().autoRotate = false;
+
+            globeEl.current.pointOfView({
+                lat: selectedEvent.location.lat,
+                lng: selectedEvent.location.lng,
+                altitude: 1.5
+            }, 2000); // 2 seconds transition
+        }
+    }, [selectedEvent]);
+
     // Color logic matching Leaflet map
     const getEventColor = (severity: number) => {
-        if (severity >= 4) return '#E8E8F0'; // Critical - Flashing White/Red?
+        if (severity >= 4) return '#E8E8F0'; // Critical
         if (severity === 3) return '#A07888'; // High
         if (severity === 2) return '#D4B57A'; // Medium
         return '#7088A0'; // Low
