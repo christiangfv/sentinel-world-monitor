@@ -103,32 +103,6 @@ export const testFetchConnectivity = async () => {
       timeout: 15000
     }
   ];
-    {
-      name: 'USGS',
-      url: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson',
-      timeout: 10000
-    },
-    {
-      name: 'GDACS',
-      url: 'https://www.gdacs.org/xml/rss.xml',
-      timeout: 10000
-    },
-    {
-      name: 'CSN Chile',
-      url: 'https://sismologia.cl/',
-      timeout: 10000
-    },
-    {
-      name: 'NHC Atlantic',
-      url: 'https://www.nhc.noaa.gov/index-at.xml',
-      timeout: 10000
-    },
-    {
-      name: 'NASA EONET',
-      url: 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5&days=7',
-      timeout: 15000
-    }
-  ];
 
   const results = [];
 
