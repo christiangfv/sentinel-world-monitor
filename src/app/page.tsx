@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 
@@ -36,6 +36,14 @@ export default function HomePage() {
   })
   const [showEvents, setShowEvents] = useState(true)
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d')
+
+  // Auto-trigger insight card on selection
+  useEffect(() => {
+    if (selectedEvent) {
+      setContextEvent(selectedEvent)
+      setIsContextOpen(true)
+    }
+  }, [selectedEvent])
 
   const { events, loading } = useEvents(eventFilters)
 
