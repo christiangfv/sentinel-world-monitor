@@ -1,17 +1,31 @@
 import { getToken, onMessage, Messaging } from 'firebase/messaging';
-import { messaging, VAPID_KEY } from './config';
+import { VAPID_KEY, initializeMessaging } from './config';
 import { updateUserFcmToken } from './auth';
 
-// Verificar si FCM está disponible
-export function isMessagingSupported(): boolean {
-  return messaging !== null;
+// Cache para la instancia de messaging
+let messagingInstance: Messaging | null = null;
+
+/**
+ * Verificar si FCM está disponible
+ */
+export async function isMessagingSupported(): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    messagingInstance = await initializeMessaging();
+    return messagingInstance !== null;
+  } catch (error) {
+    console.error('Error checking messaging support:', error);
+    return false;
+  }
 }
 
 /**
  * Solicita permiso para notificaciones push
  */
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!isMessagingSupported()) {
+  const supported = await isMessagingSupported();
+  if (!supported) {
     console.warn('Firebase Messaging no está soportado en este navegador');
     return false;
   }
@@ -29,7 +43,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
  * Obtiene el FCM token del dispositivo
  */
 export async function getFcmToken(): Promise<string | null> {
-  if (!isMessagingSupported()) {
+  const supported = await isMessagingSupported();
+  if (!supported || !messagingInstance) {
     return null;
   }
 
@@ -39,7 +54,7 @@ export async function getFcmToken(): Promise<string | null> {
   }
 
   try {
-    const token = await getToken(messaging!, {
+    const token = await getToken(messagingInstance, {
       vapidKey: VAPID_KEY
     });
 
@@ -82,12 +97,12 @@ export async function unregisterFcmToken(userId: string): Promise<void> {
  * Listener para mensajes FCM cuando la app está en primer plano
  */
 export function onForegroundMessage(callback: (payload: any) => void) {
-  if (!isMessagingSupported()) {
+  if (!messagingInstance) {
     console.warn('Firebase Messaging no disponible para mensajes en primer plano');
     return () => {};
   }
 
-  return onMessage(messaging!, (payload) => {
+  return onMessage(messagingInstance, (payload) => {
     console.log('Mensaje recibido en primer plano:', payload);
 
     // Mostrar notificación nativa del navegador si es necesario
@@ -96,8 +111,8 @@ export function onForegroundMessage(callback: (payload: any) => void) {
       if (title && body) {
         new Notification(title, {
           body,
-          icon: '/icons/icon-192.png',
-          badge: '/icons/badge-72.png',
+          icon: '/icons/icon-192.svg',
+          badge: '/icons/badge-72.svg',
           tag: payload.data?.eventId || 'sentinel-notification'
         });
       }
@@ -114,8 +129,8 @@ export async function showTestNotification(): Promise<void> {
   if (Notification.permission === 'granted') {
     new Notification('🔔 Sentinel - Prueba', {
       body: 'Esta es una notificación de prueba de Sentinel',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/badge-72.png',
+      icon: '/icons/icon-192.svg',
+      badge: '/icons/badge-72.svg',
       tag: 'sentinel-test'
     });
   } else {
@@ -141,7 +156,8 @@ export function areNotificationsEnabled(): boolean {
  * Inicializa el sistema de notificaciones
  */
 export async function initializeNotifications(userId: string): Promise<boolean> {
-  if (!isMessagingSupported()) {
+  const supported = await isMessagingSupported();
+  if (!supported) {
     console.warn('Firebase Messaging no soportado');
     return false;
   }

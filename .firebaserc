@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "sentinel-89591"
+    "production": "sentinel-production-2025",
+    "testing": "sentinel-testing-2025",
+    "default": "sentinel-testing-2025"
   }
 }

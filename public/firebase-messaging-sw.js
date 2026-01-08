@@ -2,52 +2,60 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
 
-// Configuración de Firebase (debe coincidir con la del cliente)
-firebase.initializeApp({
-  apiKey: "demo_api_key", // Se reemplazará en producción
-  authDomain: "demo-project.firebaseapp.com",
-  projectId: "demo-project",
-  storageBucket: "demo-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "demo_app_id"
-});
+// Configuración dinámica desde el cliente
+let firebaseApp = null;
+let messaging = null;
 
-const messaging = firebase.messaging();
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "FIREBASE_CONFIG") {
+    const config = event.data.config;
+    if (config && !firebaseApp) {
+      try {
+        firebaseApp = firebase.initializeApp(config);
+        messaging = firebase.messaging();
+        
+        // Configurar messaging una vez inicializado
+        messaging.onBackgroundMessage((payload) => {
+          console.log('Mensaje FCM recibido en background:', payload);
 
-// Manejar mensajes en background
-messaging.onBackgroundMessage((payload) => {
-  console.log('Mensaje FCM recibido en background:', payload);
+          const { title, body } = payload.notification || {};
+          const data = payload.data || {};
 
-  const { title, body } = payload.notification || {};
-  const data = payload.data || {};
+          const notificationOptions = {
+            body,
+            icon: '/icons/icon-192.svg',
+            badge: '/icons/badge-72.svg',
+            vibrate: [200, 100, 200, 200, 100, 200],
+            requireInteraction: true,
+            silent: false,
+            tag: data.eventId || 'sentinel-notification',
+            data: {
+              eventId: data.eventId,
+              disasterType: data.disasterType,
+              url: `/event/${data.eventId}`
+            },
+            actions: [
+              {
+                action: 'view',
+                title: 'Ver Detalles',
+                icon: '/icons/icon-192.svg'
+              },
+              {
+                action: 'dismiss',
+                title: 'Cerrar'
+              }
+            ]
+          };
 
-  const notificationOptions = {
-    body,
-    icon: '/icons/icon-192.svg',
-    badge: '/icons/badge-72.svg',
-    vibrate: [200, 100, 200, 200, 100, 200],
-    requireInteraction: true,
-    silent: false,
-    tag: data.eventId || 'sentinel-notification',
-    data: {
-      eventId: data.eventId,
-      disasterType: data.disasterType,
-      url: `/event/${data.eventId}`
-    },
-    actions: [
-      {
-        action: 'view',
-        title: 'Ver Detalles',
-        icon: '/icons/icon-192.svg'
-      },
-      {
-        action: 'dismiss',
-        title: 'Cerrar'
+          self.registration.showNotification(title || 'Nueva Alerta', notificationOptions);
+        });
+        
+        console.log("Service Worker: Firebase initialized successfully");
+      } catch (error) {
+        console.error("Service Worker: Error initializing Firebase:", error);
       }
-    ]
-  };
-
-  self.registration.showNotification(title || 'Nueva Alerta', notificationOptions);
+    }
+  }
 });
 
 // Manejar clicks en notificaciones
@@ -164,4 +172,3 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
-

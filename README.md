@@ -1,6 +1,20 @@
-# Sentinel - App de Monitoreo de Desastres Naturales
+# Sentinel - App de Monitoreo de Desastres Naturales (Versión Segura)
 
 Aplicación web PWA para monitorear desastres naturales en tiempo real (sismos, tsunamis, incendios, etc.). Los usuarios pueden registrarse con Google, configurar zonas geográficas de interés, y recibir notificaciones push cuando ocurra un evento cerca de sus zonas.
+
+## 🔒 SEGURIDAD - CRÍTICO
+
+**Esta versión ha sido completamente revisada y corregida para eliminar vulnerabilidades de seguridad críticas.**
+
+### ✅ Correcciones Implementadas
+- ✅ Eliminadas claves API hardcodeadas de `firebase.json`
+- ✅ Service Worker seguro con configuración dinámica
+- ✅ Variables de entorno segregadas por ambiente
+- ✅ Autenticación mock deshabilitada en producción
+- ✅ Configuración de Firebase segura por ambiente
+
+### 🚨 NO USAR LA VERSIÓN ANTERIOR
+La versión anterior contenía vulnerabilidades críticas de seguridad que han sido corregidas en esta versión.
 
 ## 🚀 Características Principales
 
@@ -18,12 +32,12 @@ Aplicación web PWA para monitorear desastres naturales en tiempo real (sismos, 
 - **Mapas**: Leaflet + React-Leaflet + OpenStreetMap
 - **Geolocalización**: geofire-common para queries geoespaciales
 
-## 📦 Instalación y Configuración
+## 📦 Instalación y Configuración Segura
 
-### 1. Clonar el repositorio
+### 1. Clonar el repositorio seguro
 ```bash
-git clone git@github.com:christiangfv/sentinel.git
-cd sentinel
+git clone git@github.com:christiangfv/sentinel-world-monitor-secure.git
+cd sentinel-world-monitor-secure
 ```
 
 ### 2. Instalar dependencias
@@ -31,168 +45,119 @@ cd sentinel
 npm install
 ```
 
-### 3. Configurar Firebase
+### 3. Configurar ambientes Firebase
+
+#### Crear proyectos Firebase (ya creados)
+- **Producción**: `sentinel-production-2025`
+- **Testing**: `sentinel-testing-2025`
+
+### 4. Configurar variables de entorno
+
+#### Para Testing (`.env.testing`):
+```env
+# Firebase Testing Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_testing_api_key_here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-testing-2025.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-testing-2025
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-testing-2025.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_testing_sender_id_here
+NEXT_PUBLIC_FIREBASE_APP_ID=your_testing_app_id_here
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_testing_vapid_key_here
+
+NODE_ENV=development
+```
+
+#### Para Producción (`.env.production`):
+```env
+# Firebase Production Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_production_api_key_here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=sentinel-production-2025.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=sentinel-production-2025
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=sentinel-production-2025.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_production_sender_id_here
+NEXT_PUBLIC_FIREBASE_APP_ID=your_production_app_id_here
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_production_vapid_key_here
+
+NODE_ENV=production
+```
+
+### 5. Configurar Firebase CLI
 ```bash
-# Instalar Firebase CLI
+# Instalar Firebase CLI (si no está instalado)
 npm install -g firebase-tools
 
 # Login en Firebase
 firebase login
 
-# Inicializar proyecto
-firebase init
+# Usar proyecto de testing por defecto
+firebase use testing
 ```
-
-### 4. Variables de entorno
-Crear archivo `.env.local` en la raíz del proyecto:
-```env
-# Firebase Frontend (obtener de Firebase Console > Project Settings > Your Apps)
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_vapid_key
-```
-
-### 5. Ejecutar en desarrollo
-```bash
-npm run dev
-```
-
-### 6. Deploy a producción
-```bash
-npm run build
-firebase deploy
-```
-
-## 🏗️ Estructura del Proyecto
-
-```
-sentinel/
-├── src/
-│   ├── app/                          # Next.js App Router
-│   │   ├── layout.tsx                # Layout principal
-│   │   ├── page.tsx                  # Home - Mapa + Feed
-│   │   ├── login/page.tsx            # Página de login
-│   │   ├── dashboard/page.tsx        # Panel del usuario
-│   │   ├── settings/page.tsx         # Configuración
-│   │   └── event/[id]/page.tsx       # Detalle de evento
-│   ├── components/
-│   │   ├── layout/                   # Header, Sidebar, Nav
-│   │   ├── map/                      # Mapa y markers
-│   │   ├── events/                   # Feed y cards de eventos
-│   │   ├── user/                     # CRUD de zonas y preferencias
-│   │   ├── auth/                     # Login y guards
-│   │   └── ui/                       # Componentes base (Button, Card, etc.)
-│   └── lib/
-│       ├── firebase/                 # Config y funciones Firebase
-│       ├── hooks/                    # Hooks personalizados
-│       ├── utils/                    # Utilidades
-│       ├── constants/                # Configuración de desastres
-│       └── types/                    # Tipos TypeScript
-├── functions/                        # Cloud Functions
-│   ├── src/
-│   │   ├── index.ts                  # Entry point
-│   │   ├── fetchUSGS.ts              # Polling USGS
-│   │   ├── fetchGDACS.ts             # Polling GDACS
-│   │   └── sendNotifications.ts      # Push notifications
-│   └── package.json
-├── public/
-│   ├── manifest.json                 # PWA manifest
-│   ├── firebase-messaging-sw.js      # Service Worker FCM
-│   └── icons/                        # Iconos PWA
-├── firebase.json                     # Config hosting + functions
-├── firestore.rules                   # Security rules
-├── firestore.indexes.json            # Índices Firestore
-└── package.json
-```
-
-## 🌍 APIs Integradas
-
-### USGS Earthquake API
-- **Endpoint**: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson`
-- **Frecuencia**: Cada 5 minutos
-- **Cobertura**: Sismos magnitud 2.5+ globales
-
-### GDACS (Global Disaster Alert)
-- **Endpoint**: `https://www.gdacs.org/xml/rss.xml`
-- **Frecuencia**: Cada 15 minutos
-- **Cobertura**: Múltiples tipos de desastre
-
-## 🗄️ Estructura Firestore
-
-### Colecciones principales:
-- `events` - Eventos de desastres
-- `users/{uid}/zones` - Zonas de monitoreo por usuario
-- `users/{uid}/alertPrefs` - Preferencias de alertas
-- `notifications` - Historial de notificaciones enviadas
-
-## 📱 PWA Features
-
-- **Instalación**: Se puede instalar como app nativa
-- **Offline**: Funciona sin conexión (mapas cacheados)
-- **Push Notifications**: Alertas en tiempo real
-- **Background Sync**: Sincronización cuando vuelve la conexión
-
-## 🔒 Seguridad
-
-- Autenticación obligatoria para funcionalidades personalizadas
-- Security Rules de Firestore que protegen datos de usuarios
-- Validación de datos en cliente y servidor
-- Rate limiting en Cloud Functions
 
 ## 🚀 Despliegue
 
-### Desarrollo
+### Despliegue a Testing
 ```bash
-npm run dev              # Frontend + emuladores Firebase
-firebase emulators:start  # Solo emuladores
+./deploy-testing.sh
 ```
 
-### Producción
+### Despliegue a Producción
 ```bash
-npm run build
-firebase deploy         # Deploy hosting + functions
+./deploy-production.sh
 ```
 
-### CI/CD
-GitHub Actions configurado para deploy automático en push a `main`.
+## 🔧 Desarrollo Local
 
-## 📋 Tipos de Desastre Soportados
+```bash
+# Instalar dependencias
+npm install
 
-- 🌍 **Sismos** (USGS)
-- 🌊 **Tsunamis**
-- 🌋 **Erupciones Volcánicas**
-- 🔥 **Incendios Forestales**
-- 💧 **Inundaciones**
-- 🌀 **Tormentas/Huracanes**
-- ⛰️ **Deslizamientos de Tierra**
+# Configurar variables de entorno para desarrollo
+cp .env.testing .env.local
 
-## 🎨 Diseño
+# Ejecutar en modo desarrollo
+npm run dev
+```
 
-- **Mobile-first**: Optimizado para dispositivos móviles
-- **Dark/Light mode**: Soporte para ambos temas
-- **Responsive**: Funciona en todos los tamaños de pantalla
-- **Accesible**: Cumple estándares WCAG
+## 📱 Uso de la Aplicación
+
+1. **Registro**: Los usuarios se registran con Google
+2. **Configuración**: Se configuran zonas geográficas de interés
+3. **Preferencias**: Se configuran tipos de desastre y severidad mínima
+4. **Notificaciones**: Se reciben alertas push cuando ocurren eventos relevantes
+
+## 🏗️ Arquitectura
+
+### Frontend (Next.js)
+- **Páginas**: Dashboard, Event Details, Settings, Login
+- **Componentes**: Mapa, Lista de eventos, Configuración de usuario
+- **Hooks**: Autenticación, PWA, Notificaciones
+
+### Backend (Firebase)
+- **Firestore**: Base de datos NoSQL para usuarios, eventos, zonas
+- **Cloud Functions**: Procesamiento de eventos y envío de notificaciones
+- **Authentication**: Autenticación con Google
+- **Hosting**: Despliegue estático de la aplicación
+
+### Seguridad Implementada
+- ✅ Autenticación segura con Firebase Auth
+- ✅ Reglas de Firestore que protegen datos de usuario
+- ✅ Validación de entrada en Cloud Functions
+- ✅ Service Worker seguro sin credenciales hardcodeadas
+- ✅ Variables de entorno segregadas por ambiente
+- ✅ Rate limiting y validaciones en backend
 
 ## 🤝 Contribución
 
-1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abrir Pull Request
+1. Crear rama desde `develop`
+2. Implementar cambios
+3. Ejecutar tests: `npm test`
+4. Hacer commit y push
+5. Crear Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT.
+Este proyecto es privado y propiedad de Sentinel.
 
-## 👥 Autor
+## 📞 Soporte
 
-**Christian González** - [christiangfv](https://github.com/christiangfv)
-
----
-
-¡Mantente seguro monitoreando los desastres naturales con **Sentinel**! 🌍⚠️
+Para soporte técnico contactar al equipo de desarrollo.
