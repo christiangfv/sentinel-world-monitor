@@ -1,0 +1,452 @@
+[debug] [2026-01-08T02:14:09.560Z] ----------------------------------------------------------------------
+[debug] [2026-01-08T02:14:09.568Z] Command:       /Users/chris/.nvm/versions/node/v20.19.5/bin/node /Users/chris/.nvm/versions/node/v20.19.5/bin/firebase deploy
+[debug] [2026-01-08T02:14:09.568Z] CLI Version:   15.1.0
+[debug] [2026-01-08T02:14:09.569Z] Platform:      darwin
+[debug] [2026-01-08T02:14:09.569Z] Node Version:  v20.19.5
+[debug] [2026-01-08T02:14:09.570Z] Time:          Wed Jan 07 2026 23:14:09 GMT-0300 (Chile Summer Time)
+[debug] [2026-01-08T02:14:09.570Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-08T02:14:12.997Z] Object "/hosting" in "firebase.json" has unknown property: {"additionalProperty":"environmentVariables"}
+[debug] [2026-01-08T02:14:12.997Z] Field "/hosting" in "firebase.json" is possibly invalid: must be array
+[debug] [2026-01-08T02:14:12.997Z] Field "/hosting" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[debug] [2026-01-08T02:14:13.000Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-08T02:14:13.001Z] > authorizing via signed-in user (christiangfv@gmail.com)
+[debug] [2026-01-08T02:14:13.001Z] [iam] checking project sentinel-89591 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-01-08T02:14:13.002Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:13.005Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:13.006Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions [none]
+[debug] [2026-01-08T02:14:13.006Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions x-goog-quota-user=projects/sentinel-89591
+[debug] [2026-01-08T02:14:13.006Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-01-08T02:14:14.361Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions 200
+[debug] [2026-01-08T02:14:14.365Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-01-08T02:14:14.366Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:14.366Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:14.366Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-01-08T02:14:14.366Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-01-08T02:14:15.467Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-01-08T02:14:15.468Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/sentinel-89591/serviceAccounts/sentinel-89591@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-01-08T02:14:15.472Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:15.472Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:15.473Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591 [none]
+[debug] [2026-01-08T02:14:15.882Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591 200
+[debug] [2026-01-08T02:14:15.889Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591 {"projectId":"sentinel-89591","projectNumber":"638359914064","displayName":"Sentinel","name":"projects/sentinel-89591","resources":{"hostingSite":"sentinel-89591"},"state":"ACTIVE","etag":"1_4f73b1bc-2c0e-44ec-9fa8-98e24b7bd903"}
+[debug] [2026-01-08T02:14:22.977Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:23.014Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:23.051Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites pageToken=&pageSize=10
+[debug] [2026-01-08T02:14:24.510Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites 200
+[debug] [2026-01-08T02:14:24.511Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites {"sites":[{"name":"projects/sentinel-89591/sites/sentinel-89591","defaultUrl":"https://sentinel-89591.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-01-08T02:14:24.511Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:24.512Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:24.516Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites 
+[debug] [2026-01-08T02:14:24.839Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites 200
+[debug] [2026-01-08T02:14:24.840Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites {"sites":[{"name":"projects/sentinel-89591/sites/sentinel-89591","defaultUrl":"https://sentinel-89591.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-01-08T02:14:24.840Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:24.840Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:24.841Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/webApps/-/config [none]
+[debug] [2026-01-08T02:14:25.874Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/webApps/-/config 200
+[debug] [2026-01-08T02:14:25.875Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/webApps/-/config {"projectId":"sentinel-89591","appId":"1:638359914064:web:4ad700b8777dbda615f355","storageBucket":"sentinel-89591.firebasestorage.app","apiKey":"AIzaSyArZVsBh-9ANzntpw0hTi9M3yEJLNNOk3E","authDomain":"sentinel-89591.firebaseapp.com","messagingSenderId":"638359914064","measurementId":"G-ZGSTWRR0CV","projectNumber":"638359914064","version":"2"}
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 15.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[debug] [2026-01-08T02:14:50.531Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:50.532Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:14:50.546Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites/sentinel-89591 [none]
+[debug] [2026-01-08T02:14:51.653Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites/sentinel-89591 200
+[debug] [2026-01-08T02:14:51.654Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/sentinel-89591/sites/sentinel-89591 {"name":"projects/sentinel-89591/sites/sentinel-89591","defaultUrl":"https://sentinel-89591.web.app","type":"DEFAULT_SITE"}
+[info] ▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local, .env
+
+
+[info]   Creating an optimized production build ...
+
+[info] ✓ Compiled successfully in 32.2s
+
+[info]   Running TypeScript ...
+
+[info]   Collecting page data using 9 workers ...
+
+[info]   Generating static pages using 9 workers (0/8) ...
+
+[info] Firebase initialized: { projectId: 'sentinel-89591', hasAuth: true, hasDb: true }
+
+[info]   Generating static pages using 9 workers (2/8) 
+
+[info]   Generating static pages using 9 workers (4/8) 
+  Generating static pages using 9 workers (6/8) 
+✓ Generating static pages using 9 workers (8/8) in 3.6s
+
+[info]   Finalizing page optimization ...
+
+[info] 
+
+[info] Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /dashboard
+├ ○ /event
+├ ○ /login
+└ ○ /settings
+
+
+
+[info] ○  (Static)  prerendered as static content
+
+
+[debug] [2026-01-08T02:16:11.930Z] [web frameworks] effective firebase.json:  {
+  "hosting": [
+    {
+      "source": ".",
+      "frameworksBackend": {
+        "region": "southamerica-east1"
+      },
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
+      "environmentVariables": {
+        "NEXT_PUBLIC_FIREBASE_API_KEY": "AIzaSyArZVsBh-9ANzntpw0hTi9M3yEJLNNOk3E",
+        "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "sentinel-89591.firebaseapp.com",
+        "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "sentinel-89591",
+        "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "sentinel-89591.firebasestorage.app",
+        "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "638359914064",
+        "NEXT_PUBLIC_FIREBASE_APP_ID": "1:638359914064:web:4ad700b8777dbda615f355",
+        "NEXT_PUBLIC_FIREBASE_VAPID_KEY": "tu_vapid_key_aqui"
+      },
+      "site": "sentinel-89591",
+      "redirects": [],
+      "headers": [
+        {
+          "source": "/_not-found",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "300"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/_not-found/layout,_N_T_/_not-found/page,_N_T_/_not-found/"
+            }
+          ]
+        },
+        {
+          "source": "/_global-error",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "300"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/_global-error/layout,_N_T_/_global-error/page,_N_T_/_global-error/"
+            }
+          ]
+        },
+        {
+          "source": "/event",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "300"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/event/layout,_N_T_/event/page,_N_T_/event/"
+            }
+          ]
+        },
+        {
+          "source": "/dashboard",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "300"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/dashboard/layout,_N_T_/dashboard/page,_N_T_/dashboard/"
+            }
+          ]
+        },
+        {
+          "source": "/favicon.ico",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "public, max-age=0, must-revalidate"
+            },
+            {
+              "key": "content-type",
+              "value": "image/x-icon"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico/"
+            }
+          ]
+        },
+        {
+          "source": "/login",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "300"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/login/layout,_N_T_/login/page,_N_T_/login/"
+            }
+          ]
+        },
+        {
+          "source": "/settings",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "300"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/settings/layout,_N_T_/settings/page,_N_T_/settings/"
+            }
+          ]
+        },
+        {
+          "source": "**/*.[jt]s",
+          "headers": [
+            {
+              "key": "Set-Cookie",
+              "value": "__FIREBASE_DEFAULTS__=eyJjb25maWciOnsicHJvamVjdElkIjoic2VudGluZWwtODk1OTEiLCJhcHBJZCI6IjE6NjM4MzU5OTE0MDY0OndlYjo0YWQ3MDBiODc3N2RiZGE2MTVmMzU1Iiwic3RvcmFnZUJ1Y2tldCI6InNlbnRpbmVsLTg5NTkxLmZpcmViYXNlc3RvcmFnZS5hcHAiLCJhcGlLZXkiOiJBSXphU3lBclpWc0JoLTlBTnpudHB3MGhUaTlNM3lFSkxOTk9rM0UiLCJhdXRoRG9tYWluIjoic2VudGluZWwtODk1OTEuZmlyZWJhc2VhcHAuY29tIiwibWVzc2FnaW5nU2VuZGVySWQiOiI2MzgzNTk5MTQwNjQiLCJtZWFzdXJlbWVudElkIjoiRy1aR1NUV1JSMENWIiwicHJvamVjdE51bWJlciI6IjYzODM1OTkxNDA2NCIsInZlcnNpb24iOiIyIn19; SameSite=Strict; Expires=2027-12-03T12:56:11.914Z; Path=/;"
+            }
+          ]
+        }
+      ],
+      "cleanUrls": true,
+      "trailingSlash": true,
+      "public": ".firebase/sentinel-89591/hosting",
+      "webFramework": "next"
+    }
+  ],
+  "functions": [
+    {
+      "source": "functions",
+      "runtime": "nodejs20"
+    }
+  ]
+}
+[info] 
+[info] === Deploying to 'sentinel-89591'...
+[info] 
+[info] i  deploying firestore, functions, hosting 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-01-08T02:16:11.980Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:11.981Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:11.989Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default) [none]
+[debug] [2026-01-08T02:16:12.973Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default) 200
+[debug] [2026-01-08T02:16:12.975Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default) {"name":"projects/sentinel-89591/databases/(default)","uid":"d74049f0-b318-40ea-829c-fbc7875cacce","createTime":"2026-01-07T05:28:31.012630Z","updateTime":"2026-01-07T05:28:31.012630Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-01-08T01:16:12.919167Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":false,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"ILzsovHv+pEDMMHr5aLZ+JED"}
+[info] i  firestore: reading indexes from firestore.indexes.json... 
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2026-01-08T02:16:12.996Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:12.997Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:12.997Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591:test [none]
+[debug] [2026-01-08T02:16:12.997Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591:test [omitted]
+[debug] [2026-01-08T02:16:14.196Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591:test 200
+[debug] [2026-01-08T02:16:14.197Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591:test {}
+[info] ✔  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2026-01-08T02:16:14.207Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:14.207Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:14.207Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591 [none]
+[debug] [2026-01-08T02:16:15.288Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591 200
+[debug] [2026-01-08T02:16:15.288Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591 {"projectNumber":"638359914064","projectId":"sentinel-89591","lifecycleState":"ACTIVE","name":"Sentinel","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-01-07T04:40:21.657393Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2026-01-08T02:16:15.297Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:15.297Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:15.298Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/adminSdkConfig [none]
+[debug] [2026-01-08T02:16:15.638Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/adminSdkConfig 200
+[debug] [2026-01-08T02:16:15.638Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/sentinel-89591/adminSdkConfig {"projectId":"sentinel-89591","storageBucket":"sentinel-89591.firebasestorage.app"}
+[debug] [2026-01-08T02:16:15.639Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:15.639Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:15.639Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/sentinel-89591/configs [none]
+[debug] [2026-01-08T02:16:16.685Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/sentinel-89591/configs 200
+[debug] [2026-01-08T02:16:16.686Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/sentinel-89591/configs {}
+[debug] [2026-01-08T02:16:16.689Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-01-08T02:16:18.438Z] > [functions] package.json contents: {
+  "name": "sentinel-functions",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^4.5.0",
+    "geofire-common": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
+[debug] [2026-01-08T02:16:18.438Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[info] i  functions: You are using a version of firebase-functions SDK (4.9.0) that does not have support for the newest Firebase Extensions features. Please update firebase-functions SDK to >=5.1.0 to use them correctly 
+[debug] [2026-01-08T02:16:18.446Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-01-08T02:16:18.460Z] Found firebase-functions binary at '/Users/chris/GitHub/world-monitor/functions/node_modules/.bin/firebase-functions'
+[info] Serving at port 8944
+
+[debug] [2026-01-08T02:16:20.762Z] Got response from /__/functions.yaml {"endpoints":{"fetchAllEvents":{"availableMemoryMb":256,"timeoutSeconds":300,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"scheduleTrigger":{"schedule":"every 10 minutes","retryConfig":{}},"entryPoint":"fetchAllEvents"},"testDataSources":{"availableMemoryMb":512,"timeoutSeconds":300,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"testDataSources"}},"specVersion":"v1alpha1","requiredAPIs":[{"api":"cloudscheduler.googleapis.com","reason":"Needed for scheduled functions."}]}
+[info] i  functions: preparing functions directory for uploading... 
+[info] i  functions: packaged /Users/chris/GitHub/world-monitor/functions (110.97 KB) for uploading 
+[debug] [2026-01-08T02:16:25.449Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:25.452Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:25.455Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/sentinel-89591/locations/-/functions [none]
+[debug] [2026-01-08T02:16:26.571Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/sentinel-89591/locations/-/functions 200
+[debug] [2026-01-08T02:16:26.572Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/sentinel-89591/locations/-/functions {}
+[debug] [2026-01-08T02:16:26.578Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:26.578Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:26.579Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/sentinel-89591/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2026-01-08T02:16:28.087Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/sentinel-89591/locations/-/functions 200
+[debug] [2026-01-08T02:16:28.088Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/sentinel-89591/locations/-/functions {"functions":[{"name":"projects/sentinel-89591/locations/southamerica-east1/functions/fetchAllEvents","buildConfig":{"build":"projects/638359914064/locations/southamerica-east1/builds/1edd93b2-dec9-4dc5-8a89-517d0fb53123","runtime":"nodejs20","entryPoint":"fetchAllEvents","source":{"storageSource":{"bucket":"gcf-v2-sources-638359914064-southamerica-east1","object":"fetchAllEvents/function-source.zip","generation":"1767836544328151"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/sentinel-89591/locations/southamerica-east1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-638359914064-southamerica-east1","object":"fetchAllEvents/function-source.zip","generation":"1767836544328151"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/sentinel-89591/serviceAccounts/638359914064-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/sentinel-89591/locations/southamerica-east1/services/fetchallevents","timeoutSeconds":300,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"sentinel-89591\",\"storageBucket\":\"sentinel-89591.firebasestorage.app\"}","GCLOUD_PROJECT":"sentinel-89591","EVENTARC_CLOUD_EVENT_SOURCE":"projects/sentinel-89591/locations/southamerica-east1/services/fetchAllEvents","FUNCTION_TARGET":"fetchAllEvents","LOG_EXECUTION_ID":"true"},"maxInstanceCount":20,"ingressSettings":"ALLOW_ALL","uri":"https://fetchallevents-ohd3jdiffa-rj.a.run.app","serviceAccountEmail":"638359914064-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"fetchallevents-00005-wob","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2026-01-08T01:43:19.462862024Z","labels":{"deployment-tool":"cli-firebase","deployment-scheduled":"true","firebase-functions-hash":"626f907bb086c8b23386af088ca7b6d42fb5e37b"},"environment":"GEN_2","url":"https://southamerica-east1-sentinel-89591.cloudfunctions.net/fetchAllEvents","satisfiesPzs":true,"createTime":"2026-01-07T19:27:33.274228223Z","satisfiesPzi":true},{"name":"projects/sentinel-89591/locations/southamerica-east1/functions/ssrsentinel89591","buildConfig":{"build":"projects/638359914064/locations/southamerica-east1/builds/f967cd2c-aa0b-47b1-9af8-558aa72e130d","runtime":"nodejs20","entryPoint":"ssrsentinel89591","source":{"storageSource":{"bucket":"gcf-v2-sources-638359914064-southamerica-east1","object":"ssrsentinel89591/function-source.zip","generation":"1767766606332066"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/sentinel-89591/locations/southamerica-east1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-638359914064-southamerica-east1","object":"ssrsentinel89591/function-source.zip","generation":"1767766606332066"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/sentinel-89591/serviceAccounts/638359914064-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/sentinel-89591/locations/southamerica-east1/services/ssrsentinel89591","timeoutSeconds":60,"environmentVariables":{"NEXT_PUBLIC_FIREBASE_API_KEY":"AIzaSyArZVsBh-9ANzntpw0hTi9M3yEJLNNOk3E","NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN":"sentinel-89591.firebaseapp.com","NEXT_PUBLIC_FIREBASE_PROJECT_ID":"sentinel-89591","NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET":"sentinel-89591.firebasestorage.app","NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID":"638359914064","NEXT_PUBLIC_FIREBASE_APP_ID":"1:638359914064:web:4ad700b8777dbda615f355","NEXT_PUBLIC_FIREBASE_VAPID_KEY":"BBL9i3ARw_RB1eozgOqbJOfe4CmbogsmoK3aIct5b1gZ27A5RntkixCueemSEWZPZ_Njf5HQ1h0wxzrgIzwvbSU","VERCEL_URL":"sentinel-89591.web.app","__FIREBASE_FRAMEWORKS_ENTRY__":"next.js","__FIREBASE_DEFAULTS__":"{\"config\":{\"projectId\":\"sentinel-89591\",\"appId\":\"1:638359914064:web:4ad700b8777dbda615f355\",\"storageBucket\":\"sentinel-89591.firebasestorage.app\",\"apiKey\":\"AIzaSyArZVsBh-9ANzntpw0hTi9M3yEJLNNOk3E\",\"authDomain\":\"sentinel-89591.firebaseapp.com\",\"messagingSenderId\":\"638359914064\",\"measurementId\":\"G-ZGSTWRR0CV\",\"projectNumber\":\"638359914064\",\"version\":\"2\"},\"_authTokenSyncURL\":\"/__session\"}","FIREBASE_CONFIG":"{\"projectId\":\"sentinel-89591\",\"storageBucket\":\"sentinel-89591.firebasestorage.app\"}","GCLOUD_PROJECT":"sentinel-89591","EVENTARC_CLOUD_EVENT_SOURCE":"projects/sentinel-89591/locations/southamerica-east1/services/ssrsentinel89591","FUNCTION_TARGET":"ssrsentinel89591","LOG_EXECUTION_ID":"true"},"maxInstanceCount":20,"ingressSettings":"ALLOW_ALL","uri":"https://ssrsentinel89591-ohd3jdiffa-rj.a.run.app","serviceAccountEmail":"638359914064-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"ssrsentinel89591-00009-zof","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2026-01-07T06:19:52.356497055Z","labels":{"firebase-functions-hash":"a8cc0891ef0e66f6fe4d9ebaae1a9c734d76d634","deployment-tool":"cli-firebase","firebase-functions-codebase":"firebase-frameworks-sentinel-89591"},"environment":"GEN_2","url":"https://southamerica-east1-sentinel-89591.cloudfunctions.net/ssrsentinel89591","satisfiesPzs":true,"createTime":"2026-01-07T05:32:32.382130935Z","satisfiesPzi":true},{"name":"projects/sentinel-89591/locations/southamerica-east1/functions/testDataSources","buildConfig":{"build":"projects/638359914064/locations/southamerica-east1/builds/c61fd461-cbd2-477a-a61e-dd8adf08cb13","runtime":"nodejs20","entryPoint":"testDataSources","source":{"storageSource":{"bucket":"gcf-v2-sources-638359914064-southamerica-east1","object":"testDataSources/function-source.zip","generation":"1767836544384125"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/sentinel-89591/locations/southamerica-east1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-638359914064-southamerica-east1","object":"testDataSources/function-source.zip","generation":"1767836544384125"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/sentinel-89591/serviceAccounts/638359914064-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/sentinel-89591/locations/southamerica-east1/services/testdatasources","timeoutSeconds":300,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"sentinel-89591\",\"storageBucket\":\"sentinel-89591.firebasestorage.app\"}","GCLOUD_PROJECT":"sentinel-89591","EVENTARC_CLOUD_EVENT_SOURCE":"projects/sentinel-89591/locations/southamerica-east1/services/testDataSources","FUNCTION_TARGET":"testDataSources","LOG_EXECUTION_ID":"true"},"maxInstanceCount":20,"ingressSettings":"ALLOW_ALL","uri":"https://testdatasources-ohd3jdiffa-rj.a.run.app","serviceAccountEmail":"638359914064-compute@developer.gserviceaccount.com","availableMemory":"512Mi","allTrafficOnLatestRevision":true,"revision":"testdatasources-00006-vih","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2026-01-08T01:43:16.296780099Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"626f907bb086c8b23386af088ca7b6d42fb5e37b"},"environment":"GEN_2","url":"https://southamerica-east1-sentinel-89591.cloudfunctions.net/testDataSources","satisfiesPzs":true,"createTime":"2026-01-07T08:17:59.926112370Z","satisfiesPzi":true}]}
+[info] i  functions: ensuring required API cloudscheduler.googleapis.com is enabled... 
+[info] i  functions: ensuring required API run.googleapis.com is enabled... 
+[info] i  functions: ensuring required API eventarc.googleapis.com is enabled... 
+[info] i  functions: ensuring required API pubsub.googleapis.com is enabled... 
+[info] i  functions: ensuring required API storage.googleapis.com is enabled... 
+[info] i  functions: generating the service identity for pubsub.googleapis.com... 
+[debug] [2026-01-08T02:16:28.147Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:28.147Z] Checked if tokens are valid: true, expires at: 1767840123423
+[info] i  functions: generating the service identity for eventarc.googleapis.com... 
+[debug] [2026-01-08T02:16:28.148Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:28.148Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:28.153Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/pubsub.googleapis.com:generateServiceIdentity [none]
+[debug] [2026-01-08T02:16:28.153Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/pubsub.googleapis.com:generateServiceIdentity x-goog-quota-user=projects/638359914064
+[debug] [2026-01-08T02:16:28.154Z] >>> [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/pubsub.googleapis.com:generateServiceIdentity {}
+[debug] [2026-01-08T02:16:28.163Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/eventarc.googleapis.com:generateServiceIdentity [none]
+[debug] [2026-01-08T02:16:28.163Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/eventarc.googleapis.com:generateServiceIdentity x-goog-quota-user=projects/638359914064
+[debug] [2026-01-08T02:16:28.163Z] >>> [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/eventarc.googleapis.com:generateServiceIdentity {}
+[debug] [2026-01-08T02:16:29.555Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/eventarc.googleapis.com:generateServiceIdentity 200
+[debug] [2026-01-08T02:16:29.556Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/eventarc.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-638359914064@gcp-sa-eventarc.iam.gserviceaccount.com","uniqueId":"105944408715408467603"}}
+[debug] [2026-01-08T02:16:29.695Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/pubsub.googleapis.com:generateServiceIdentity 200
+[debug] [2026-01-08T02:16:29.695Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/638359914064/services/pubsub.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-638359914064@gcp-sa-pubsub.iam.gserviceaccount.com","uniqueId":"105487476327268947175"}}
+[debug] [2026-01-08T02:16:29.704Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:29.704Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:29.705Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591 [none]
+[debug] [2026-01-08T02:16:30.853Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591 200
+[debug] [2026-01-08T02:16:30.853Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/sentinel-89591 {"projectNumber":"638359914064","projectId":"sentinel-89591","lifecycleState":"ACTIVE","name":"Sentinel","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-01-07T04:40:21.657393Z"}
+[debug] [2026-01-08T02:16:30.854Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:30.854Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:30.854Z] >>> [apiv2][query] GET https://compute.googleapis.com/compute/v1/projects/638359914064 [none]
+[debug] [2026-01-08T02:16:31.237Z] <<< [apiv2][status] GET https://compute.googleapis.com/compute/v1/projects/638359914064 403
+[debug] [2026-01-08T02:16:31.237Z] <<< [apiv2][body] GET https://compute.googleapis.com/compute/v1/projects/638359914064 {"error":{"code":403,"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064","consumer":"projects/638359914064","serviceTitle":"Compute Engine API","service":"compute.googleapis.com","containerInfo":"638359914064"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064"}]}]}}
+[debug] [2026-01-08T02:16:31.245Z] unable to look up default compute service account. Falling back to 638359914064-compute@developer.gserviceaccount.com. Error: {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":403,"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064","consumer":"projects/638359914064","serviceTitle":"Compute Engine API","service":"compute.googleapis.com","containerInfo":"638359914064"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064"}]}]}},"response":{"statusCode":403}},"exit":1,"message":"Request to https://compute.googleapis.com/compute/v1/projects/638359914064 had HTTP Error: 403, Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","status":403}
+[debug] [2026-01-08T02:16:31.245Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:31.245Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:31.245Z] >>> [apiv2][query] GET https://compute.googleapis.com/compute/v1/projects/638359914064 [none]
+[debug] [2026-01-08T02:16:31.479Z] <<< [apiv2][status] GET https://compute.googleapis.com/compute/v1/projects/638359914064 403
+[debug] [2026-01-08T02:16:31.479Z] <<< [apiv2][body] GET https://compute.googleapis.com/compute/v1/projects/638359914064 {"error":{"code":403,"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"serviceTitle":"Compute Engine API","consumer":"projects/638359914064","activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064","containerInfo":"638359914064","service":"compute.googleapis.com"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064"}]}]}}
+[debug] [2026-01-08T02:16:31.479Z] unable to look up default compute service account. Falling back to 638359914064-compute@developer.gserviceaccount.com. Error: {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":403,"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"serviceTitle":"Compute Engine API","consumer":"projects/638359914064","activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064","containerInfo":"638359914064","service":"compute.googleapis.com"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064"}]}]}},"response":{"statusCode":403}},"exit":1,"message":"Request to https://compute.googleapis.com/compute/v1/projects/638359914064 had HTTP Error: 403, Compute Engine API has not been used in project 638359914064 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=638359914064 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","status":403}
+[debug] [2026-01-08T02:16:31.488Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:31.488Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:31.488Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/sentinel-89591/versions [none]
+[debug] [2026-01-08T02:16:31.488Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/sentinel-89591/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase","firebase-web-framework":"next"}}
+[debug] [2026-01-08T02:16:32.798Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/sentinel-89591/versions 200
+[debug] [2026-01-08T02:16:32.799Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/sentinel-89591/versions {"name":"projects/638359914064/sites/sentinel-89591/versions/95efdd8ba15e23ea","status":"CREATED","config":{},"labels":{"firebase-web-framework":"next","deployment-tool":"cli-firebase"}}
+[debug] [2026-01-08T02:16:32.812Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:32.812Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:32.812Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/sentinel-89591/releases pageSize=10&pageToken=
+[debug] [2026-01-08T02:16:33.951Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/sentinel-89591/releases 200
+[debug] [2026-01-08T02:16:33.952Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/sentinel-89591/releases {"releases":[{"name":"projects/sentinel-89591/releases/cloud.firestore","rulesetName":"projects/sentinel-89591/rulesets/53906c03-7df9-4050-8f6c-43f67d350aa2","createTime":"2026-01-07T05:32:29.103717Z","updateTime":"2026-01-07T07:33:09.984817Z"},{"name":"projects/sentinel-89591/releases/cloud.firestore/default","rulesetName":"projects/sentinel-89591/rulesets/962574cc-579c-4830-90cb-6700cce16efb","createTime":"2026-01-07T05:27:11.842378Z","updateTime":"2026-01-07T05:27:11.842378Z"}]}
+[debug] [2026-01-08T02:16:33.970Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:33.970Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:33.970Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/sentinel-89591/rulesets/53906c03-7df9-4050-8f6c-43f67d350aa2 [none]
+[debug] [2026-01-08T02:16:35.080Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/sentinel-89591/rulesets/53906c03-7df9-4050-8f6c-43f67d350aa2 200
+[debug] [2026-01-08T02:16:35.080Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/sentinel-89591/rulesets/53906c03-7df9-4050-8f6c-43f67d350aa2 [omitted]
+[info] i  firestore: uploading rules firestore.rules... 
+[debug] [2026-01-08T02:16:35.088Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:35.088Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:35.088Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591/rulesets [none]
+[debug] [2026-01-08T02:16:35.089Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591/rulesets [omitted]
+[debug] [2026-01-08T02:16:36.358Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591/rulesets 200
+[debug] [2026-01-08T02:16:36.359Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/sentinel-89591/rulesets {"name":"projects/sentinel-89591/rulesets/b9878f2c-a7af-401c-9047-3e311a5917cb","source":{"files":[{"content":"rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    // Eventos - lectura pública, escritura solo backend (Cloud Functions)\n    match /events/{eventId} {\n      allow read: if true;\n      allow write: if false;\n    }\n\n    // Usuarios - solo el propio usuario puede leer/escribir\n    match /users/{userId} {\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n\n      match /zones/{zoneId} {\n        allow read, write: if request.auth != null && request.auth.uid == userId;\n      }\n\n      match /alertPrefs/{prefId} {\n        allow read, write: if request.auth != null && request.auth.uid == userId;\n      }\n    }\n\n    // Notificaciones - solo lectura del propio usuario\n    match /notifications/{notifId} {\n      allow read: if request.auth != null && resource.data.userId == request.auth.uid;\n      allow update: if request.auth != null && resource.data.userId == request.auth.uid\n                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']);\n      allow create, delete: if false;\n    }\n  }\n}\n\n","name":"firestore.rules"}]},"createTime":"2026-01-08T02:16:36.270383Z","metadata":{"services":["cloud.firestore"]}}
+[debug] [2026-01-08T02:16:36.360Z] [rules] created ruleset projects/sentinel-89591/rulesets/b9878f2c-a7af-401c-9047-3e311a5917cb
+[info] i  firestore: deploying indexes... 
+[debug] [2026-01-08T02:16:36.372Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:36.372Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:36.372Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2026-01-08T02:16:37.324Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2026-01-08T02:16:37.326Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default)/collectionGroups/-/indexes {"indexes":[{"name":"projects/sentinel-89591/databases/(default)/collectionGroups/events/indexes/CICAgJim14AK","queryScope":"COLLECTION","fields":[{"fieldPath":"disasterType","order":"ASCENDING"},{"fieldPath":"eventTime","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/sentinel-89591/databases/(default)/collectionGroups/events/indexes/CICAgJjF9oIK","queryScope":"COLLECTION","fields":[{"fieldPath":"disasterType","order":"ASCENDING"},{"fieldPath":"eventTime","order":"DESCENDING"},{"fieldPath":"severity","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"READY","density":"SPARSE_ALL"}]}
+[debug] [2026-01-08T02:16:37.354Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:37.354Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:37.355Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2026-01-08T02:16:37.547Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2026-01-08T02:16:37.547Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/sentinel-89591/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[debug] [2026-01-08T02:16:37.547Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:37.548Z] Checked if tokens are valid: true, expires at: 1767840123423
+[debug] [2026-01-08T02:16:37.548Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default) [none]
+[debug] [2026-01-08T02:16:37.732Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default) 200
+[debug] [2026-01-08T02:16:37.738Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/sentinel-89591/databases/(default) {"name":"projects/sentinel-89591/databases/(default)","uid":"d74049f0-b318-40ea-829c-fbc7875cacce","createTime":"2026-01-07T05:28:31.012630Z","updateTime":"2026-01-07T05:28:31.012630Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-01-08T01:16:37.676741Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":false,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IIz4if3v+pEDMMHr5aLZ+JED"}
+[info] i  firestore: The following indexes are defined in your project but are not present in your firestore indexes file:
+	(events) -- (disasterType,ASCENDING) (eventTime,DESCENDING)  -- Density:SPARSE_ALL 
+	(events) -- (disasterType,ASCENDING) (eventTime,DESCENDING) (severity,DESCENDING)  -- Density:SPARSE_ALL  
+[debug] [2026-01-08T02:24:27.678Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/Users/chris/.nvm/versions/node/v20.19.5/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:524:28)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1128:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:267:20)
+    at ReadStream.emit (node:events:536:35)
+    at emitKeys (node:internal/readline/utils:371:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+    at ReadStream.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+[error] 
+[error] Error: An unexpected error has occurred.
