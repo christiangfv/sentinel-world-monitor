@@ -5,14 +5,8 @@ import { getMessaging } from 'firebase-admin/messaging';
 // Inicializar Firebase Admin
 initializeApp();
 
-// Exportar todas las funciones
-export { fetchUSGSEvents } from './fetchUSGS';
-export { fetchGDACSEvents } from './fetchGDACS';
-export { fetchCSNEvents } from './fetchCSN';
-export { fetchEMSCvents } from './fetchEMSC';
-export { fetchBOMEvents } from './fetchBOM';
-export { fetchNHCEvents } from './fetchNHC';
-export { fetchJMAEvents } from './fetchJMA';
+// Exportar funciones esenciales y consolidadas
+export { fetchAllEvents } from './masterFetch';
 export { testDataSources } from './testSources';
 
 // Funciones de utilidad que pueden ser útiles
@@ -105,8 +99,8 @@ export const sendCriticalNotifications = async (eventData: any) => {
 
     // Validar coordenadas
     if (!eventLocation || typeof eventLocation.latitude !== 'number' ||
-        typeof eventLocation.longitude !== 'number' ||
-        isNaN(eventLocation.latitude) || isNaN(eventLocation.longitude)) {
+      typeof eventLocation.longitude !== 'number' ||
+      isNaN(eventLocation.latitude) || isNaN(eventLocation.longitude)) {
       return { sent: 0, message: 'Invalid event coordinates' };
     }
 

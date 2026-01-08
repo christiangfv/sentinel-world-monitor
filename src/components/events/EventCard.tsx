@@ -58,22 +58,29 @@ export function EventCard({
         onClick={onClick}
         style={{ borderLeftColor: severityColor }}
       >
-        <CardContent className="p-4">
-          <div className="flex items-start gap-4">
-            <div className={`shrink-0 ${isCritical ? 'animate-pulse-dot' : ''}`}>
-              <IconComponent size={32} />
+        <CardContent className="p-3.5">
+          <div className="flex items-start gap-3.5">
+            <div className={`shrink-0 mt-0.5 ${isCritical ? 'animate-pulse-dot' : ''}`}>
+              <IconComponent size={30} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <h3 className="font-medium text-sm text-[#E8E8F0] truncate flex-1">{event.title}</h3>
-                <Badge variant={severityVariant(event.severity)} className="shrink-0">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3 className="font-semibold text-[13px] text-[#E8E8F0] leading-snug line-clamp-2 flex-1">
+                  {event.title}
+                </h3>
+                <Badge variant={severityVariant(event.severity)} className="shrink-0 h-5 px-1.5 text-[10px] font-bold">
                   {event.severity}
                 </Badge>
               </div>
-              <p className="text-xs text-[#8890A0] truncate">{event.locationName}</p>
-              <div className="flex items-center justify-between text-xs text-[#8890A0] mt-1">
-                <span>{formatTimeAgo(event.eventTime)}</span>
-                <span className="px-1.5 py-0.5 bg-[#4A5060]/20 rounded text-[10px] uppercase tracking-wide">
+              <p className="text-[11px] text-[#8890A0] leading-relaxed mb-2 font-medium">
+                {event.locationName}
+              </p>
+              <div className="flex items-center justify-between text-[10px] text-[#8890A0]/80">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="opacity-70">🕒</span>
+                  <span>{formatTimeAgo(event.eventTime)}</span>
+                </div>
+                <span className="px-2 py-0.5 bg-[#4A5060]/15 rounded-md text-[9px] font-bold uppercase tracking-wider text-[#7088A0]">
                   {config.nameEs}
                 </span>
               </div>

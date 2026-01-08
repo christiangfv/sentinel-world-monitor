@@ -6,21 +6,15 @@ const firebase_functions_1 = require("firebase-functions");
 const fetchUSGS_1 = require("./fetchUSGS");
 const fetchGDACS_1 = require("./fetchGDACS");
 const fetchCSN_1 = require("./fetchCSN");
-const fetchEMSC_1 = require("./fetchEMSC");
-const fetchBOM_1 = require("./fetchBOM");
 const fetchNHC_1 = require("./fetchNHC");
-const fetchJMA_1 = require("./fetchJMA");
 // Función para probar todas las fuentes de datos
 const testAllSources = async () => {
     firebase_functions_1.logger.info('🧪 Iniciando pruebas de todas las fuentes de datos...');
     const sources = [
-        { name: 'USGS (Terremotos)', function: fetchUSGS_1.fetchUSGSEvents },
-        { name: 'GDACS (Desastres Globales)', function: fetchGDACS_1.fetchGDACSEvents },
-        { name: 'CSN (Chile)', function: fetchCSN_1.fetchCSNEvents },
-        { name: 'EMSC (Europa)', function: fetchEMSC_1.fetchEMSCvents },
-        { name: 'BOM (Australia)', function: fetchBOM_1.fetchBOMEvents },
-        { name: 'NHC (Huracanes)', function: fetchNHC_1.fetchNHCEvents },
-        { name: 'JMA (Japón)', function: fetchJMA_1.fetchJMAEvents }
+        { name: 'USGS (Terremotos)', function: fetchUSGS_1.processUSGSFetch },
+        { name: 'GDACS (Desastres Globales)', function: fetchGDACS_1.processGDACSFetch },
+        { name: 'CSN (Chile)', function: fetchCSN_1.processCSNFetch },
+        { name: 'NHC (Huracanes)', function: fetchNHC_1.processNHCFetch }
     ];
     const results = [];
     for (const source of sources) {
@@ -87,28 +81,13 @@ const testFetchConnectivity = async () => {
         },
         {
             name: 'CSN Chile',
-            url: 'https://api.csn.uchile.cl/api/v1/last_events',
-            timeout: 10000
-        },
-        {
-            name: 'EMSC',
-            url: 'https://www.emsc-csem.org/service/rss/rss.php?typ=emsc',
-            timeout: 10000
-        },
-        {
-            name: 'BOM Australia',
-            url: 'https://www.bom.gov.au/fwo/IDY00000.xml',
+            url: 'https://sismologia.cl/',
             timeout: 10000
         },
         {
             name: 'NHC Atlantic',
             url: 'https://www.nhc.noaa.gov/index-at.xml',
             timeout: 10000
-        },
-        {
-            name: 'JMA Japan',
-            url: 'https://www.jma.go.jp/en/quake/quakee_index.html',
-            timeout: 15000
         }
     ];
     const results = [];
@@ -202,13 +181,7 @@ exports.testDataSources = (0, https_1.onRequest)({
             connectivityTest: connectivityResults,
             sampleExecution: sampleExecutionResult,
             activeSources: [
-                { name: 'USGS', function: 'fetchUSGSEvents', schedule: 'every 5 minutes' },
-                { name: 'GDACS', function: 'fetchGDACSEvents', schedule: 'every 10 minutes' },
-                { name: 'CSN Chile', function: 'fetchCSNEvents', schedule: 'every 10 minutes' },
-                { name: 'EMSC Europa', function: 'fetchEMSCvents', schedule: 'every 15 minutes' },
-                { name: 'BOM Australia', function: 'fetchBOMEvents', schedule: 'every 30 minutes' },
-                { name: 'NHC EEUU', function: 'fetchNHCEvents', schedule: 'every 30 minutes' },
-                { name: 'JMA Japón', function: 'fetchJMAEvents', schedule: 'every 15 minutes' }
+                { name: 'Consolidado', function: 'fetchAllEvents', schedule: 'every 10 minutes' }
             ],
             status: connectivityResults.errors === 0 ? '✅ Todas las fuentes funcionando' : '⚠️ Algunas fuentes con problemas'
         };

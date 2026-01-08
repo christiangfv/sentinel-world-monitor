@@ -1,4 +1,3 @@
-import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { sendCriticalNotifications } from './index';
@@ -49,12 +48,8 @@ function determineDisasterType(title: string, description: string): string {
 }
 
 // Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
-export const fetchGDACSEvents = onSchedule({
-  schedule: 'every 10 minutes',
-  region: 'southamerica-east1',
-  timeoutSeconds: 60,
-  memory: '256MiB',
-}, async (): Promise<void> => {
+// Función principal para procesar el fetch (exportada para consolidación)
+export async function processGDACSFetch(): Promise<void> {
   logger.info('🚀 Iniciando fetch de eventos del GDACS');
 
   try {
@@ -70,6 +65,24 @@ export const fetchGDACSEvents = onSchedule({
     const events = parseGDACSXML(xmlText);
     logger.info(`📊 Recibidos ${events.length} eventos del GDACS`);
 
+    // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+    const existingIds = new Set<string>();
+    try {
+      const existingDocs = await db.collection('events')
+        .where('source', '==', 'gdacs')
+        .orderBy('eventTime', 'desc')
+        .limit(500)
+        .get();
+      existingDocs.forEach(doc => {
+        const extId = doc.data().externalId;
+        if (extId) existingIds.add(extId);
+      });
+      logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+    } catch (error) {
+      logger.error('❌ Error cargando IDs existentes:', error);
+      // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+    }
+
     const batch = db.batch();
     let processedCount = 0;
     let skippedCount = 0;
@@ -77,16 +90,23 @@ export const fetchGDACSEvents = onSchedule({
 
     for (const event of events) {
       try {
-        // Verificar si el evento ya existe
-        const existingDoc = await db.collection('events')
-          .where('source', '==', 'gdacs')
-          .where('externalId', '==', event.guid)
-          .limit(1)
-          .get();
-
-        if (!existingDoc.empty) {
+        // Verificar si el evento ya existe usando el Set optimizado
+        if (existingIds.has(event.guid)) {
           skippedCount++;
           continue;
+        }
+
+        // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+        if (existingIds.size === 0) {
+          const checkDoc = await db.collection('events')
+            .where('source', '==', 'gdacs')
+            .where('externalId', '==', event.guid)
+            .limit(1)
+            .get();
+          if (!checkDoc.empty) {
+            skippedCount++;
+            continue;
+          }
         }
 
         // Determinar tipo de desastre
@@ -172,10 +192,10 @@ export const fetchGDACSEvents = onSchedule({
     logger.info('✅ Fetch GDACS completado exitosamente');
 
   } catch (error) {
-    logger.error('❌ Error en fetchGDACSEvents:', error);
+    logger.error('❌ Error en processGDACSFetch:', error);
     throw error;
   }
-});
+}
 
 // Parser simplificado de XML GDACS
 function parseGDACSXML(xmlText: string): any[] {

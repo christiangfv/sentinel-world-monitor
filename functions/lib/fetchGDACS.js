@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchGDACSEvents = void 0;
-const scheduler_1 = require("firebase-functions/v2/scheduler");
+exports.processGDACSFetch = processGDACSFetch;
 const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
 const index_1 = require("./index");
@@ -52,12 +51,8 @@ function determineDisasterType(title, description) {
     return 'earthquake'; // Default
 }
 // Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
-exports.fetchGDACSEvents = (0, scheduler_1.onSchedule)({
-    schedule: 'every 10 minutes',
-    region: 'southamerica-east1',
-    timeoutSeconds: 60,
-    memory: '256MiB',
-}, async () => {
+// Función principal para procesar el fetch (exportada para consolidación)
+async function processGDACSFetch() {
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del GDACS');
     try {
         const response = await fetch('https://www.gdacs.org/xml/rss.xml');
@@ -68,21 +63,47 @@ exports.fetchGDACSEvents = (0, scheduler_1.onSchedule)({
         // Parsear XML básico (podríamos usar una librería más robusta en producción)
         const events = parseGDACSXML(xmlText);
         firebase_functions_1.logger.info(`📊 Recibidos ${events.length} eventos del GDACS`);
+        // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+        const existingIds = new Set();
+        try {
+            const existingDocs = await db.collection('events')
+                .where('source', '==', 'gdacs')
+                .orderBy('eventTime', 'desc')
+                .limit(500)
+                .get();
+            existingDocs.forEach(doc => {
+                const extId = doc.data().externalId;
+                if (extId)
+                    existingIds.add(extId);
+            });
+            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+        }
+        catch (error) {
+            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+        }
         const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         const criticalEvents = []; // Eventos de severidad 4+ para notificaciones
         for (const event of events) {
             try {
-                // Verificar si el evento ya existe
-                const existingDoc = await db.collection('events')
-                    .where('source', '==', 'gdacs')
-                    .where('externalId', '==', event.guid)
-                    .limit(1)
-                    .get();
-                if (!existingDoc.empty) {
+                // Verificar si el evento ya existe usando el Set optimizado
+                if (existingIds.has(event.guid)) {
                     skippedCount++;
                     continue;
+                }
+                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                if (existingIds.size === 0) {
+                    const checkDoc = await db.collection('events')
+                        .where('source', '==', 'gdacs')
+                        .where('externalId', '==', event.guid)
+                        .limit(1)
+                        .get();
+                    if (!checkDoc.empty) {
+                        skippedCount++;
+                        continue;
+                    }
                 }
                 // Determinar tipo de desastre
                 const disasterType = determineDisasterType(event.title, event.description);
@@ -160,10 +181,10 @@ exports.fetchGDACSEvents = (0, scheduler_1.onSchedule)({
         firebase_functions_1.logger.info('✅ Fetch GDACS completado exitosamente');
     }
     catch (error) {
-        firebase_functions_1.logger.error('❌ Error en fetchGDACSEvents:', error);
+        firebase_functions_1.logger.error('❌ Error en processGDACSFetch:', error);
         throw error;
     }
-});
+}
 // Parser simplificado de XML GDACS
 function parseGDACSXML(xmlText) {
     const events = [];

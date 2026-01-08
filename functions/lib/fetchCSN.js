@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchCSNEvents = void 0;
-const scheduler_1 = require("firebase-functions/v2/scheduler");
+exports.processCSNFetch = processCSNFetch;
 const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
@@ -31,12 +30,8 @@ function calculateEventRadius(magnitude) {
     return Math.max(30, Math.round(magnitude * 15));
 }
 // Cron job: Fetch CSN cada 10 minutos
-exports.fetchCSNEvents = (0, scheduler_1.onSchedule)({
-    schedule: 'every 10 minutes',
-    region: 'southamerica-east1',
-    timeoutSeconds: 60,
-    memory: '256MiB',
-}, async () => {
+// Función principal para procesar el fetch (exportada para consolidación)
+async function processCSNFetch() {
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del CSN');
     try {
         // Sitio web del Centro Sismológico Nacional de Chile
@@ -48,6 +43,25 @@ exports.fetchCSNEvents = (0, scheduler_1.onSchedule)({
         // Parsear HTML para extraer datos de sismos
         const events = parseCSNHTML(htmlText);
         firebase_functions_1.logger.info(`📊 Recibidos ${events.length} eventos del CSN`);
+        // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+        const existingIds = new Set();
+        try {
+            const existingDocs = await db.collection('events')
+                .where('source', '==', 'csn')
+                .orderBy('eventTime', 'desc')
+                .limit(500)
+                .get();
+            existingDocs.forEach(doc => {
+                const extId = doc.data().externalId;
+                if (extId)
+                    existingIds.add(extId);
+            });
+            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+        }
+        catch (error) {
+            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+        }
         const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
@@ -60,15 +74,22 @@ exports.fetchCSNEvents = (0, scheduler_1.onSchedule)({
                     skippedCount++;
                     continue;
                 }
-                // Verificar si el evento ya existe
-                const existingDoc = await db.collection('events')
-                    .where('source', '==', 'csn')
-                    .where('externalId', '==', event.id)
-                    .limit(1)
-                    .get();
-                if (!existingDoc.empty) {
+                // Verificar si el evento ya existe usando el Set optimizado
+                if (existingIds.has(event.id)) {
                     skippedCount++;
                     continue;
+                }
+                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                if (existingIds.size === 0) {
+                    const checkDoc = await db.collection('events')
+                        .where('source', '==', 'csn')
+                        .where('externalId', '==', event.id)
+                        .limit(1)
+                        .get();
+                    if (!checkDoc.empty) {
+                        skippedCount++;
+                        continue;
+                    }
                 }
                 // Calcular geohash y otros datos
                 const geohash = (0, geofire_common_1.geohashForLocation)([event.lat, event.lng]);
@@ -141,10 +162,10 @@ exports.fetchCSNEvents = (0, scheduler_1.onSchedule)({
         firebase_functions_1.logger.info('✅ Fetch CSN completado exitosamente');
     }
     catch (error) {
-        firebase_functions_1.logger.error('❌ Error en fetchCSNEvents:', error);
+        firebase_functions_1.logger.error('❌ Error en processCSNFetch:', error);
         throw error;
     }
-});
+}
 // Parser simplificado de HTML CSN
 function parseCSNHTML(htmlText) {
     const events = [];
@@ -158,7 +179,7 @@ function parseCSNHTML(htmlText) {
         }
         const tableContent = tableMatch[0];
         // Buscar filas de la tabla con datos de sismos
-        const rowRegex = /<tr[^>]*>(.*?)<\/tr>/gis;
+        const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
         let rowMatch;
         let rowCount = 0;
         while ((rowMatch = rowRegex.exec(tableContent)) !== null && rowCount < 20) { // Limitar a 20 filas
@@ -168,31 +189,36 @@ function parseCSNHTML(htmlText) {
                 continue;
             }
             // Extraer celdas
-            const cellRegex = /<td[^>]*>(.*?)<\/td>/gis;
+            const cellRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
             const cells = [];
             let cellMatch;
             while ((cellMatch = cellRegex.exec(rowContent)) !== null) {
-                const cellContent = cellMatch[1].replace(/<[^>]*>/g, '').trim();
+                let cellContent = cellMatch[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
                 cells.push(cellContent);
             }
             if (cells.length >= 3) {
-                // Formato esperado: [Fecha, Ubicación, Profundidad, Magnitud]
-                const dateTimeStr = cells[0];
-                const locationStr = cells[1];
-                const depthStr = cells[2];
-                const magnitudeStr = cells[3];
-                if (magnitudeStr && locationStr) {
+                // Nuevo formato detectado: [Fecha+Lugar, Profundidad, Magnitud]
+                const firstCell = cells[0];
+                // El formato de fecha es YYYY-MM-DD HH:MM:SS
+                const dateRegex = /\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/;
+                const dateMatch = firstCell.match(dateRegex);
+                if (dateMatch) {
+                    const dateTimeStr = dateMatch[0];
+                    const locationStr = firstCell.replace(dateTimeStr, '').trim();
+                    const depthStr = cells[1];
+                    const magnitudeStr = cells[2];
                     const magnitude = parseFloat(magnitudeStr);
                     const depth = depthStr ? parseFloat(depthStr.replace('km', '').trim()) : null;
                     if (!isNaN(magnitude)) {
                         // Extraer coordenadas aproximadas de Chile basado en la ubicación
                         const coords = estimateChileCoordinates(locationStr);
-                        const eventId = `csn-${dateTimeStr.replace(/[^0-9]/g, '')}-${Math.random().toString(36).substr(2, 9)}`;
+                        const eventTime = new Date(dateTimeStr.replace(' ', 'T'));
+                        const eventId = `csn-${dateTimeStr.replace(/[^0-9]/g, '')}`;
                         events.push({
                             id: eventId,
                             title: `Sismo M${magnitude.toFixed(1)} - ${locationStr}`,
                             description: locationStr,
-                            time: new Date(), // Usar fecha actual si no se puede parsear
+                            time: eventTime,
                             lat: coords.lat,
                             lng: coords.lng,
                             magnitude,

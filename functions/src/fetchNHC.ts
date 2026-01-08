@@ -1,4 +1,3 @@
-import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { geohashForLocation } from 'geofire-common';
@@ -41,12 +40,8 @@ function extractWindSpeed(text: string): number | null {
 }
 
 // Cron job: Fetch NHC cada 30 minutos
-export const fetchNHCEvents = onSchedule({
-  schedule: 'every 30 minutes',
-  region: 'southamerica-east1',
-  timeoutSeconds: 60,
-  memory: '256MiB',
-}, async (): Promise<void> => {
+// Función principal para procesar el fetch (exportada para consolidación)
+export async function processNHCFetch(): Promise<void> {
   logger.info('🚀 Iniciando fetch de eventos del NHC');
 
   try {
@@ -77,6 +72,24 @@ export const fetchNHCEvents = onSchedule({
     const allEvents = [...atlanticEvents, ...pacificEvents];
     logger.info(`📊 Recibidos ${allEvents.length} eventos del NHC (${atlanticEvents.length} Atlántico, ${pacificEvents.length} Pacífico)`);
 
+    // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+    const existingIds = new Set<string>();
+    try {
+      const existingDocs = await db.collection('events')
+        .where('source', '==', 'nhc')
+        .orderBy('eventTime', 'desc')
+        .limit(500)
+        .get();
+      existingDocs.forEach(doc => {
+        const extId = doc.data().externalId;
+        if (extId) existingIds.add(extId);
+      });
+      logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+    } catch (error) {
+      logger.error('❌ Error cargando IDs existentes:', error);
+      // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+    }
+
     const batch = db.batch();
     let processedCount = 0;
     let skippedCount = 0;
@@ -84,16 +97,23 @@ export const fetchNHCEvents = onSchedule({
 
     for (const event of allEvents) {
       try {
-        // Verificar si el evento ya existe
-        const existingDoc = await db.collection('events')
-          .where('source', '==', 'nhc')
-          .where('externalId', '==', event.guid)
-          .limit(1)
-          .get();
-
-        if (!existingDoc.empty) {
+        // Verificar si el evento ya existe usando el Set optimizado
+        if (existingIds.has(event.guid)) {
           skippedCount++;
           continue;
+        }
+
+        // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+        if (existingIds.size === 0) {
+          const checkDoc = await db.collection('events')
+            .where('source', '==', 'nhc')
+            .where('externalId', '==', event.guid)
+            .limit(1)
+            .get();
+          if (!checkDoc.empty) {
+            skippedCount++;
+            continue;
+          }
         }
 
         // Extraer coordenadas si están disponibles
@@ -184,10 +204,10 @@ export const fetchNHCEvents = onSchedule({
     logger.info('✅ Fetch NHC completado exitosamente');
 
   } catch (error) {
-    logger.error('❌ Error en fetchNHCEvents:', error);
+    logger.error('❌ Error en processNHCFetch:', error);
     throw error;
   }
-});
+}
 
 // Parser simplificado de XML NHC
 function parseNHCXML(xmlText: string, ocean: string): any[] {
@@ -216,9 +236,9 @@ function parseNHCXML(xmlText: string, ocean: string): any[] {
 
       // Solo procesar si es un huracán, tormenta tropical, o depresión tropical activa
       if (!title.toLowerCase().includes('hurricane') &&
-          !title.toLowerCase().includes('tropical storm') &&
-          !title.toLowerCase().includes('tropical depression') &&
-          !title.toLowerCase().includes('potential')) {
+        !title.toLowerCase().includes('tropical storm') &&
+        !title.toLowerCase().includes('tropical depression') &&
+        !title.toLowerCase().includes('potential')) {
         continue;
       }
 

@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchUSGSEvents = void 0;
-const scheduler_1 = require("firebase-functions/v2/scheduler");
+exports.processUSGSFetch = processUSGSFetch;
 const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
@@ -32,12 +31,8 @@ function calculateEventRadius(magnitude) {
     return Math.max(50, Math.round(magnitude * 20));
 }
 // Cron job: Fetch USGS cada 15 minutos (optimizado para reducir costos)
-exports.fetchUSGSEvents = (0, scheduler_1.onSchedule)({
-    schedule: 'every 5 minutes',
-    region: 'southamerica-east1',
-    timeoutSeconds: 60,
-    memory: '256MiB',
-}, async () => {
+// Función principal para procesar el fetch (exportada para consolidación)
+async function processUSGSFetch() {
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del USGS');
     try {
         const response = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
@@ -46,6 +41,25 @@ exports.fetchUSGSEvents = (0, scheduler_1.onSchedule)({
         }
         const data = await response.json();
         firebase_functions_1.logger.info(`📊 Recibidos ${data.features.length} eventos del USGS`);
+        // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+        const existingIds = new Set();
+        try {
+            const existingDocs = await db.collection('events')
+                .where('source', '==', 'usgs')
+                .orderBy('eventTime', 'desc')
+                .limit(500)
+                .get();
+            existingDocs.forEach(doc => {
+                const extId = doc.data().externalId;
+                if (extId)
+                    existingIds.add(extId);
+            });
+            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+        }
+        catch (error) {
+            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+        }
         const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
@@ -60,15 +74,23 @@ exports.fetchUSGSEvents = (0, scheduler_1.onSchedule)({
                     skippedCount++;
                     continue;
                 }
-                // Verificar si el evento ya existe
-                const existingDoc = await db.collection('events')
-                    .where('source', '==', 'usgs')
-                    .where('externalId', '==', id)
-                    .limit(1)
-                    .get();
-                if (!existingDoc.empty) {
+                // Verificar si el evento ya existe usando el Set optimizado
+                if (existingIds.has(id)) {
                     skippedCount++;
                     continue;
+                }
+                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                // Esto solo debería ocurrir si la carga masiva falló
+                if (existingIds.size === 0) {
+                    const checkDoc = await db.collection('events')
+                        .where('source', '==', 'usgs')
+                        .where('externalId', '==', id)
+                        .limit(1)
+                        .get();
+                    if (!checkDoc.empty) {
+                        skippedCount++;
+                        continue;
+                    }
                 }
                 // Calcular geohash y otros datos
                 const geohash = (0, geofire_common_1.geohashForLocation)([lat, lng]);
@@ -157,8 +179,8 @@ exports.fetchUSGSEvents = (0, scheduler_1.onSchedule)({
         firebase_functions_1.logger.info('✅ Fetch USGS completado exitosamente');
     }
     catch (error) {
-        firebase_functions_1.logger.error('❌ Error en fetchUSGSEvents:', error);
+        firebase_functions_1.logger.error('❌ Error en processUSGSFetch:', error);
         throw error;
     }
-});
+}
 //# sourceMappingURL=fetchUSGS.js.map

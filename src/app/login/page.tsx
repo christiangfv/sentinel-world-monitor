@@ -1,5 +1,7 @@
+'use client';
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { LoginButton } from "@/components/auth/LoginButton";
+import { MockLoginButton } from "@/components/auth/MockLoginButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
 const features = [
@@ -80,8 +82,10 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <div className="flex justify-center pt-4">
+              <div className="flex flex-col items-center gap-4 pt-4">
                 <LoginButton />
+
+                <MockLoginButton />
               </div>
             </div>
 

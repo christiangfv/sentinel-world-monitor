@@ -1,26 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendCriticalNotifications = exports.getSystemStats = exports.cleanupExpiredEvents = exports.testConnection = exports.testDataSources = exports.fetchJMAEvents = exports.fetchNHCEvents = exports.fetchBOMEvents = exports.fetchEMSCvents = exports.fetchCSNEvents = exports.fetchGDACSEvents = exports.fetchUSGSEvents = void 0;
+exports.sendCriticalNotifications = exports.getSystemStats = exports.cleanupExpiredEvents = exports.testConnection = exports.testDataSources = exports.fetchAllEvents = void 0;
 const app_1 = require("firebase-admin/app");
 const firestore_1 = require("firebase-admin/firestore");
 const messaging_1 = require("firebase-admin/messaging");
 // Inicializar Firebase Admin
 (0, app_1.initializeApp)();
-// Exportar todas las funciones
-var fetchUSGS_1 = require("./fetchUSGS");
-Object.defineProperty(exports, "fetchUSGSEvents", { enumerable: true, get: function () { return fetchUSGS_1.fetchUSGSEvents; } });
-var fetchGDACS_1 = require("./fetchGDACS");
-Object.defineProperty(exports, "fetchGDACSEvents", { enumerable: true, get: function () { return fetchGDACS_1.fetchGDACSEvents; } });
-var fetchCSN_1 = require("./fetchCSN");
-Object.defineProperty(exports, "fetchCSNEvents", { enumerable: true, get: function () { return fetchCSN_1.fetchCSNEvents; } });
-var fetchEMSC_1 = require("./fetchEMSC");
-Object.defineProperty(exports, "fetchEMSCvents", { enumerable: true, get: function () { return fetchEMSC_1.fetchEMSCvents; } });
-var fetchBOM_1 = require("./fetchBOM");
-Object.defineProperty(exports, "fetchBOMEvents", { enumerable: true, get: function () { return fetchBOM_1.fetchBOMEvents; } });
-var fetchNHC_1 = require("./fetchNHC");
-Object.defineProperty(exports, "fetchNHCEvents", { enumerable: true, get: function () { return fetchNHC_1.fetchNHCEvents; } });
-var fetchJMA_1 = require("./fetchJMA");
-Object.defineProperty(exports, "fetchJMAEvents", { enumerable: true, get: function () { return fetchJMA_1.fetchJMAEvents; } });
+// Exportar funciones esenciales y consolidadas
+var masterFetch_1 = require("./masterFetch");
+Object.defineProperty(exports, "fetchAllEvents", { enumerable: true, get: function () { return masterFetch_1.fetchAllEvents; } });
 var testSources_1 = require("./testSources");
 Object.defineProperty(exports, "testDataSources", { enumerable: true, get: function () { return testSources_1.testDataSources; } });
 // Funciones de utilidad que pueden ser útiles

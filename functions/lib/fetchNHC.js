@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchNHCEvents = void 0;
-const scheduler_1 = require("firebase-functions/v2/scheduler");
+exports.processNHCFetch = processNHCFetch;
 const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
@@ -43,12 +42,8 @@ function extractWindSpeed(text) {
     return windMatch ? parseInt(windMatch[1]) : null;
 }
 // Cron job: Fetch NHC cada 30 minutos
-exports.fetchNHCEvents = (0, scheduler_1.onSchedule)({
-    schedule: 'every 30 minutes',
-    region: 'southamerica-east1',
-    timeoutSeconds: 60,
-    memory: '256MiB',
-}, async () => {
+// Función principal para procesar el fetch (exportada para consolidación)
+async function processNHCFetch() {
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del NHC');
     try {
         // API del National Hurricane Center - Atlantic
@@ -73,21 +68,47 @@ exports.fetchNHCEvents = (0, scheduler_1.onSchedule)({
         }
         const allEvents = [...atlanticEvents, ...pacificEvents];
         firebase_functions_1.logger.info(`📊 Recibidos ${allEvents.length} eventos del NHC (${atlanticEvents.length} Atlántico, ${pacificEvents.length} Pacífico)`);
+        // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+        const existingIds = new Set();
+        try {
+            const existingDocs = await db.collection('events')
+                .where('source', '==', 'nhc')
+                .orderBy('eventTime', 'desc')
+                .limit(500)
+                .get();
+            existingDocs.forEach(doc => {
+                const extId = doc.data().externalId;
+                if (extId)
+                    existingIds.add(extId);
+            });
+            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+        }
+        catch (error) {
+            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+        }
         const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         const criticalEvents = []; // Eventos de severidad 4+ para notificaciones
         for (const event of allEvents) {
             try {
-                // Verificar si el evento ya existe
-                const existingDoc = await db.collection('events')
-                    .where('source', '==', 'nhc')
-                    .where('externalId', '==', event.guid)
-                    .limit(1)
-                    .get();
-                if (!existingDoc.empty) {
+                // Verificar si el evento ya existe usando el Set optimizado
+                if (existingIds.has(event.guid)) {
                     skippedCount++;
                     continue;
+                }
+                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                if (existingIds.size === 0) {
+                    const checkDoc = await db.collection('events')
+                        .where('source', '==', 'nhc')
+                        .where('externalId', '==', event.guid)
+                        .limit(1)
+                        .get();
+                    if (!checkDoc.empty) {
+                        skippedCount++;
+                        continue;
+                    }
                 }
                 // Extraer coordenadas si están disponibles
                 const coords = extractCoordinates(event.description);
@@ -169,10 +190,10 @@ exports.fetchNHCEvents = (0, scheduler_1.onSchedule)({
         firebase_functions_1.logger.info('✅ Fetch NHC completado exitosamente');
     }
     catch (error) {
-        firebase_functions_1.logger.error('❌ Error en fetchNHCEvents:', error);
+        firebase_functions_1.logger.error('❌ Error en processNHCFetch:', error);
         throw error;
     }
-});
+}
 // Parser simplificado de XML NHC
 function parseNHCXML(xmlText, ocean) {
     const events = [];

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { showTestNotification } from '@/lib/firebase/messaging'
 
 export function UserMenu() {
   const { user, logout } = useAuth()
@@ -86,6 +87,12 @@ export function UserMenu() {
                 className="w-full px-3 py-2 text-sm text-left text-[#8890A0] hover:text-[#E8E8F0] hover:bg-[#1A1B22] rounded-md flex items-center gap-2"
               >
                 <span>⚙️</span> Config
+              </button>
+              <button
+                onClick={async () => { await showTestNotification(); setIsOpen(false); }}
+                className="w-full px-3 py-2 text-sm text-left text-[#D4B57A] hover:bg-[#D4B57A]/10 rounded-md flex items-center gap-2"
+              >
+                <span>🔔</span> Probar Notificación
               </button>
 
               <div className="border-t border-[#4A5060]/30 my-2" />

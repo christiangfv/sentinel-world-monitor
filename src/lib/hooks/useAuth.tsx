@@ -9,6 +9,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: () => Promise<void>;
+  mockSignIn: () => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -20,17 +21,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listener para cambios de estado de autenticación
-    const unsubscribe = onAuthStateChange(async (userData) => {
-      setUser(userData);
-      setLoading(false);
+    // Verificar si hay un usuario mock persistido
+    const savedMockUser = localStorage.getItem('sentinel_mock_user');
+    if (savedMockUser) {
+      try {
+        setUser(JSON.parse(savedMockUser));
+        setLoading(false);
+        // Si hay mock user, no inicializamos el listener de Firebase por ahora
+        return;
+      } catch (e) {
+        console.error('Error parsing saved mock user:', e);
+        localStorage.removeItem('sentinel_mock_user');
+      }
+    }
 
-      // Inicializar notificaciones si el usuario está autenticado
-      if (userData) {
-        try {
-          await initializeNotifications(userData.uid);
-        } catch (error) {
-          console.error('Error initializing notifications:', error);
+    // Listener para cambios de estado de autenticación real
+    const unsubscribe = onAuthStateChange(async (userData) => {
+      // Solo actualizar si no hay un usuario mock activo (evitar colisiones)
+      if (!localStorage.getItem('sentinel_mock_user')) {
+        setUser(userData);
+        setLoading(false);
+
+        if (userData) {
+          try {
+            await initializeNotifications(userData.uid);
+          } catch (error) {
+            console.error('Error initializing notifications:', error);
+          }
         }
       }
     });
@@ -48,8 +65,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const mockSignIn = async () => {
+    try {
+      setLoading(true);
+      // Simular usuario de prueba
+      const mockUser: User = {
+        uid: 'mock-user-123',
+        email: 'test@sentinel.app',
+        displayName: 'Usuario de Prueba',
+        settings: {
+          language: 'es',
+          darkMode: true,
+          soundEnabled: true
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      setUser(mockUser);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sentinel_mock_user', JSON.stringify(mockUser));
+      }
+      setLoading(false);
+
+      // Intentar inicializar notificaciones
+      try {
+        await initializeNotifications(mockUser.uid);
+      } catch (e) {
+        console.warn('Mock status: Notifications initialization skipped or failed in test environment');
+      }
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
+      localStorage.removeItem('sentinel_mock_user');
       await signOut();
       setUser(null);
     } catch (error) {
@@ -67,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     loading,
     signIn,
+    mockSignIn,
     logout,
     refreshUser
   };

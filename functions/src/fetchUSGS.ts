@@ -1,4 +1,3 @@
-import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { geohashForLocation } from 'geofire-common';
@@ -31,12 +30,8 @@ function calculateEventRadius(magnitude: number): number {
 }
 
 // Cron job: Fetch USGS cada 15 minutos (optimizado para reducir costos)
-export const fetchUSGSEvents = onSchedule({
-  schedule: 'every 5 minutes',
-  region: 'southamerica-east1',
-  timeoutSeconds: 60,
-  memory: '256MiB',
-}, async (): Promise<void> => {
+// Función principal para procesar el fetch (exportada para consolidación)
+export async function processUSGSFetch(): Promise<void> {
   logger.info('🚀 Iniciando fetch de eventos del USGS');
 
   try {
@@ -50,6 +45,24 @@ export const fetchUSGSEvents = onSchedule({
 
     const data = await response.json();
     logger.info(`📊 Recibidos ${data.features.length} eventos del USGS`);
+
+    // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+    const existingIds = new Set<string>();
+    try {
+      const existingDocs = await db.collection('events')
+        .where('source', '==', 'usgs')
+        .orderBy('eventTime', 'desc')
+        .limit(500)
+        .get();
+      existingDocs.forEach(doc => {
+        const extId = doc.data().externalId;
+        if (extId) existingIds.add(extId);
+      });
+      logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+    } catch (error) {
+      logger.error('❌ Error cargando IDs existentes:', error);
+      // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+    }
 
     const batch = db.batch();
     let processedCount = 0;
@@ -68,16 +81,24 @@ export const fetchUSGSEvents = onSchedule({
           continue;
         }
 
-        // Verificar si el evento ya existe
-        const existingDoc = await db.collection('events')
-          .where('source', '==', 'usgs')
-          .where('externalId', '==', id)
-          .limit(1)
-          .get();
-
-        if (!existingDoc.empty) {
+        // Verificar si el evento ya existe usando el Set optimizado
+        if (existingIds.has(id)) {
           skippedCount++;
           continue;
+        }
+
+        // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+        // Esto solo debería ocurrir si la carga masiva falló
+        if (existingIds.size === 0) {
+          const checkDoc = await db.collection('events')
+            .where('source', '==', 'usgs')
+            .where('externalId', '==', id)
+            .limit(1)
+            .get();
+          if (!checkDoc.empty) {
+            skippedCount++;
+            continue;
+          }
         }
 
         // Calcular geohash y otros datos
@@ -173,7 +194,7 @@ export const fetchUSGSEvents = onSchedule({
     logger.info('✅ Fetch USGS completado exitosamente');
 
   } catch (error) {
-    logger.error('❌ Error en fetchUSGSEvents:', error);
+    logger.error('❌ Error en processUSGSFetch:', error);
     throw error;
   }
-});
+}
