@@ -112,6 +112,19 @@ export function GeneralSettings() {
                         </Button>
                     </div>
 
+                    {/* Notifications Toggle */}
+                    <div className="flex items-center justify-between">
+                        <span className="font-medium">Habilitar Notificaciones</span>
+                        <Button
+                            variant={currentSettings.notificationsEnabled ? undefined : 'outline'}
+                            size="sm"
+                            onClick={() => handleUpdateSetting('notificationsEnabled', !currentSettings.notificationsEnabled)}
+                            disabled={loading}
+                        >
+                            {currentSettings.notificationsEnabled ? 'Activado' : 'Desactivado'}
+                        </Button>
+                    </div>
+
                     <div className="border-t border-[#4A5060]/20 pt-4 mt-4">
                         <h4 className="text-sm font-bold text-[#D4B57A] uppercase tracking-wider mb-4">Preferencias de Notificación</h4>
 

@@ -66,6 +66,7 @@ export interface UserSettings {
   country?: string;
   minMagnitude?: number;
   onboardingCompleted?: boolean;
+  notificationsEnabled?: boolean;
 }
 
 // Zona de monitoreo del usuario

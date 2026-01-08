@@ -156,6 +156,9 @@ export const sendCriticalNotifications = async (eventData: any) => {
         // --- FILTRADO POR PREFERENCIAS DE USUARIO (PAÍS Y MAGNITUD) ---
         const userSettings = userData.settings || {};
 
+        // 0. Global Notifications Toggle
+        if (userSettings.notificationsEnabled === false) continue;
+
         // 1. Filtrado por Magnitud (solo para sismos)
         if (eventData.disasterType === 'earthquake' && eventData.magnitude) {
           const minMag = userSettings.minMagnitude || 4.5;

@@ -21,6 +21,7 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
     const [step, setStep] = useState(1);
     const [country, setCountry] = useState(user?.settings?.country || "Global");
     const [magnitude, setMagnitude] = useState(user?.settings?.minMagnitude || 4.5);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(user?.settings?.notificationsEnabled ?? true);
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -38,6 +39,7 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
                 ...user.settings,
                 country,
                 minMagnitude: magnitude,
+                notificationsEnabled,
                 onboardingCompleted: true
             });
             setIsOpen(false);
@@ -91,8 +93,8 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
                                             key={c}
                                             onClick={() => setCountry(c)}
                                             className={`px-4 py-3 rounded-xl border text-sm font-semibold transition-all ${country === c
-                                                    ? 'bg-[#D4B57A] text-[#0D0E14] border-[#D4B57A]'
-                                                    : 'bg-[#0D0E14]/50 text-[#8890A0] border-[#4A5060]/30 hover:border-[#D4B57A]/50'
+                                                ? 'bg-[#D4B57A] text-[#0D0E14] border-[#D4B57A]'
+                                                : 'bg-[#0D0E14]/50 text-[#8890A0] border-[#4A5060]/30 hover:border-[#D4B57A]/50'
                                                 }`}
                                         >
                                             {c}
@@ -184,8 +186,23 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
                                 </div>
 
                                 <div className="bg-[#0D0E14]/50 border border-[#22C55E]/20 rounded-2xl p-6 my-6 text-center">
+                                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-[#4A5060]/20">
+                                        <div className="text-left">
+                                            <p className="text-[#E8E8F0] font-bold">Notificaciones</p>
+                                            <p className="text-[#8890A0] text-xs">Recibir alertas en tiempo real</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                                            className={`w-12 h-6 rounded-full transition-all relative ${notificationsEnabled ? 'bg-[#22C55E]' : 'bg-[#4A5060]'}`}
+                                        >
+                                            <motion.div
+                                                className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full"
+                                                animate={{ x: notificationsEnabled ? 24 : 0 }}
+                                            />
+                                        </button>
+                                    </div>
                                     <p className="text-[#E8E8F0] text-sm">
-                                        Recibirás alertas críticas según tu ubicación y preferencias. Puedes cambiarlas en cualquier momento desde <strong>Configuración</strong>.
+                                        Has configurado Sentinel para <strong>{country}</strong>. Puedes cambiar esto en cualquier momento desde <strong>Configuración</strong>.
                                     </p>
                                 </div>
 
