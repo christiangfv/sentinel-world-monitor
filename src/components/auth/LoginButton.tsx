@@ -1,17 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 
 export function LoginButton() {
   const { signIn, loading } = useAuth()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLogin = async () => {
     try {
       setIsLoading(true)
       await signIn()
+      // Explicit redirect after successful login
+      router.push('/')
     } catch (error) {
       console.error('Error during login:', error)
     } finally {
@@ -22,8 +26,8 @@ export function LoginButton() {
   const busy = isLoading || loading
 
   return (
-    <button 
-      onClick={handleLogin} 
+    <button
+      onClick={handleLogin}
       disabled={busy}
       className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#E8E8F0] hover:text-[#D4B57A] transition-colors disabled:opacity-50"
     >
