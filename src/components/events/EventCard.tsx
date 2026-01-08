@@ -60,43 +60,43 @@ export function EventCard({
         onClick={onClick}
         style={{ borderLeftColor: severityColor }}
       >
-        <CardContent className="p-3.5">
-          <div className="flex items-start gap-3.5">
-            <div className={`shrink-0 mt-0.5 ${isCritical ? 'animate-pulse-dot' : ''}`}>
-              <IconComponent size={30} />
+        <CardContent className="p-4">
+          <div className="flex items-start gap-4">
+            <div className={`
+              shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
+              bg-[#D4B57A]/10 border border-[#D4B57A]/20
+              ${isCritical ? 'animate-pulse-dot shadow-[0_0_15px_rgba(212,181,122,0.3)]' : ''}
+            `}>
+              <IconComponent size={24} className="text-[#D4B57A]" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="font-semibold text-[13px] text-[#E8E8F0] leading-snug line-clamp-2 flex-1">
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <h3 className="font-bold text-sm text-[#E8E8F0] tracking-tight leading-snug line-clamp-1 flex-1">
                   {event.title}
                 </h3>
-                <Badge variant={severityVariant(event.severity)} className="shrink-0 h-5 px-1.5 text-[10px] font-bold">
-                  {event.severity}
+                <Badge variant={severityVariant(event.severity)} className="shrink-0 h-5 px-2 text-[10px] font-black tracking-widest uppercase">
+                  S{event.severity}
                 </Badge>
               </div>
-              <p className="text-[11px] text-[#8890A0] leading-relaxed mb-2 font-medium">
-                {event.locationName}
+              <p className="text-xs text-[#8890A0] leading-relaxed mb-3 font-medium flex items-center gap-1.5">
+                <span className="opacity-50">📍</span> {event.locationName}
               </p>
-              <div className="flex items-center justify-between text-[10px] text-[#8890A0]/80">
-                <div className="flex items-center gap-1.5 font-medium">
-                  <span className="opacity-70">🕒</span>
-                  <span>{formatTimeAgo(event.eventTime)}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-[10px]">
+                  <span className="text-[#8890A0]/70 font-bold uppercase tracking-widest">{formatTimeAgo(event.eventTime)}</span>
+                  <span className="w-1 h-1 rounded-full bg-[#4A5060]/40" />
+                  <span className="text-[#D4B57A] font-bold uppercase tracking-widest">{config.nameEs}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onShowContext?.(event);
-                    }}
-                    className="p-1 hover:bg-[#D4B57A]/10 rounded transition-colors"
-                    title="Noticias y más info"
-                  >
-                    📰
-                  </button>
-                  <span className="px-2 py-0.5 bg-[#4A5060]/15 rounded-md text-[9px] font-bold uppercase tracking-wider text-[#7088A0]">
-                    {config.nameEs}
-                  </span>
-                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShowContext?.(event);
+                  }}
+                  className="p-1.5 bg-[#D4B57A]/10 hover:bg-[#D4B57A]/20 rounded-lg transition-all active:scale-95"
+                  title="Noticias y más info"
+                >
+                  <span className="text-xs">📰</span>
+                </button>
               </div>
             </div>
           </div>
@@ -118,85 +118,72 @@ export function EventCard({
         `}
         style={{ borderLeftColor: severityColor }}
       >
-        <CardContent className="p-5">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-5">
+            <div className="flex items-center gap-4">
               <div className={`
-                w-12 h-12 rounded-xl flex items-center justify-center
-                bg-gradient-to-br from-[#4A5060]/20 to-transparent
-                ${isCritical ? 'animate-pulse-dot' : ''}
+                w-14 h-14 rounded-2xl flex items-center justify-center
+                bg-gradient-to-br from-[#D4B57A]/20 to-transparent border border-[#D4B57A]/10
+                ${isCritical ? 'animate-pulse-dot shadow-[0_0_20px_rgba(212,181,122,0.2)]' : ''}
               `}>
-                <IconComponent size={40} />
+                <IconComponent size={32} className="text-[#D4B57A]" />
               </div>
               <div>
-                <h3 className="font-semibold text-[#E8E8F0] leading-tight">{event.title}</h3>
-                <p className="text-sm text-[#8890A0] mt-0.5">{config.nameEs}</p>
+                <h3 className="font-bold text-[#E8E8F0] text-lg tracking-tight leading-tight">{event.title}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-black uppercase tracking-[0.2em] text-[#D4B57A]">{config.nameEs}</span>
+                  <span className="w-1 h-1 rounded-full bg-[#4A5060]/40" />
+                  <span className="text-xs text-[#8890A0] font-medium">{formatTimeAgo(event.eventTime)}</span>
+                </div>
               </div>
             </div>
-            <Badge variant={severityVariant(event.severity)} className={isCritical ? 'shadow-[0_0_12px_rgba(248,113,113,0.3)]' : ''}>
+            <Badge variant={severityVariant(event.severity)} className={`h-7 px-3 text-[10px] font-black tracking-widest uppercase ${isCritical ? 'shadow-[0_0_15px_rgba(248,113,113,0.3)]' : ''}`}>
               {severityLabel}
             </Badge>
           </div>
 
-          <div className="space-y-2.5 text-sm">
-            <div className="flex items-center gap-3 text-[#8890A0]">
-              <div className="w-5 h-5 rounded bg-[#4A5060]/20 flex items-center justify-center text-xs">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center gap-3 text-[#E8E8F0]">
+              <div className="w-6 h-6 rounded-lg bg-[#D4B57A]/5 flex items-center justify-center text-[#D4B57A] border border-[#D4B57A]/10">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span>{event.locationName}</span>
+              <span className="text-sm font-medium">{event.locationName}</span>
             </div>
             <div className="flex items-center gap-3 text-[#8890A0]">
-              <div className="w-5 h-5 rounded bg-[#4A5060]/20 flex items-center justify-center text-xs">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-6 h-6 rounded-lg bg-[#4A5060]/10 flex items-center justify-center">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span>{formatEventDate(event.eventTime)}</span>
+              <span className="text-xs">{formatEventDate(event.eventTime)}</span>
             </div>
             {event.magnitude && (
-              <div className="flex items-center gap-3 text-[#8890A0]">
-                <div className="w-5 h-5 rounded bg-[#4A5060]/20 flex items-center justify-center text-xs">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                  </svg>
+              <div className="flex items-center gap-3 text-[#D4B57A]">
+                <div className="w-6 h-6 rounded-lg bg-[#D4B57A]/10 flex items-center justify-center border border-[#D4B57A]/20">
+                  <span className="text-[10px] font-black">M</span>
                 </div>
-                <span>Magnitud: <strong className="text-[#E8E8F0]">{event.magnitude.toFixed(1)}</strong></span>
+                <span className="text-sm font-bold tracking-tight">Magnitud: <span className="text-[#E8E8F0] text-base">{event.magnitude.toFixed(1)}</span></span>
               </div>
-            )}
-            {event.description && (
-              <p className="text-[#8890A0] line-clamp-2 mt-3 pl-8 border-l-2 border-[#4A5060]/30 italic">
-                {event.description}
-              </p>
             )}
           </div>
 
           {showMapLink && (
-            <div className="mt-4 pt-3 border-t border-[#4A5060]/30 flex items-center justify-between">
-              <span className="text-xs text-[#8890A0] flex items-center gap-2 group-hover:text-[#D4B57A] transition-colors">
-                <span>Ver detalles</span>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onShowContext?.(event);
-                  }}
-                  className="px-3 py-1 bg-[#D4B57A]/10 text-[#D4B57A] rounded-lg text-xs font-bold hover:bg-[#D4B57A]/20 transition-colors flex items-center gap-1.5"
-                >
-                  📰 Noticias
-                </button>
-                <div className="w-6 h-6 rounded bg-[#D4B57A]/10 flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-[#D4B57A]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
+            <div className="pt-5 border-t border-[#4A5060]/20 flex items-center justify-between gap-4">
+              <button className="flex-1 px-4 py-2.5 bg-[#D4B57A] text-[#0D0E14] rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#E8C585] transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(212,181,122,0.2)]">
+                Ver Detalles
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onShowContext?.(event);
+                }}
+                className="px-4 py-2.5 bg-[#1A1B22] border border-[#D4B57A]/30 text-[#D4B57A] rounded-xl text-xs font-bold hover:bg-[#D4B57A]/10 transition-all flex items-center gap-2"
+              >
+                📰 Noticias
+              </button>
             </div>
           )}
         </CardContent>

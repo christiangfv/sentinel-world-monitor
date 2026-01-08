@@ -63,47 +63,46 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
   }
 
   return (
-    <div className="glass-strong rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden">
+    <div className="bg-[#1A1B22]/85 backdrop-blur-xl border border-[#D4B57A]/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden ring-1 ring-white/5 ring-inset">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full px-4 py-3 flex items-center justify-between text-sm hover:bg-[#4A5060]/10 transition-colors"
+        className="w-full px-5 py-4 flex items-center justify-between text-sm hover:bg-[#D4B57A]/5 transition-all active:scale-[0.99]"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4B57A]/20 to-transparent flex items-center justify-center">
-            <svg className="w-4 h-4 text-[#D4B57A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-[#D4B57A]/10 flex items-center justify-center border border-[#D4B57A]/20">
+            <svg className="w-5 h-5 text-[#D4B57A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
           </div>
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-[#E8E8F0] font-medium">Filtros</span>
-            <span className="text-[10px] text-[#D4B57A] font-bold tracking-wide">
-              🕒 {getCurrentRangeLabel()}
+            <span className="text-[#E8E8F0] font-black uppercase tracking-widest text-[11px] opacity-90">Filtros Avanzados</span>
+            <span className="text-[10px] text-[#D4B57A] font-black tracking-widest uppercase mt-0.5">
+              Rango: {getCurrentRangeLabel()}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#D4B57A]/10 text-[#D4B57A] text-xs font-medium">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#D4B57A]/10 border border-[#D4B57A]/20 text-[#D4B57A] text-[10px] font-black uppercase tracking-widest">
             <span>{activeCount}</span>
-            <span className="text-[#8890A0]">/</span>
-            <span className="text-[#8890A0]">{DISASTER_TYPES.length}</span>
+            <span className="opacity-40">/</span>
+            <span>{DISASTER_TYPES.length}</span>
           </div>
         </div>
-        <svg
-          className={`w-4 h-4 text-[#8890A0] transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <div className={`p-1.5 rounded-lg bg-[#4A5060]/10 text-[#8890A0] transition-all duration-500 ${open ? 'rotate-180 bg-[#D4B57A]/20 text-[#D4B57A]' : ''}`}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </button>
 
-      <div className={`overflow-hidden transition-all duration-300 ease-out ${open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="p-4 pt-2 space-y-5 border-t border-[#4A5060]/30 custom-scrollbar overflow-y-auto max-h-[400px]">
+      <div className={`transition-all duration-500 ease-in-out ${open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="p-6 pt-2 space-y-6 border-t border-[#D4B57A]/10 custom-scrollbar overflow-y-auto max-h-[450px]">
 
           {/* Rango de tiempo */}
           <div>
-            <label className="text-xs text-[#8890A0] mb-3 block uppercase tracking-wider font-medium">
-              Rango de tiempo
+            <label className="text-[10px] text-[#D4B57A] mb-4 block uppercase font-black tracking-[0.2em] opacity-80">
+              Ventana de Tiempo
             </label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {timeRanges.map(range => {
                 const isActive = getCurrentRangeLabel() === range.label || (getCurrentRangeLabel() === '1d' && range.label === '24h');
                 return (
@@ -111,10 +110,10 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
                     key={range.label}
                     onClick={() => setTimeRange(range.days)}
                     className={`
-                        flex-1 px-3 py-2 text-xs rounded-lg font-medium transition-all
+                        px-3 py-3 text-[10px] rounded-xl font-black uppercase tracking-widest transition-all
                         ${isActive
-                        ? 'bg-[#D4B57A] text-[#0D0E14] shadow-lg scale-105'
-                        : 'bg-[#1A1B22]/50 text-[#8890A0] hover:bg-[#1A1B22] hover:text-[#E8E8F0]'
+                        ? 'bg-[#D4B57A] text-[#0D0E14] shadow-[0_4px_12px_rgba(212,181,122,0.3)] scale-105'
+                        : 'bg-[#1A1B22] text-[#8890A0] border border-[#4A5060]/20 hover:border-[#D4B57A]/40 hover:text-[#E8E8F0]'
                       }
                         `}
                   >
@@ -127,32 +126,31 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
 
           {/* Severidad */}
           <div>
-            <label className="text-xs text-[#8890A0] mb-3 block uppercase tracking-wider font-medium">
-              Severidad mínima
+            <label className="text-[10px] text-[#D4B57A] mb-4 block uppercase font-black tracking-[0.2em] opacity-80">
+              Intensidad Mínima
             </label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {severities.map(s => (
                 <button
                   key={s.value}
                   onClick={() => setSeverity(s.value as 1 | 2 | 3 | 4)}
                   className={`
-                    flex-1 px-3 py-2.5 text-xs rounded-lg flex flex-col items-center gap-1.5
-                    transition-all duration-200 ease-out
+                    px-2 py-3 rounded-xl flex flex-col items-center gap-2
+                    transition-all duration-300 border-2
                     ${filters.minSeverity === s.value
-                      ? 'bg-[#1A1B22] border-2 shadow-[0_0_12px_rgba(0,0,0,0.3)] scale-105'
-                      : 'bg-[#1A1B22]/50 border-2 border-transparent hover:bg-[#1A1B22] hover:scale-102'
+                      ? 'bg-[#1A1B22] shadow-[0_10px_25px_rgba(0,0,0,0.5)] scale-110'
+                      : 'bg-[#1A1B22]/30 border-transparent hover:bg-[#1A1B22]/60'
                     }
                   `}
                   style={{
                     borderColor: filters.minSeverity === s.value ? s.color : 'transparent',
-                    boxShadow: filters.minSeverity === s.value ? `0 0 16px ${s.color}20` : undefined
                   }}
                 >
-                  <span
-                    className={`w-3 h-3 rounded-full transition-transform ${filters.minSeverity === s.value ? 'scale-125' : ''}`}
-                    style={{ background: s.color }}
+                  <div
+                    className={`w-3 h-3 rounded-full transition-all ${filters.minSeverity === s.value ? 'scale-125 shadow-[0_0_10px_currentColor]' : 'opacity-40'}`}
+                    style={{ background: s.color, color: s.color }}
                   />
-                  <span className={filters.minSeverity === s.value ? 'text-[#E8E8F0] font-medium' : 'text-[#8890A0]'}>
+                  <span className={`text-[9px] font-black uppercase tracking-tighter ${filters.minSeverity === s.value ? 'text-[#E8E8F0]' : 'text-[#8890A0]'}`}>
                     {s.label}
                   </span>
                 </button>
@@ -162,8 +160,8 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
 
           {/* Tipos */}
           <div>
-            <label className="text-xs text-[#8890A0] mb-3 block uppercase tracking-wider font-medium">
-              Tipos de evento
+            <label className="text-[10px] text-[#D4B57A] mb-4 block uppercase font-black tracking-[0.2em] opacity-80">
+              Vectores de Datos
             </label>
             <div className="flex flex-wrap gap-2">
               {DISASTER_TYPES.map(type => {
@@ -174,21 +172,16 @@ export function EventFiltersComponent({ filters, onFilterChange }: EventFiltersC
                     key={type}
                     onClick={() => toggleType(type)}
                     className={`
-                      px-3 py-2 text-xs rounded-lg flex items-center gap-2
-                      transition-all duration-200 ease-out
+                      px-4 py-2.5 text-[10px] rounded-xl flex items-center gap-3
+                      transition-all duration-300 font-black uppercase tracking-widest
                       ${active
-                        ? 'bg-[#7088A0]/20 text-[#E8E8F0] border border-[#7088A0]/40 shadow-[0_2px_8px_rgba(112,136,160,0.15)]'
-                        : 'bg-[#1A1B22]/50 text-[#8890A0] border border-transparent hover:bg-[#1A1B22] hover:text-[#E8E8F0]'
+                        ? 'bg-[#D4B57A]/10 text-[#E8E8F0] border border-[#D4B57A]/40 shadow-[0_4px_12px_rgba(212,181,122,0.1)]'
+                        : 'bg-[#1A1B22]/50 text-[#8890A0] border border-transparent hover:border-[#D4B57A]/20'
                       }
                     `}
                   >
-                    <span className={`text-base transition-transform ${active ? 'scale-110' : ''}`}>{cfg.icon}</span>
-                    <span className="font-medium">{cfg.nameEs}</span>
-                    {active && (
-                      <svg className="w-3 h-3 text-[#7088A0]" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
+                    <span className={`text-base transition-transform ${active ? 'scale-110' : 'grayscale opacity-50'}`}>{cfg.icon}</span>
+                    <span className={active ? 'text-[#E8E8F0]' : 'text-[#8890A0]'}>{cfg.nameEs}</span>
                   </button>
                 )
               })}
