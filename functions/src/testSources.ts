@@ -13,7 +13,8 @@ export const testAllSources = async () => {
     { name: 'USGS (Terremotos)', function: processUSGSFetch },
     { name: 'GDACS (Desastres Globales)', function: processGDACSFetch },
     { name: 'CSN (Chile)', function: processCSNFetch },
-    { name: 'NHC (Huracanes)', function: processNHCFetch }
+    { name: 'NHC (Huracanes)', function: processNHCFetch },
+    { name: 'NASA EONET', function: () => import('./fetchNASA').then(m => m.processNASAFetch()) }
   ];
 
   const results = [];
@@ -95,6 +96,11 @@ export const testFetchConnectivity = async () => {
       name: 'NHC Atlantic',
       url: 'https://www.nhc.noaa.gov/index-at.xml',
       timeout: 10000
+    },
+    {
+      name: 'NASA EONET',
+      url: 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5&days=7',
+      timeout: 15000
     }
   ];
 
