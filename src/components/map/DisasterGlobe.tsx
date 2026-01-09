@@ -52,11 +52,11 @@ export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterG
     };
 
     const getEventAltitude = (severity: number) => {
-        return severity * 0.05; // Higher severity = higher altitude
+        return severity * 0.06; // Higher severity = higher altitude (increased)
     };
 
     const getEventRadius = (severity: number) => {
-        return 0.5 + (severity * 0.2);
+        return 0.6 + (severity * 0.25); // Larger markers for better visibility
     };
 
     const ringsData = useMemo(() => events.filter(e => e.severity >= 3), [events]);
@@ -71,9 +71,9 @@ export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterG
                 bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
                 backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
 
-                // Atmosphere
+                // Enhanced Atmosphere
                 atmosphereColor="#D4B57A"
-                atmosphereAltitude={0.15}
+                atmosphereAltitude={0.22}
 
                 // Points (Events)
                 pointsData={events}
@@ -84,17 +84,40 @@ export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterG
                 pointRadius={d => getEventRadius((d as DisasterEvent).severity)}
                 pointsMerge={true}
                 pointLabel={d => {
-                    const root = document.documentElement;
-                    const computedStyle = getComputedStyle(root);
-                    const bgColor = computedStyle.getPropertyValue('--card').trim() || 'rgba(13, 14, 20, 0.9)';
-                    const textColor = computedStyle.getPropertyValue('--card-foreground').trim() || '#E8E8F0';
-                    const borderColor = computedStyle.getPropertyValue('--border').trim() || '#4A5060';
-                    const mutedColor = computedStyle.getPropertyValue('--muted-foreground').trim() || '#8890A0';
+                    const event = d as DisasterEvent;
+                    const severityColors: Record<number, string> = {
+                        1: '#7088A0',
+                        2: '#D4B57A',
+                        3: '#A07888',
+                        4: '#E8E8F0'
+                    };
+                    const color = severityColors[event.severity] || '#7088A0';
 
                     return `
-          <div style="background: ${bgColor}; color: ${textColor}; padding: 4px 8px; border-radius: 4px; border: 1px solid ${borderColor};">
-            <div style="font-weight: bold;">${(d as DisasterEvent).title}</div>
-            <div style="font-size: 10px; color: ${mutedColor};">${(d as DisasterEvent).disasterType}</div>
+          <div style="
+            background: linear-gradient(135deg, rgba(26, 27, 34, 0.95) 0%, rgba(26, 27, 34, 0.85) 100%);
+            backdrop-filter: blur(16px);
+            color: #E8E8F0;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px ${color}20;
+            min-width: 160px;
+          ">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <div style="
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: ${color};
+                box-shadow: 0 0 10px ${color}80;
+              "></div>
+              <div style="font-weight: 600; font-size: 13px;">${event.title}</div>
+            </div>
+            <div style="font-size: 11px; color: #8890A0; display: flex; justify-content: space-between;">
+              <span>${event.disasterType}</span>
+              <span style="color: ${color}; font-weight: 600;">S${event.severity}</span>
+            </div>
           </div>
         `;
                 }}

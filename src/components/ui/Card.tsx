@@ -6,10 +6,8 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        'bg-card/85 backdrop-blur-xl border border-border rounded-2xl shadow-lg',
+        'glass-card',
         'transition-all duration-300 ease-out',
-        'hover:border-border-strong hover:bg-card/95',
-        'ring-1 ring-white-5 ring-inset card-hover',
         className
       )}
       {...props}

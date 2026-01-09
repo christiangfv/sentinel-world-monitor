@@ -50,58 +50,87 @@ export function EventCard({
 
   if (compact) {
     return (
-      <Card
+      <div
         className={`
-          cursor-pointer border-l-4 relative
-          transition-all duration-200 ease-out
-          hover:bg-[#1A1B22] hover:translate-x-0.5
+          cursor-pointer relative rounded-xl overflow-hidden
+          glass-subtle
+          transition-all duration-300 ease-out
+          hover:bg-shadow/80 hover:border-plasma/25
+          hover:shadow-[0_8px_30px_rgba(0,0,0,0.4),0_0_20px_rgba(212,181,122,0.08)]
+          hover:scale-[1.01]
           ${className}
         `}
         onClick={onClick}
-        style={{ borderLeftColor: severityColor }}
       >
-        <CardContent className="p-3">
+        {/* Enhanced severity indicator bar with glow */}
+        <div
+          className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
+          style={{
+            backgroundColor: severityColor,
+            boxShadow: `0 0 12px ${severityColor}60, 0 0 24px ${severityColor}30`
+          }}
+        />
+
+        <div className="p-3 pl-4">
           <div className="flex items-start gap-3">
-            <div className={`
-              shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
-              bg-plasma/10 border border-plasma/20
-              ${isCritical ? 'animate-pulse-dot shadow-glow-sm' : ''}
-            `}>
-              <IconComponent size={18} className="text-plasma" />
+            <div
+              className={`
+                shrink-0 w-9 h-9 rounded-xl flex items-center justify-center
+                transition-transform group-hover:scale-105
+                ${isCritical ? 'animate-pulse shadow-glow-sm' : ''}
+              `}
+              style={{
+                background: `linear-gradient(135deg, ${severityColor}20, ${severityColor}05)`,
+                border: `1px solid ${severityColor}30`
+              }}
+            >
+              <IconComponent size={18} style={{ color: severityColor }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2 mb-1">
                 <h3 className="font-semibold text-sm text-foreground tracking-tight leading-tight line-clamp-1 flex-1">
                   {event.title}
                 </h3>
-                <Badge variant={severityVariant(event.severity)} className="shrink-0 h-4 px-1.5 text-[9px] font-black tracking-widest uppercase">
+                <span
+                  className="shrink-0 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider"
+                  style={{
+                    backgroundColor: `${severityColor}15`,
+                    color: severityColor,
+                    border: `1px solid ${severityColor}25`
+                  }}
+                >
                   S{event.severity}
-                </Badge>
+                </span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-tight mb-2 font-medium flex items-center gap-1">
-                <span className="opacity-50">📍</span> {event.locationName}
+              <p className="text-[11px] text-smoke leading-tight mb-2 flex items-center gap-1.5">
+                <svg className="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span className="truncate">{event.locationName}</span>
               </p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[9px]">
-                  <span className="text-muted-foreground/70 font-bold uppercase tracking-widest">{formatTimeAgo(event.eventTime)}</span>
-                  <span className="w-0.5 h-0.5 rounded-full bg-border" />
-                  <span className="text-plasma font-bold uppercase tracking-widest">{config.nameEs}</span>
+                <div className="flex items-center gap-2 text-[10px]">
+                  <span className="text-smoke font-medium">{formatTimeAgo(event.eventTime)}</span>
+                  <span className="w-1 h-1 rounded-full bg-border" />
+                  <span className="text-plasma font-semibold">{config.nameEs}</span>
                 </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onShowContext?.(event);
                   }}
-                  className="p-1 bg-plasma/10 hover:bg-plasma/20 rounded-md transition-all active:scale-95"
-                  title="Noticias y más info"
+                  className="p-1.5 bg-shadow/50 hover:bg-plasma/20 rounded-lg transition-all active:scale-95 border border-transparent hover:border-plasma/20"
+                  title="Ver noticias relacionadas"
                 >
-                  <span className="text-[10px]">📰</span>
+                  <svg className="w-3.5 h-3.5 text-smoke hover:text-plasma" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                  </svg>
                 </button>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     )
   }
 
@@ -109,24 +138,29 @@ export function EventCard({
     <Link href={`/event?id=${event.id}`} onClick={onClick}>
       <Card
         className={`
-          cursor-pointer border-l-4
+          cursor-pointer border-l-4 glass-card
           transition-all duration-300 ease-out
-          hover:translate-y-[-2px] hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)]
-          ${isCritical ? 'animate-pulse-glow' : ''}
+          hover:translate-y-[-3px] hover:shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_40px_rgba(212,181,122,0.08)]
+          ${isCritical ? 'animate-glass-glow' : ''}
           ${getSeverityClass(event.severity)}
           ${className}
         `}
-        style={{ borderLeftColor: severityColor }}
+        style={{
+          borderLeftColor: severityColor,
+          boxShadow: isCritical ? `0 0 30px ${severityColor}30` : undefined
+        }}
       >
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-5">
             <div className="flex items-center gap-4">
               <div className={`
                 w-14 h-14 rounded-2xl flex items-center justify-center
-                bg-gradient-to-br from-[#D4B57A]/20 to-transparent border border-[#D4B57A]/10
-                ${isCritical ? 'animate-pulse-dot shadow-[0_0_20px_rgba(212,181,122,0.2)]' : ''}
+                bg-gradient-to-br from-[#D4B57A]/25 via-[#D4B57A]/10 to-transparent
+                border border-[#D4B57A]/15
+                shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]
+                ${isCritical ? 'animate-pulse shadow-[0_0_25px_rgba(212,181,122,0.3)]' : ''}
               `}>
-                <IconComponent size={32} className="text-[#D4B57A]" />
+                <IconComponent size={32} className="text-[#D4B57A] drop-shadow-[0_0_8px_rgba(212,181,122,0.4)]" />
               </div>
               <div>
                 <h3 className="font-bold text-[#E8E8F0] text-lg tracking-tight leading-tight">{event.title}</h3>

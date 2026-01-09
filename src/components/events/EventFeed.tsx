@@ -28,9 +28,14 @@ export function EventFeed({ events, selectedEvent, newEventIds, onEventSelect, o
 
   if (events.length === 0) {
     return (
-      <div className="p-8 text-center">
-        <div className="text-3xl mb-3">🔍</div>
-        <p className="text-[#8890A0] text-sm">Sin eventos</p>
+      <div className="p-8 text-center animate-fade-in">
+        <div className="icon-container-mist w-16 h-16 mx-auto mb-4">
+          <svg className="w-8 h-8 text-mist" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <p className="text-smoke text-sm font-medium">Sin eventos detectados</p>
+        <p className="text-smoke/60 text-xs mt-1">Los eventos aparecerán aquí</p>
       </div>
     )
   }
@@ -41,20 +46,24 @@ export function EventFeed({ events, selectedEvent, newEventIds, onEventSelect, o
   };
 
   return (
-    <div ref={scrollContainerRef} className="p-4 space-y-2">
-      {events.map((event) => {
+    <div ref={scrollContainerRef} className="p-3 space-y-2">
+      {events.map((event, index) => {
         const isNew = newEventIds?.has(event.id);
         const isSelected = selectedEvent?.id === event.id;
 
-        let cardClass = '';
+        let cardClass = 'animate-fade-in-up';
         if (isSelected) {
-          cardClass = 'ring-2 ring-plasma/50 bg-plasma/5 shadow-glow-sm';
+          cardClass += ' ring-2 ring-plasma/50 bg-plasma/5 shadow-glow-sm';
         } else if (isNew) {
-          cardClass = 'ring-2 ring-success/50 bg-success/5 shadow-[0_0_10px_rgba(34,197,94,0.2)] animate-pulse';
+          cardClass += ' ring-2 ring-green-500/50 bg-green-500/5 shadow-[0_0_10px_rgba(34,197,94,0.2)]';
         }
 
         return (
-          <div id={`event-card-${event.id}`} key={event.id}>
+          <div
+            id={`event-card-${event.id}`}
+            key={event.id}
+            style={{ animationDelay: `${Math.min(index * 0.03, 0.3)}s` }}
+          >
             <EventCard
               event={event}
               compact

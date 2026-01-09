@@ -35,17 +35,40 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
         if (!user) return;
         setLoading(true);
         try {
-            await updateUserSettings(user.uid, {
-                ...user.settings,
-                country,
-                minMagnitude: magnitude,
-                notificationsEnabled,
-                onboardingCompleted: true
-            });
+            const isMockUser = user.uid === 'mock-user-123';
+
+            if (isMockUser) {
+                // For mock users, save settings to localStorage
+                const updatedSettings = {
+                    ...user.settings,
+                    country,
+                    minMagnitude: magnitude,
+                    notificationsEnabled,
+                    onboardingCompleted: true
+                };
+                const mockUser = {
+                    ...user,
+                    settings: updatedSettings
+                };
+                localStorage.setItem('sentinel_mock_user', JSON.stringify(mockUser));
+            } else {
+                // For real users, save to Firestore
+                await updateUserSettings(user.uid, {
+                    ...user.settings,
+                    country,
+                    minMagnitude: magnitude,
+                    notificationsEnabled,
+                    onboardingCompleted: true
+                });
+            }
+
             setIsOpen(false);
             onComplete();
         } catch (error) {
             console.error('Error during onboarding:', error);
+            // Still close the modal even if there's an error, so user isn't stuck
+            setIsOpen(false);
+            onComplete();
         } finally {
             setLoading(false);
         }
