@@ -173,11 +173,12 @@ export async function updateUserFcmToken(uid: string, fcmToken: string | null): 
  */
 export async function updateUserSettings(uid: string, settings: Partial<User['settings']>): Promise<void> {
   try {
-    await import('firebase/firestore').then(async ({ updateDoc, doc, serverTimestamp }) => {
-      await updateDoc(doc(db, 'users', uid), {
+    // Use setDoc with merge to create document if it doesn't exist
+    await import('firebase/firestore').then(async ({ setDoc, doc, serverTimestamp }) => {
+      await setDoc(doc(db, 'users', uid), {
         settings,
         updatedAt: serverTimestamp()
-      });
+      }, { merge: true });
     });
   } catch (error) {
     console.error('Error updating user settings:', error);

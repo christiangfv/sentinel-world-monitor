@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from '@/lib/types';
 import { updateUserSettings } from '@/lib/firebase/auth';
@@ -24,9 +24,11 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
     const [notificationsEnabled, setNotificationsEnabled] = useState(user?.settings?.notificationsEnabled ?? true);
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const onboardingAttempted = useRef(false);
 
     useEffect(() => {
-        if (user && !user.settings?.onboardingCompleted) {
+        // Only show modal if user exists, onboarding not completed, and we haven't attempted it yet
+        if (user && !user.settings?.onboardingCompleted && !onboardingAttempted.current) {
             setIsOpen(true);
         }
     }, [user]);
@@ -34,6 +36,8 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
     const handleFinish = async () => {
         if (!user) return;
         setLoading(true);
+        onboardingAttempted.current = true; // Mark as attempted to prevent re-opening
+
         try {
             const isMockUser = user.uid === 'mock-user-123';
 
@@ -52,25 +56,33 @@ export function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
                 };
                 localStorage.setItem('sentinel_mock_user', JSON.stringify(mockUser));
             } else {
-                // For real users, save to Firestore
-                await updateUserSettings(user.uid, {
-                    ...user.settings,
-                    country,
-                    minMagnitude: magnitude,
-                    notificationsEnabled,
-                    onboardingCompleted: true
-                });
+                // For real users, try to save to Firestore
+                try {
+                    await updateUserSettings(user.uid, {
+                        ...user.settings,
+                        country,
+                        minMagnitude: magnitude,
+                        notificationsEnabled,
+                        onboardingCompleted: true
+                    });
+                } catch (firestoreError) {
+                    console.warn('Could not save to Firestore, saving locally:', firestoreError);
+                    // Fallback: save to localStorage if Firestore fails
+                    localStorage.setItem('sentinel_onboarding_completed', 'true');
+                    localStorage.setItem('sentinel_user_settings', JSON.stringify({
+                        country,
+                        minMagnitude: magnitude,
+                        notificationsEnabled,
+                        onboardingCompleted: true
+                    }));
+                }
             }
-
-            setIsOpen(false);
-            onComplete();
         } catch (error) {
             console.error('Error during onboarding:', error);
-            // Still close the modal even if there's an error, so user isn't stuck
-            setIsOpen(false);
-            onComplete();
         } finally {
             setLoading(false);
+            setIsOpen(false);
+            onComplete();
         }
     };
 
