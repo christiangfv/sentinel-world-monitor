@@ -36,117 +36,122 @@ interface EventContextModalProps {
     onClose: () => void;
 }
 
-// Hook personalizado para obtener noticias reales (simulado por ahora)
+// Hook para obtener SOLO noticias reales - sin fallback a datos mock
 function useEventNews(event: DisasterEvent | null) {
     const [news, setNews] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [hasRealData, setHasRealData] = useState(false);
 
     useEffect(() => {
         if (!event) {
             setNews([]);
+            setHasRealData(false);
             return;
         }
 
         const fetchNews = async () => {
             setLoading(true);
+            setHasRealData(false);
+
             try {
                 const config = DISASTER_CONFIGS[event.disasterType];
                 const location = event.locationName;
+                const searchQuery = encodeURIComponent(`${config.nameEs} ${location}`);
 
                 console.log('🔍 Buscando noticias reales para:', `${config.nameEs} ${location}`);
-                console.log('🔑 NewsAPI Key disponible:', !!process.env.NEXT_PUBLIC_NEWS_API_KEY);
 
-                // Intentar búsqueda real primero
-                try {
-                    const searchQuery = encodeURIComponent(`${config.nameEs} ${location} desastre sismo terremoto`);
-                    const newsApiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
-
-                    if (newsApiKey) {
-                        console.log('📰 Usando NewsAPI real');
-                        // Usar NewsAPI si hay key configurada
+                // Intentar NewsAPI primero
+                const newsApiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
+                if (newsApiKey) {
+                    console.log('📰 Usando NewsAPI');
+                    try {
                         const response = await fetch(
-                            `https://newsapi.org/v2/everything?q=${searchQuery}&sortBy=publishedAt&language=es&pageSize=5&apiKey=${newsApiKey}`
+                            `https://newsapi.org/v2/everything?q=${searchQuery}&sortBy=publishedAt&language=es&pageSize=10&apiKey=${newsApiKey}`
                         );
 
                         if (response.ok) {
                             const data = await response.json();
                             if (data.articles && data.articles.length > 0) {
-                                console.log('✅ Encontradas', data.articles.length, 'noticias reales');
-                                return data.articles.slice(0, 3).map((article: any) => ({
-                                    title: article.title,
-                                    description: article.description || article.content?.substring(0, 150) + '...',
-                                    source: { name: article.source.name },
-                                    publishedAt: article.publishedAt,
-                                    url: article.url,
-                                    urlToImage: article.urlToImage
-                                }));
-                            }
-                        } else {
-                            console.warn('❌ Error en NewsAPI:', response.status);
-                        }
-                    }
+                                // Filtrar solo artículos con imagen real (no null, no placeholder)
+                                const articlesWithImages = data.articles
+                                    .filter((article: any) =>
+                                        article.urlToImage &&
+                                        !article.urlToImage.includes('unsplash.com') &&
+                                        article.url !== '#'
+                                    )
+                                    .slice(0, 5)
+                                    .map((article: any) => ({
+                                        title: article.title,
+                                        description: article.description || article.content?.substring(0, 150) + '...',
+                                        source: { name: article.source.name },
+                                        publishedAt: article.publishedAt,
+                                        url: article.url,
+                                        urlToImage: article.urlToImage
+                                    }));
 
-                    // Si no hay API key o falla, intentar búsqueda con Google News RSS
-                    console.log('📰 Probando Google News RSS');
+                                if (articlesWithImages.length > 0) {
+                                    console.log('✅ Encontradas', articlesWithImages.length, 'noticias reales con imagen');
+                                    setNews(articlesWithImages);
+                                    setHasRealData(true);
+                                    setLoading(false);
+                                    return;
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('❌ Error en NewsAPI:', error);
+                    }
+                }
+
+                // Intentar Google News RSS como fallback
+                console.log('📰 Probando Google News RSS');
+                try {
                     const googleNewsUrl = `https://news.google.com/rss/search?q=${searchQuery}&hl=es&gl=CL&ceid=CL:es`;
                     const rssResponse = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}`);
 
                     if (rssResponse.ok) {
                         const rssData = await rssResponse.json();
                         if (rssData.items && rssData.items.length > 0) {
-                            console.log('✅ Encontradas', rssData.items.length, 'noticias via RSS');
-                            return rssData.items.slice(0, 3).map((item: any) => ({
-                                title: item.title,
-                                description: item.description?.replace(/<[^>]*>/g, '') || item.contentSnippet || 'Noticia reciente sobre el evento.',
-                                source: { name: item.source || 'Google News' },
-                                publishedAt: item.pubDate,
-                                url: item.link,
-                                urlToImage: item.enclosure?.link || item.thumbnail || `https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=200&fit=crop&q=80&fm=jpg`
-                            }));
+                            // Solo incluir artículos con imagen real del RSS
+                            const articlesWithImages = rssData.items
+                                .filter((item: any) => {
+                                    const imageUrl = item.enclosure?.link || item.thumbnail;
+                                    return imageUrl &&
+                                           !imageUrl.includes('unsplash.com') &&
+                                           item.link !== '#';
+                                })
+                                .slice(0, 5)
+                                .map((item: any) => ({
+                                    title: item.title,
+                                    description: item.description?.replace(/<[^>]*>/g, '').substring(0, 150) || '',
+                                    source: { name: item.source || 'Google News' },
+                                    publishedAt: item.pubDate,
+                                    url: item.link,
+                                    urlToImage: item.enclosure?.link || item.thumbnail
+                                }));
+
+                            if (articlesWithImages.length > 0) {
+                                console.log('✅ Encontradas', articlesWithImages.length, 'noticias RSS con imagen');
+                                setNews(articlesWithImages);
+                                setHasRealData(true);
+                                setLoading(false);
+                                return;
+                            }
                         }
-                    } else {
-                        console.warn('❌ Error en RSS:', rssResponse.status);
                     }
                 } catch (error) {
-                    console.warn('Error fetching real news, using mock data:', error);
+                    console.warn('❌ Error en RSS:', error);
                 }
 
-                // Fallback: noticias simuladas pero realistas
-                console.log('📝 Usando datos simulados (configura APIs para contenido real)');
-                const mockNews = [
-                    {
-                        title: `"${config.nameEs} de magnitud ${event.magnitude?.toFixed(1) || '6.2'}: autoridades evalúan daños en ${location}"`,
-                        description: `Un fuerte sismo de magnitud ${event.magnitude?.toFixed(1) || '6.2'} sacudió esta madrugada la región de ${location}. Las autoridades locales han iniciado la evaluación de daños en infraestructura crítica mientras equipos de emergencia coordinan rescates.`,
-                        source: { name: "El País" },
-                        publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 horas atrás
-                        url: "#",
-                        urlToImage: `https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=200&fit=crop&q=80&fm=jpg`
-                    },
-                    {
-                        title: `Emergencia declarada: ${config.nameEs} afecta a más de 50.000 habitantes en ${location}`,
-                        description: `El Gobierno ha declarado zona de emergencia en ${location} tras el ${config.nameEs} registrado. Protección Civil coordina con ONEMI para desplegar ayuda humanitaria y evaluar necesidades de la población afectada.`,
-                        source: { name: "CNN Chile" },
-                        publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 horas atrás
-                        url: "#",
-                        urlToImage: `https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=200&fit=crop&q=80&fm=jpg`
-                    },
-                    {
-                        title: `Expertos analizan riesgo de réplicas tras ${config.nameEs} en ${location}`,
-                        description: `Sismólogos del Centro Sismológico Nacional advierten sobre posible actividad sísmica secundaria. La población debe mantenerse alerta ante posibles réplicas de menor intensidad en las próximas horas.`,
-                        source: { name: "La Tercera" },
-                        publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 horas atrás
-                        url: "#",
-                        urlToImage: `https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400&h=200&fit=crop&q=80&fm=jpg`
-                    }
-                ];
+                // No hay noticias reales disponibles - no mostrar nada
+                console.log('ℹ️ No se encontraron noticias reales con imágenes');
+                setNews([]);
+                setHasRealData(false);
 
-                // Simular delay de API
-                await new Promise(resolve => setTimeout(resolve, 800));
-
-                setNews(mockNews);
             } catch (error) {
                 console.error('Error fetching news:', error);
                 setNews([]);
+                setHasRealData(false);
             } finally {
                 setLoading(false);
             }
@@ -155,95 +160,73 @@ function useEventNews(event: DisasterEvent | null) {
         fetchNews();
     }, [event]);
 
-    return { news, loading };
+    return { news, loading, hasRealData };
 }
 
-// Hook para obtener fotos del lugar
+// Hook para obtener SOLO fotos reales del lugar - sin fallback
 function useLocationPhotos(event: DisasterEvent | null) {
     const [photos, setPhotos] = useState<any[]>([]);
+    const [hasRealPhotos, setHasRealPhotos] = useState(false);
 
     useEffect(() => {
         if (!event) {
             setPhotos([]);
+            setHasRealPhotos(false);
             return;
         }
 
         const fetchPhotos = async () => {
             try {
                 const location = event.locationName;
-                const searchTerms = location.split(',').map(term => term.trim());
+                const unsplashKey = process.env.NEXT_PUBLIC_UNSPLASH_API_KEY;
 
-                // Intentar búsqueda de fotos reales
-                try {
-                    const unsplashKey = process.env.NEXT_PUBLIC_UNSPLASH_API_KEY;
-                    if (unsplashKey) {
-                        console.log('📸 Buscando fotos reales de:', location);
-                        const photoQuery = encodeURIComponent(`${location} landscape city view`);
-                        const response = await fetch(
-                            `https://api.unsplash.com/search/photos?query=${photoQuery}&per_page=3&client_id=${unsplashKey}`
-                        );
+                if (unsplashKey) {
+                    console.log('📸 Buscando fotos reales de:', location);
+                    const photoQuery = encodeURIComponent(`${location} landscape city`);
+                    const response = await fetch(
+                        `https://api.unsplash.com/search/photos?query=${photoQuery}&per_page=4&client_id=${unsplashKey}`
+                    );
 
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.results && data.results.length > 0) {
-                                console.log('✅ Encontradas', data.results.length, 'fotos reales');
-                                return data.results.map((img: any) => ({
-                                    url: img.urls.small,
-                                    alt: img.alt_description || `${location} - Vista panorámica`
-                                }));
-                            }
-                        } else {
-                            console.warn('❌ Error en Unsplash API:', response.status);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.results && data.results.length > 0) {
+                            console.log('✅ Encontradas', data.results.length, 'fotos reales');
+                            const realPhotos = data.results.map((img: any) => ({
+                                url: img.urls.small,
+                                alt: img.alt_description || `${location} - Vista`,
+                                photographer: img.user?.name || 'Unsplash'
+                            }));
+                            setPhotos(realPhotos);
+                            setHasRealPhotos(true);
+                            return;
                         }
+                    } else {
+                        console.warn('❌ Error en Unsplash API:', response.status);
                     }
-                } catch (error) {
-                    console.warn('Error fetching real photos, using mock data:', error);
                 }
 
-                // Fallback: fotos simuladas
-                const mockPhotos = [
-                    {
-                        url: `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop&q=80&fm=jpg`,
-                        alt: `${location} - Vista panorámica`,
-                        location: location
-                    },
-                    {
-                        url: `https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=300&h=200&fit=crop&q=80&fm=jpg`,
-                        alt: `${location} - Paisaje natural`,
-                        location: location
-                    },
-                    {
-                        url: `https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=300&h=200&fit=crop&q=80&fm=jpg`,
-                        alt: `${location} - Zona urbana`,
-                        location: location
-                    },
-                    {
-                        url: `https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop&q=80&fm=jpg`,
-                        alt: `${location} - Costa y mar`,
-                        location: location
-                    }
-                ];
+                // No hay API key o no se encontraron fotos - no mostrar nada
+                console.log('ℹ️ No se encontraron fotos reales del lugar');
+                setPhotos([]);
+                setHasRealPhotos(false);
 
-                // Simular búsqueda por ubicación
-                await new Promise(resolve => setTimeout(resolve, 600));
-
-                setPhotos(mockPhotos.slice(0, 3)); // Mostrar 3 fotos
             } catch (error) {
                 console.error('Error fetching photos:', error);
                 setPhotos([]);
+                setHasRealPhotos(false);
             }
         };
 
         fetchPhotos();
     }, [event]);
 
-    return photos;
+    return { photos, hasRealPhotos };
 }
 
 export function EventContextModal({ event, isOpen, onClose }: EventContextModalProps) {
     const [isSearching, setIsSearching] = useState(true);
-    const { news, loading: newsLoading } = useEventNews(event);
-    const photos = useLocationPhotos(event);
+    const { news, loading: newsLoading, hasRealData: hasRealNews } = useEventNews(event);
+    const { photos, hasRealPhotos } = useLocationPhotos(event);
 
     useEffect(() => {
         if (isOpen && event) {
@@ -364,69 +347,92 @@ export function EventContextModal({ event, isOpen, onClose }: EventContextModalP
                                             )}
                                         </div>
 
-                                        {/* Últimas Noticias */}
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="text-[#D4B57A] text-[10px] font-black uppercase tracking-[0.2em] opacity-90 flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4B57A] animate-pulse" />
-                                                    Últimas Noticias
-                                                    {process.env.NEXT_PUBLIC_NEWS_API_KEY && (
-                                                        <span className="text-[8px] bg-[#D4B57A]/20 text-[#D4B57A] px-1.5 py-0.5 rounded-full">
-                                                            REAL
+                                        {/* Últimas Noticias - Solo si hay noticias reales */}
+                                        {newsLoading ? (
+                                            <div className="flex items-center justify-center py-6">
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#D4B57A] border-t-transparent"></div>
+                                                    <span className="text-[10px] text-[#8890A0]">Buscando noticias...</span>
+                                                </div>
+                                            </div>
+                                        ) : hasRealNews && news.length > 0 ? (
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-[#D4B57A] text-[10px] font-black uppercase tracking-[0.2em] opacity-90 flex items-center gap-2">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4B57A] animate-pulse" />
+                                                        Noticias Relacionadas
+                                                        <span className="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full">
+                                                            EN VIVO
                                                         </span>
-                                                    )}
-                                                </h3>
-                                                <span className="text-[9px] text-[#8890A0] font-medium">{news.length} reportes</span>
-                                            </div>
+                                                    </h3>
+                                                    <span className="text-[9px] text-[#8890A0] font-medium">{news.length} reportes</span>
+                                                </div>
 
-                                            <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
-                                                {news.map((item, index) => {
-                                                    const publishedDate = new Date(item.publishedAt);
-                                                    const timeAgo = Math.floor((Date.now() - publishedDate.getTime()) / (1000 * 60 * 60));
-                                                    const timeAgoText = timeAgo < 1 ? 'Ahora' : timeAgo === 1 ? '1h' : `${timeAgo}h`;
+                                                <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+                                                    {news.map((item, index) => {
+                                                        const publishedDate = new Date(item.publishedAt);
+                                                        const timeAgo = Math.floor((Date.now() - publishedDate.getTime()) / (1000 * 60 * 60));
+                                                        const timeAgoText = timeAgo < 1 ? 'Ahora' : timeAgo === 1 ? '1h' : timeAgo < 24 ? `${timeAgo}h` : `${Math.floor(timeAgo / 24)}d`;
 
-                                                    return (
-                                                        <motion.div
-                                                            key={index}
-                                                            initial={{ opacity: 0, x: -10 }}
-                                                            animate={{ opacity: 1, x: 0 }}
-                                                            transition={{ delay: index * 0.1 }}
-                                                            className="bg-[#0D0E14]/40 border border-[#D4B57A]/10 rounded-xl overflow-hidden hover:border-[#D4B57A]/20 transition-all cursor-pointer group"
-                                                            onClick={() => window.open(item.url, '_blank')}
-                                                        >
-                                                            <div className="aspect-[2/1] relative overflow-hidden">
-                                                                <img
-                                                                    src={item.urlToImage}
-                                                                    alt={item.title}
-                                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                                    loading="lazy"
-                                                                />
-                                                                <div className="absolute top-2 right-2 bg-[#0D0E14]/80 backdrop-blur-sm rounded-lg px-2 py-1">
-                                                                    <span className="text-[9px] text-[#D4B57A] font-bold">{item.source.name}</span>
+                                                        return (
+                                                            <motion.div
+                                                                key={index}
+                                                                initial={{ opacity: 0, x: -10 }}
+                                                                animate={{ opacity: 1, x: 0 }}
+                                                                transition={{ delay: index * 0.1 }}
+                                                                className="bg-[#0D0E14]/40 border border-[#D4B57A]/10 rounded-xl overflow-hidden hover:border-[#D4B57A]/20 transition-all cursor-pointer group"
+                                                                onClick={() => window.open(item.url, '_blank')}
+                                                            >
+                                                                <div className="aspect-[2/1] relative overflow-hidden">
+                                                                    <img
+                                                                        src={item.urlToImage}
+                                                                        alt={item.title}
+                                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                                        loading="lazy"
+                                                                        onError={(e) => {
+                                                                            // Ocultar imagen si falla la carga
+                                                                            (e.target as HTMLElement).parentElement!.style.display = 'none';
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute top-2 right-2 bg-[#0D0E14]/80 backdrop-blur-sm rounded-lg px-2 py-1">
+                                                                        <span className="text-[9px] text-[#D4B57A] font-bold">{item.source.name}</span>
+                                                                    </div>
+                                                                    <div className="absolute bottom-2 left-2 bg-[#0D0E14]/80 backdrop-blur-sm rounded-lg px-2 py-1">
+                                                                        <span className="text-[9px] text-[#E8E8F0] font-medium">{timeAgoText}</span>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="absolute bottom-2 left-2 bg-[#0D0E14]/80 backdrop-blur-sm rounded-lg px-2 py-1">
-                                                                    <span className="text-[9px] text-[#E8E8F0] font-medium">{timeAgoText}</span>
+                                                                <div className="p-3">
+                                                                    <h4 className="text-[#E8E8F0] text-sm font-bold leading-tight line-clamp-2 mb-2 group-hover:text-[#D4B57A] transition-colors">
+                                                                        {item.title}
+                                                                    </h4>
+                                                                    {item.description && (
+                                                                        <p className="text-[#8890A0] text-xs leading-relaxed line-clamp-2">
+                                                                            {item.description}
+                                                                        </p>
+                                                                    )}
                                                                 </div>
-                                                            </div>
-                                                            <div className="p-3">
-                                                                <h4 className="text-[#E8E8F0] text-sm font-bold leading-tight line-clamp-2 mb-2 group-hover:text-[#D4B57A] transition-colors">
-                                                                    {item.title}
-                                                                </h4>
-                                                                <p className="text-[#8890A0] text-xs leading-relaxed line-clamp-2">
-                                                                    {item.description}
-                                                                </p>
-                                                            </div>
-                                                        </motion.div>
-                                                    );
-                                                })}
-                                                {newsLoading && (
-                                                    <div className="flex items-center justify-center py-4">
-                                                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#D4B57A] border-t-transparent"></div>
-                                                    </div>
-                                                )}
+                                                            </motion.div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
+                                        ) : (
+                                            <div className="text-center py-4">
+                                                <p className="text-[#8890A0] text-xs">No se encontraron noticias recientes</p>
+                                                <a
+                                                    href={`https://www.google.com/search?q=${encodeURIComponent(`${config.nameEs} ${event.locationName}`)}&tbm=nws`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 mt-2 text-[#D4B57A] text-xs hover:underline"
+                                                >
+                                                    <span>🔍</span>
+                                                    Buscar en Google News
+                                                </a>
+                                            </div>
+                                        )}
 
-                                            {/* Fotos del lugar */}
+                                        {/* Fotos del lugar - Solo si hay fotos reales */}
+                                        {hasRealPhotos && photos.length > 0 && (
                                             <div className="pt-3 border-t border-[#D4B57A]/10">
                                                 <div className="flex items-center justify-between mb-3">
                                                     <h4 className="text-[#D4B57A] text-[10px] font-black uppercase tracking-[0.2em] opacity-90 flex items-center gap-2">
@@ -454,26 +460,26 @@ export function EventContextModal({ event, isOpen, onClose }: EventContextModalP
                                                             />
                                                             <div className="absolute inset-0 bg-gradient-to-t from-[#000000]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 <div className="absolute bottom-2 left-2 right-2">
-                                                                    <p className="text-[9px] text-[#E8E8F0] font-medium line-clamp-2">{photo.alt}</p>
+                                                                    <p className="text-[8px] text-[#E8E8F0]/80 font-medium">📷 {photo.photographer}</p>
                                                                 </div>
                                                             </div>
                                                         </motion.div>
                                                     ))}
                                                 </div>
-
-                                                {/* Enlace a más noticias */}
-                                                <div className="mt-3 pt-3 border-t border-[#D4B57A]/10">
-                                                    <a
-                                                        href={`https://www.google.com/search?q=${encodeURIComponent(`${config.nameEs} ${event.locationName} ${new Date(event.eventTime).getFullYear()}`)}&tbm=nws`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="w-full flex items-center justify-center gap-2 p-2 bg-[#D4B57A]/10 hover:bg-[#D4B57A]/20 text-[#D4B57A] rounded-lg text-xs font-semibold transition-all"
-                                                    >
-                                                        <span>📰</span>
-                                                        Ver todas las noticias
-                                                    </a>
-                                                </div>
                                             </div>
+                                        )}
+
+                                        {/* Enlace a más noticias - siempre visible */}
+                                        <div className="pt-3 border-t border-[#D4B57A]/10">
+                                            <a
+                                                href={`https://www.google.com/search?q=${encodeURIComponent(`${config.nameEs} ${event.locationName} ${new Date(event.eventTime).getFullYear()}`)}&tbm=nws`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-full flex items-center justify-center gap-2 p-2 bg-[#D4B57A]/10 hover:bg-[#D4B57A]/20 text-[#D4B57A] rounded-lg text-xs font-semibold transition-all"
+                                            >
+                                                <span>📰</span>
+                                                Ver todas las noticias en Google
+                                            </a>
                                         </div>
                                     </motion.div>
                                 )}
