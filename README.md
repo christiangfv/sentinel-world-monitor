@@ -38,9 +38,10 @@
 ## ✨ Características
 
 ### 🚨 **Monitoreo en Tiempo Real**
-- **Actualización automática** cada 5-15 minutos desde múltiples fuentes oficiales
+- **Actualización automática** cada 1 hora (producción) / 12 horas (desarrollo)
+- **8 fuentes oficiales** de datos verificadas
 - **Cobertura global** de desastres naturales
-- **Alertas inteligentes** basadas en ubicación y preferencias
+- **Costo cero** garantizado
 
 ### 🗺️ **Mapas Interactivos Avanzados**
 - **Visualización 3D** con react-globe.gl para vista global
@@ -48,11 +49,11 @@
 - **Zonas personalizables** con radio configurable
 - **Clusters inteligentes** para mejor rendimiento
 
-### 📢 **Sistema de Notificaciones**
-- **Push notifications** nativas en móvil y desktop
-- **Filtros avanzados** por tipo de desastre y severidad
-- **Personalización completa** de alertas por usuario
-- **Modo offline** con notificaciones almacenadas
+### 💰 **Optimización de Costos**
+- **Costo cero** garantizado en Firebase
+- **Frecuencias inteligentes** por entorno
+- **Procesamiento eficiente** de datos
+- **Almacenamiento optimizado** en Firestore
 
 ### 🔐 **Seguridad Empresarial**
 - **Autenticación Google** OAuth 2.0
@@ -82,8 +83,29 @@
 
 ### 🌍 **Escala Global**
 - **Cobertura completa** de continentes
-- **Múltiples fuentes** de datos oficiales
+- **8 fuentes oficiales** de datos verificadas
 - **Idiomas múltiples** (actualmente español, extensible)
+
+### 📡 **Fuentes de Datos Oficiales**
+
+Sentinel integra **8 fuentes de datos oficiales** verificadas para máxima confiabilidad:
+
+| Fuente | País/Región | Tipo de Datos | Institución |
+|--------|-------------|---------------|-------------|
+| **USGS** | 🌎 Global | Terremotos | Servicio Geológico de EE.UU. |
+| **GDACS** | 🌎 Global | Desastres múltiples | Naciones Unidas |
+| **NASA EONET** | 🌎 Global | Eventos naturales | NASA |
+| **CSN** | 🇨🇱 Chile | Sismos | Centro Sismológico Nacional |
+| **SSN** | 🇲🇽 México | Sismos | Servicio Sismológico Nacional |
+| **CENAPRED** | 🇲🇽 México | Volcanes | Centro Nacional de Prevención de Desastres |
+| **NHC** | 🌀 Atlántico | Huracanes | Centro Nacional de Huracanes (NOAA) |
+
+#### **Cobertura por Región:**
+- **América del Norte**: USGS, NASA EONET, NHC
+- **América del Sur**: USGS, GDACS, NASA EONET
+- **Chile**: CSN (cobertura especializada)
+- **México**: SSN + CENAPRED (cobertura completa)
+- **Océano Atlántico**: NHC (huracanes y tormentas)
 
 ---
 
@@ -103,7 +125,7 @@
 - Firebase Auth (OAuth 2.0)
 - Firestore (NoSQL Database)
 - Cloud Functions (Serverless)
-- FCM (Push Notifications)
+- Cloud Functions (Procesamiento serverless)
 ```
 
 ### **Mapas & Visualización**

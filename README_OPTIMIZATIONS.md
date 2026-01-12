@@ -11,8 +11,9 @@ El proyecto estaba generando **$140/mes** principalmente por:
 
 ### 1. **Frecuencia de Cloud Functions**
 - **Antes**: Cada 10 minutos (144 ejecuciones/día)
-- **Ahora**: Cada 2 horas (12 ejecuciones/día)
-- **Ahorro**: ~92% menos ejecuciones
+- **Producción**: Cada 1 hora (24 ejecuciones/día)
+- **Desarrollo**: Cada 12 horas (2 ejecuciones/día)
+- **Ahorro**: Optimización inteligente por entorno
 
 ### 2. **Consultas Firestore Optimizadas**
 - **Antes**: Carga masiva de hasta 500 eventos históricos
@@ -38,7 +39,7 @@ El proyecto estaba generando **$140/mes** principalmente por:
 
 | Servicio | Costo Mensual | Cuota Gratuita | Uso Esperado |
 |----------|---------------|----------------|---------------|
-| **Cloud Functions** | $0 | 2M invocations | ~360/día |
+| **Cloud Functions** | $0 | 2M invocations | ~24-26/día |
 | **Firestore** | $0 | 50K reads/day | ~600/día |
 | **Firebase Hosting** | $0 | Gratuito | Ilimitado |
 | **Authentication** | $0 | Gratuito | Ilimitado |
@@ -114,5 +115,5 @@ El sistema monitorea **8 fuentes de datos** especializadas:
 
 ---
 
-**Estado**: ✅ Optimizado para costo 0 + Nueva fuente México
+**Estado**: ✅ Optimizado para costo 0 + 8 fuentes de datos
 **Última actualización**: Enero 2026
