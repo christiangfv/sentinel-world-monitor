@@ -3,25 +3,33 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
-// ⚠️ CONFIGURACIÓN SEGURA: Las claves públicas están ahora en variables del servidor
-// Esto evita que se expongan en el bundle del cliente
+// ⚠️ CONFIGURACIÓN PARA STATIC EXPORT: Usar variables públicas expuestas por next.config.js
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID || process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
 };
 
 // Validar configuración antes de inicializar
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error('Firebase config incomplete:', {
+  const errorMsg = 'Firebase configuration is incomplete. Check environment variables.';
+  console.error(errorMsg, {
     hasApiKey: !!firebaseConfig.apiKey,
     hasProjectId: !!firebaseConfig.projectId,
     hasAuthDomain: !!firebaseConfig.authDomain,
+    firebaseConfig: firebaseConfig,
+    nodeEnv: process.env.NODE_ENV,
   });
-  throw new Error('Firebase configuration is incomplete. Check environment variables.');
+
+  // En producción, mostrar configuración disponible para diagnóstico
+  if (typeof window !== 'undefined') {
+    console.log('Firebase initialized:', firebaseConfig);
+  }
+
+  throw new Error(errorMsg);
 }
 
 // Inicializar Firebase solo si no está ya inicializado
