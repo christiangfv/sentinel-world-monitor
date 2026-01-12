@@ -1,8 +1,9 @@
 // Service Worker Mínimo - Sentinel World Monitor
 // Versión ultra-limpia para evitar cualquier error
 // Sin Firebase, sin messaging, solo cache básico
+// Versión: 2026-01-12 - Build final corregido
 
-const CACHE_NAME = 'sentinel-v2';
+const CACHE_NAME = 'sentinel-v3';
 const STATIC_CACHE_URLS = ['/', '/manifest.json'];
 
 self.addEventListener('install', (event) => {

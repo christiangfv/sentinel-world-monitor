@@ -3,36 +3,29 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
-// ⚠️ CONFIGURACIÓN PARA STATIC EXPORT: Usar variables públicas expuestas por next.config.js
+// ⚠️ CONFIGURACIÓN SENCILLA: Usar valores directos
+// Firebase API keys son públicas por diseño - la seguridad viene de las reglas
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
+  apiKey: "AIzaSyCwDxE9fG8hI1jK2lM3nO4pQ5rS6tU7vW8xY9zA0bC",
+  authDomain: "sentinel-prod-9c937.firebaseapp.com",
+  projectId: "sentinel-prod-9c937",
+  storageBucket: "sentinel-prod-9c937.appspot.com",
+  messagingSenderId: "846642937822",
+  appId: "1:846642937822:web:b0db6f6c5f3db4c3d3274f"
 };
 
-// Validar configuración antes de inicializar
+// Validar configuración
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  const errorMsg = 'Firebase configuration is incomplete. Check environment variables.';
+  const errorMsg = 'Firebase configuration is incomplete.';
   console.error(errorMsg, {
     hasApiKey: !!firebaseConfig.apiKey,
     hasProjectId: !!firebaseConfig.projectId,
     hasAuthDomain: !!firebaseConfig.authDomain,
-    firebaseConfig: firebaseConfig,
-    nodeEnv: process.env.NODE_ENV,
   });
-
-  // En producción, mostrar configuración disponible para diagnóstico
-  if (typeof window !== 'undefined') {
-    console.log('Firebase initialized:', firebaseConfig);
-  }
-
   throw new Error(errorMsg);
 }
 
-// Inicializar Firebase solo si no está ya inicializado
+// Inicializar Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 // Servicios de Firebase
@@ -41,10 +34,9 @@ export const db = getFirestore(app);
 
 console.log('Firebase initialized:', {
   projectId: firebaseConfig.projectId,
-  hasAuth: !!auth,
-  hasDb: !!db,
-  apiKey: firebaseConfig.apiKey ? 'Set' : 'Not set',
-  authDomain: firebaseConfig.authDomain,
+  hasAuth: true,
+  hasDb: true,
+  apiKey: 'Set',
   initialized: true
 });
 
