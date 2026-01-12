@@ -46,22 +46,23 @@ export async function processUSGSFetch(): Promise<void> {
     const data = await response.json();
     logger.info(`📊 Recibidos ${data.features.length} eventos del USGS`);
 
-    // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+    // OPTIMIZACIÓN PARA COSTO 0: Limitar consultas para mantener gratis
+    // Solo verificar eventos de las últimas 24 horas para reducir lecturas
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const existingIds = new Set<string>();
     try {
       const existingDocs = await db.collection('events')
         .where('source', '==', 'usgs')
-        .orderBy('eventTime', 'desc')
-        .limit(500)
+        .where('eventTime', '>=', Timestamp.fromDate(yesterday))
         .get();
       existingDocs.forEach(doc => {
         const extId = doc.data().externalId;
         if (extId) existingIds.add(extId);
       });
-      logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+      logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
     } catch (error) {
       logger.error('❌ Error cargando IDs existentes:', error);
-      // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+      // Si falla, continuamos sin verificar duplicados (menos eficiente pero evita costos)
     }
 
     const batch = db.batch();

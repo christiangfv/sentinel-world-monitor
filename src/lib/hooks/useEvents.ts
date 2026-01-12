@@ -54,33 +54,11 @@ export function useEvents(filters: EventFilters = { disasterTypes: [], minSeveri
       filters
     );
 
-    // Auto-refresh cada 2 minutos además de la suscripción en tiempo real
-    const refreshInterval = setInterval(async () => {
-      try {
-        const freshEvents = await getEvents(filters);
-        const existingIds = new Set(events.map(e => e.id));
-        const newIds = new Set<string>();
-
-        freshEvents.forEach(event => {
-          if (!existingIds.has(event.id)) {
-            newIds.add(event.id);
-          }
-        });
-
-        // Solo marcar como nuevos después de la carga inicial
-        if (!isInitialLoad && newIds.size > 0) {
-          setNewEventIds(prev => new Set([...prev, ...newIds]));
-        }
-
-        setEvents(freshEvents);
-      } catch (err) {
-        console.error('Auto-refresh error:', err);
-      }
-    }, 2 * 60 * 1000); // 2 minutos
+    // REMOVIDO: Auto-refresh cada 2 minutos (innecesario con realtime subscriptions)
+    // Esto ahorra lecturas costosas en Firestore
 
     return () => {
       unsubscribe();
-      clearInterval(refreshInterval);
     };
   }, [
     filters.disasterTypes?.join(','),

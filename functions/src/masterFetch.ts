@@ -8,10 +8,10 @@ import { processNASAFetch } from './fetchNASA';
 
 /**
  * Función consolidada que ejecuta todos los fetchers esenciales
- * Frecuencia: Cada 10 minutos para optimizar el uso de la cuota gratuita
+ * Frecuencia: Cada 2 horas para mantener costos en cero (cuota gratuita)
  */
 export const fetchAllEvents = onSchedule({
-    schedule: 'every 10 minutes',
+    schedule: 'every 2 hours',
     region: 'southamerica-east1',
     timeoutSeconds: 300, // Aumentamos el timeout para dar tiempo a todas las fuentes
     memory: '256MiB',

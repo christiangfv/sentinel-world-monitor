@@ -5,9 +5,10 @@ import { getMessaging } from 'firebase-admin/messaging';
 // Inicializar Firebase Admin
 initializeApp();
 
-// Exportar funciones esenciales y consolidadas
+// Exportar SOLO funciones esenciales optimizadas para costo 0
 export { fetchAllEvents } from './masterFetch';
 export { testDataSources } from './testSources';
+export { sendCriticalNotifications } from './index';
 
 // Funciones de utilidad que pueden ser útiles
 export const testConnection = async () => {
@@ -31,60 +32,11 @@ export const testConnection = async () => {
   }
 };
 
-// Función para limpiar eventos expirados (útil para mantenimiento)
-export const cleanupExpiredEvents = async () => {
-  try {
-    const db = getFirestore();
-    const now = new Date();
+// Función de limpieza REMOVIDA por costo - los eventos se mantienen para evitar operaciones
 
-    const expiredEvents = await db.collection('events')
-      .where('expiresAt', '<', now)
-      .get();
+// Función de estadísticas REMOVIDA por costo - usar cliente para cálculos simples
 
-    if (expiredEvents.empty) {
-      console.log('ℹ️ No expired events to clean up');
-      return { cleaned: 0 };
-    }
-
-    const batch = db.batch();
-    expiredEvents.docs.forEach(doc => {
-      batch.delete(doc.ref);
-    });
-
-    await batch.commit();
-    console.log(`🧹 Cleaned up ${expiredEvents.size} expired events`);
-
-    return { cleaned: expiredEvents.size };
-  } catch (error) {
-    console.error('❌ Error cleaning up expired events:', error);
-    throw error instanceof Error ? error : new Error('Unknown error');
-  }
-};
-
-// Función para obtener estadísticas del sistema
-export const getSystemStats = async () => {
-  try {
-    const db = getFirestore();
-
-    const [eventsCount, usersCount, notificationsCount] = await Promise.all([
-      db.collection('events').count().get(),
-      db.collection('users').count().get(),
-      db.collection('notifications').count().get()
-    ]);
-
-    return {
-      events: eventsCount.data().count,
-      users: usersCount.data().count,
-      notifications: notificationsCount.data().count,
-      timestamp: new Date().toISOString()
-    };
-  } catch (error) {
-    console.error('❌ Error getting system stats:', error);
-    throw error instanceof Error ? error : new Error('Unknown error');
-  }
-};
-
-// Función helper para enviar notificaciones (solo para eventos críticos severidad 4+)
+// Función OPTIMIZADA para costo 0: notificaciones básicas sin consultas complejas
 export const sendCriticalNotifications = async (eventData: any) => {
   const db = getFirestore();
   const messaging = getMessaging();
@@ -95,156 +47,56 @@ export const sendCriticalNotifications = async (eventData: any) => {
       return { sent: 0, message: 'Event severity too low for notifications' };
     }
 
-    const eventLocation = eventData.location;
-
-    // Validar coordenadas
-    if (!eventLocation || typeof eventLocation.latitude !== 'number' ||
-      typeof eventLocation.longitude !== 'number' ||
-      isNaN(eventLocation.latitude) || isNaN(eventLocation.longitude)) {
-      return { sent: 0, message: 'Invalid event coordinates' };
-    }
-
-    // Verificar que esté en región poblada (Sudamérica)
-    const { latitude, longitude } = eventLocation;
-    if (latitude < -60 || latitude > 20 || longitude < -90 || longitude > -30) {
-      return { sent: 0, message: 'Event outside relevant region' };
-    }
-
     // Obtener configuración de desastre
     const disasterConfig = getDisasterConfig(eventData.disasterType);
     if (!disasterConfig) {
       return { sent: 0, message: 'Unknown disaster type' };
     }
 
-    // Verificar que haya usuarios con tokens FCM
+    // OPTIMIZACIÓN: Obtener TODOS los usuarios con FCM tokens de una sola consulta
+    // Limitamos a 50 usuarios para mantener bajo costo
     const usersSnapshot = await db.collection('users')
       .where('fcmToken', '!=', null)
-      .limit(1)
+      .limit(50) // Límite para mantener gratis
       .get();
 
     if (usersSnapshot.empty) {
       return { sent: 0, message: 'No users with FCM tokens' };
     }
 
-    // Buscar todos los usuarios con tokens
-    const allUsersSnapshot = await db.collection('users')
-      .where('fcmToken', '!=', null)
-      .get();
-
+    // Crear notificación básica sin verificación de zonas compleja
+    const notification = createBasicNotificationMessage(eventData, disasterConfig);
     const notifications: Promise<any>[] = [];
-    let totalNotifications = 0;
 
-    for (const userDoc of allUsersSnapshot.docs) {
+    for (const userDoc of usersSnapshot.docs) {
       try {
         const userData = userDoc.data();
         const userId = userDoc.id;
 
-        // Obtener zonas activas del usuario
-        const zonesSnapshot = await db.collection(`users/${userId}/zones`)
-          .where('isActive', '==', true)
-          .get();
-
-        if (zonesSnapshot.empty) continue;
-
-        // Obtener preferencias de alerta
-        const alertPrefDoc = await db.doc(`users/${userId}/alertPrefs/${eventData.disasterType}`).get();
-        const alertPref = alertPrefDoc.data();
-
-        if (!alertPref?.pushEnabled) continue;
-        if (eventData.severity < (alertPref.minSeverity || 1)) continue;
-
-        // --- FILTRADO POR PREFERENCIAS DE USUARIO (PAÍS Y MAGNITUD) ---
+        // Verificación básica: solo comprobar si las notificaciones están habilitadas globalmente
         const userSettings = userData.settings || {};
-
-        // 0. Global Notifications Toggle
         if (userSettings.notificationsEnabled === false) continue;
 
-        // 1. Filtrado por Magnitud (solo para sismos)
-        if (eventData.disasterType === 'earthquake' && eventData.magnitude) {
-          const minMag = userSettings.minMagnitude || 4.5;
-          if (eventData.magnitude < minMag) continue;
-        }
-
-        // 2. Filtrado por País/Región
-        const userCountry = userSettings.country || 'Global';
-        if (userCountry !== 'Global') {
-          const eventText = (eventData.locationName + ' ' + eventData.title).toLowerCase();
-          if (!eventText.includes(userCountry.toLowerCase())) {
-            // Si no coincide el país, verificamos si está en la zona de monitoreo (se mantiene lógica de zonas)
+        const message = {
+          token: userData.fcmToken,
+          notification: {
+            title: notification.title,
+            body: notification.body,
+          },
+          data: {
+            eventId: eventData.id,
+            disasterType: eventData.disasterType,
+            severity: eventData.severity.toString(),
+            click_action: `/event/${eventData.id}`
           }
-        }
+        };
 
-        // Verificar si alguna zona intersecta con el evento
-        let shouldNotify = false;
-        let closestZone = null;
-        let minDistance = Infinity;
+        notifications.push(
+          messaging.send(message).catch((error) => {
+            console.error(`❌ Error sending notification to ${userId}:`, error);
+          })
+        );
 
-        // Si el usuario tiene un país específico y el evento coincide con ese país, 
-        // podríamos notificar incluso si no tiene una "zona" definida allí, 
-        // pero la lógica actual requiere zonas. Mantenemos el requisito de zonas pero 
-        // relajamos el límite geográfico de Sudamérica si el usuario configuró otro país.
-
-        const isSouthAmerica = latitude >= -60 && latitude <= 20 && longitude >= -90 && longitude <= -30;
-        const matchesCountry = userCountry !== 'Global' &&
-          (eventData.locationName + ' ' + eventData.title).toLowerCase().includes(userCountry.toLowerCase());
-
-        // Si el evento no está en Sudamérica Y no coincide con el país del usuario, lo ignoramos para ahorrar procesos
-        if (!isSouthAmerica && !matchesCountry && userCountry !== 'Global') continue;
-
-        for (const zoneDoc of zonesSnapshot.docs) {
-          const zone = zoneDoc.data();
-          const distance = distanceBetween(
-            [eventLocation.latitude, eventLocation.longitude],
-            [zone.location.latitude, zone.location.longitude]
-          );
-
-          if (distance <= zone.radiusKm || distance <= (eventData.radiusKm || 100)) {
-            shouldNotify = true;
-            if (distance < minDistance) {
-              minDistance = distance;
-              closestZone = zone;
-            }
-          }
-        }
-
-        if (shouldNotify && closestZone) {
-          const notification = createNotificationMessage(eventData, closestZone, disasterConfig);
-
-          const message = {
-            token: userData.fcmToken,
-            notification: {
-              title: notification.title,
-              body: notification.body,
-            },
-            data: {
-              eventId: eventData.id,
-              disasterType: eventData.disasterType,
-              severity: eventData.severity.toString(),
-              zoneId: closestZone.id,
-              click_action: `/event/${eventData.id}`
-            }
-          };
-
-          notifications.push(
-            messaging.send(message).then(() => {
-              return db.collection('notifications').add({
-                userId,
-                eventId: eventData.id,
-                event: eventData,
-                channel: 'push',
-                sentAt: new Date(),
-                readAt: null,
-                zoneId: closestZone.id,
-                title: notification.title,
-                body: notification.body
-              });
-            }).catch((error) => {
-              console.error(`❌ Error sending notification to ${userId}:`, error);
-            })
-          );
-
-          totalNotifications++;
-        }
       } catch (error) {
         console.error(`❌ Error processing user ${userDoc.id}:`, error);
       }
@@ -254,7 +106,7 @@ export const sendCriticalNotifications = async (eventData: any) => {
       await Promise.allSettled(notifications);
     }
 
-    return { sent: totalNotifications, message: 'Notifications sent successfully' };
+    return { sent: notifications.length, message: 'Basic notifications sent (cost optimized)' };
 
   } catch (error) {
     console.error('❌ Error in sendCriticalNotifications:', error);
@@ -262,16 +114,12 @@ export const sendCriticalNotifications = async (eventData: any) => {
   }
 };
 
-// Función helper para crear mensaje de notificación
-function createNotificationMessage(eventData: any, zone: any, disasterConfig: any) {
+// Función helper para crear mensaje de notificación básico (optimizado para costo 0)
+function createBasicNotificationMessage(eventData: any, disasterConfig: any) {
   const severityLabel = disasterConfig.severityLabels[eventData.severity];
-  const distance = Math.round(distanceBetween(
-    [eventData.location.latitude, eventData.location.longitude],
-    [zone.location.latitude, zone.location.longitude]
-  ));
 
   let title = `⚠️ ${disasterConfig.nameEs} - ${severityLabel}`;
-  let body = `${eventData.title}. A ${distance}km de ${zone.name}`;
+  let body = `${eventData.title} - ${eventData.locationName}`;
 
   switch (eventData.disasterType) {
     case 'earthquake':
