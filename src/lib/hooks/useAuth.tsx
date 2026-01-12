@@ -3,7 +3,7 @@
 import { useState, useEffect, useContext, createContext, ReactNode } from 'react';
 import { User } from '@/lib/types';
 import { signInWithGoogle, signOut, onAuthStateChange } from '@/lib/firebase/auth';
-import { initializeNotifications } from '@/lib/firebase/messaging';
+// NOTIFICACIONES ELIMINADAS PARA COSTO 0
 
 interface AuthContextType {
   user: User | null;
@@ -44,11 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
 
         if (userData) {
-          try {
-            await initializeNotifications(userData.uid);
-          } catch (error) {
-            console.error('Error initializing notifications:', error);
-          }
+          // Notificaciones eliminadas para costo 0
+          console.log('Notificaciones push deshabilitadas para costo 0');
         }
       }
     });
@@ -90,11 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
 
       // Intentar inicializar notificaciones
-      try {
-        await initializeNotifications(mockUser.uid);
-      } catch (e) {
-        console.warn('Mock status: Notifications initialization skipped or failed in test environment');
-      }
+      // Notificaciones eliminadas para costo 0
+      console.log('Mock: Notificaciones push deshabilitadas para costo 0');
     } catch (error) {
       setLoading(false);
       throw error;

@@ -4,13 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Notification } from '@/lib/types';
 import { useAuth } from './useAuth';
 import { getUserNotifications, markNotificationAsRead } from '@/lib/firebase/firestore';
-import {
-  initializeNotifications,
-  onForegroundMessage,
-  showTestNotification,
-  areNotificationsEnabled,
-  getNotificationPermission
-} from '@/lib/firebase/messaging';
+
+// NOTIFICACIONES PUSH COMPLETAMENTE ELIMINADAS PARA COSTO 0
+// Solo mantenemos notificaciones almacenadas en Firestore
 
 export function useNotifications() {
   const { user } = useAuth();
@@ -46,20 +42,7 @@ export function useNotifications() {
     loadNotifications();
   }, [loadNotifications]);
 
-  // Listener para mensajes FCM en primer plano
-  useEffect(() => {
-    if (!userId) return;
-
-    const unsubscribe = onForegroundMessage((payload) => {
-      // Recargar notificaciones cuando llega una nueva
-      loadNotifications();
-
-      // Aquí puedes agregar lógica adicional para mostrar toast, etc.
-      console.log('Nueva notificación recibida:', payload);
-    });
-
-    return unsubscribe;
-  }, [userId, loadNotifications]);
+  // NOTIFICACIONES PUSH ELIMINADAS - No hay listeners FCM
 
   const markAsRead = useCallback(async (notificationId: string) => {
     try {
@@ -108,50 +91,16 @@ export function useNotifications() {
 }
 
 export function useNotificationSettings() {
-  const { user } = useAuth();
-  const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [enabled, setEnabled] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setPermission(getNotificationPermission());
-    setEnabled(areNotificationsEnabled());
-  }, []);
-
-  const initialize = useCallback(async () => {
-    if (!user?.uid) return false;
-
-    try {
-      setLoading(true);
-      const success = await initializeNotifications(user.uid);
-      setEnabled(success);
-      setPermission(getNotificationPermission());
-      return success;
-    } catch (error) {
-      console.error('Error initializing notifications:', error);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.uid]);
-
-  const testNotification = useCallback(async () => {
-    try {
-      await showTestNotification();
-    } catch (error) {
-      console.error('Error showing test notification:', error);
-    }
-  }, []);
-
+  // NOTIFICACIONES PUSH COMPLETAMENTE ELIMINADAS PARA COSTO 0
   return {
-    permission,
-    enabled,
-    loading,
-    initialize,
-    testNotification,
-    canRequestPermission: permission === 'default',
-    isGranted: permission === 'granted',
-    isDenied: permission === 'denied'
+    permission: 'denied' as NotificationPermission,
+    enabled: false,
+    loading: false,
+    initialize: async () => false,
+    testNotification: async () => {},
+    canRequestPermission: false,
+    isGranted: false,
+    isDenied: true
   };
 }
 

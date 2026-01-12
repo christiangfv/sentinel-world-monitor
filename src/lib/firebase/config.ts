@@ -40,11 +40,11 @@ console.log('Firebase initialized:', {
   initialized: true
 });
 
-// Messaging solo en navegador (se inicializará dinámicamente)
-export const messaging = null; // Se inicializará en runtime si es soportado
+// Messaging ELIMINADO completamente para costo 0
+export const messaging = null;
 
-// VAPID Key para FCM (obtener de Firebase Console > Project Settings > Cloud Messaging)
-export const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+// VAPID Key ELIMINADA para costo 0
+export const VAPID_KEY = null;
 
 // Configuración de emuladores para desarrollo
 if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_EMULATOR === 'true') {
@@ -54,36 +54,5 @@ if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_EMULAT
 
 export default app;
 
-// Función para inicializar messaging dinámicamente
-export async function initializeMessaging() {
-  if (typeof window === 'undefined') return null;
-  
-  try {
-    const isSupportedBrowser = await isSupported();
-    if (!isSupportedBrowser) {
-      console.warn('Firebase Messaging no está soportado en este navegador');
-      return null;
-    }
-
-    const messagingInstance = getMessaging(app);
-    
-    // Configurar el service worker dinámicamente
-    if ('serviceWorker' in navigator) {
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('Service Worker registrado:', registration);
-      
-      // Enviar la configuración de Firebase al service worker
-      if (registration.active) {
-        registration.active.postMessage({
-          type: 'FIREBASE_CONFIG',
-          config: firebaseConfig
-        });
-      }
-    }
-    
-    return messagingInstance;
-  } catch (error) {
-    console.error('Error initializing Firebase Messaging:', error);
-    return null;
-  }
-}
+// Función de messaging ELIMINADA para costo 0
+// export async function initializeMessaging() { ... }
