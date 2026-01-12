@@ -18,6 +18,18 @@ export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterG
         setMounted(true);
     }, []);
 
+    // Initial position - Center on Latin America
+    useEffect(() => {
+        if (globeEl.current) {
+            // Center on Latin America (approximately -20 lat, -60 lng)
+            globeEl.current.pointOfView({
+                lat: -20,
+                lng: -60,
+                altitude: 2.5
+            }, 0); // Instant transition for initial position
+        }
+    }, [mounted]);
+
     // Auto-rotate
     useEffect(() => {
         if (globeEl.current) {

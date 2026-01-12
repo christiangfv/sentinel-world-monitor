@@ -35,7 +35,7 @@ export default function HomePage() {
     disasterTypes: DISASTER_TYPES,
     minSeverity: 1
   })
-  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d')
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('3d')
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   // Auto-trigger insight card on selection
