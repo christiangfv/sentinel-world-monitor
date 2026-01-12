@@ -238,3 +238,4 @@ function extractVolcanoInfo(htmlText: string): Array<{
   return volcanoEvents;
 }
 
+
