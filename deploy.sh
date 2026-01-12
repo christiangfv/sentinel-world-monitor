@@ -52,7 +52,7 @@ if [ $? -eq 0 ]; then
     echo "💰 OPTIMIZACIONES PARA COSTO 0 IMPLEMENTADAS:"
     echo "   ✅ Cloud Functions cada 2 horas (vs 10 min antes)"
     echo "   ✅ Consultas Firestore limitadas a 24h recientes"
-    echo "   ✅ Notificaciones simplificadas (sin verificación de zonas compleja)"
+    echo "   ✅ ❌ NOTIFICACIONES ELIMINADAS COMPLETAMENTE"
     echo "   ✅ Eliminadas funciones costosas (getSystemStats, cleanupExpiredEvents)"
     echo "   ✅ Cliente sin auto-refresh (usa solo realtime subscriptions)"
     echo ""

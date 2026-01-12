@@ -1,7 +1,7 @@
 import { logger } from 'firebase-functions';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { geohashForLocation } from 'geofire-common';
-import { sendCriticalNotifications } from './index';
+// NOTIFICACIONES ELIMINADAS PARA COSTO 0
 
 const db = getFirestore();
 
@@ -68,7 +68,7 @@ export async function processUSGSFetch(): Promise<void> {
     const batch = db.batch();
     let processedCount = 0;
     let skippedCount = 0;
-    const criticalEvents: any[] = []; // Eventos de severidad 4+ para notificaciones
+    // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
 
     for (const feature of data.features) {
       try {
@@ -157,12 +157,6 @@ export async function processUSGSFetch(): Promise<void> {
         batch.set(eventRef, eventData);
         processedCount++;
 
-        // Agregar a lista de eventos críticos si severidad >= 2 (M4.0+)
-        // El filtrado final se hace en sendCriticalNotifications según las preferencias del usuario
-        if (severity >= 2) {
-          criticalEvents.push(eventData);
-        }
-
         logger.info(`✅ Procesado evento USGS: ${id} - M${magnitude.toFixed(1)} - ${properties.title}`);
 
       } catch (error) {
@@ -175,21 +169,6 @@ export async function processUSGSFetch(): Promise<void> {
     if (processedCount > 0) {
       await batch.commit();
       logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
-
-      // Enviar notificaciones para eventos críticos
-      if (criticalEvents.length > 0) {
-        logger.info(`🚨 Enviando notificaciones para ${criticalEvents.length} eventos críticos...`);
-        for (const criticalEvent of criticalEvents) {
-          try {
-            const result = await sendCriticalNotifications(criticalEvent);
-            if (result.sent > 0) {
-              logger.info(`📤 Enviadas ${result.sent} notificaciones para evento crítico ${criticalEvent.externalId}`);
-            }
-          } catch (error) {
-            logger.error(`❌ Error enviando notificaciones para evento ${criticalEvent.externalId}:`, error);
-          }
-        }
-      }
     }
 
     logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);

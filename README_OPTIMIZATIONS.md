@@ -19,15 +19,15 @@ El proyecto estaba generando **$140/mes** principalmente por:
 - **Ahora**: Solo eventos de las últimas 24 horas
 - **Ahorro**: Reduce lecturas de ~500 a ~50 por ejecución
 
-### 3. **Notificaciones Simplificadas**
-- **Antes**: Verificación compleja de zonas, países y preferencias por usuario
-- **Ahora**: Notificación básica a máximo 50 usuarios sin verificación de zonas
-- **Ahorro**: De ~100+ lecturas por notificación a ~1 lectura
+### 3. **Notificaciones ELIMINADAS COMPLETAMENTE**
+- **Antes**: Sistema completo de notificaciones push con FCM
+- **Ahora**: ❌ NOTIFICACIONES ELIMINADAS PARA COSTO 0
+- **Ahorro**: $0 en costos de FCM y Cloud Messaging
 
 ### 4. **Funciones Costosas Eliminadas**
 - ❌ `getSystemStats` - Usaba operaciones count() costosas
 - ❌ `cleanupExpiredEvents` - Consultas masivas de limpieza
-- ✅ Mantengo solo: `fetchAllEvents`, `sendCriticalNotifications`, `testDataSources`
+- ✅ Mantengo solo: `fetchAllEvents`, `testDataSources`
 
 ### 5. **Cliente Optimizado**
 - **Antes**: Auto-refresh cada 2 minutos + realtime subscriptions
@@ -42,7 +42,7 @@ El proyecto estaba generando **$140/mes** principalmente por:
 | **Firestore** | $0 | 50K reads/day | ~600/día |
 | **Firebase Hosting** | $0 | Gratuito | Ilimitado |
 | **Authentication** | $0 | Gratuito | Ilimitado |
-| **Cloud Messaging** | $0 | 10K/día | ~50/día |
+| **Cloud Messaging** | $0 | 10K/día | **0/día** (eliminado) |
 
 **Total Esperado**: **$0/mes** ✅
 
@@ -59,8 +59,8 @@ firebase functions:log
 
 ### Si los Costos Suben
 1. **Reducir más la frecuencia**: Cambiar a cada 4-6 horas
-2. **Eliminar notificaciones**: Comentar `sendCriticalNotifications`
-3. **Usar APIs directas**: Mover fetching al cliente (más riesgo)
+2. **Usar APIs directas**: Mover fetching al cliente (más riesgo)
+3. **Eliminar funciones adicionales**: Solo mantener lo esencial
 
 ### Deploy Optimizado
 ```bash

@@ -1,6 +1,6 @@
 import { logger } from 'firebase-functions';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { sendCriticalNotifications } from './index';
+// NOTIFICACIONES ELIMINADAS PARA COSTO 0
 import { geohashForLocation } from 'geofire-common';
 
 const db = getFirestore();
@@ -86,7 +86,7 @@ export async function processGDACSFetch(): Promise<void> {
     const batch = db.batch();
     let processedCount = 0;
     let skippedCount = 0;
-    const criticalEvents: any[] = []; // Eventos de severidad 4+ para notificaciones
+    // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
 
     for (const event of events) {
       try {
@@ -154,11 +154,6 @@ export async function processGDACSFetch(): Promise<void> {
         batch.set(eventRef, eventData);
         processedCount++;
 
-        // Agregar a lista de eventos críticos si severidad >= 4
-        if (severity >= 4) {
-          criticalEvents.push(eventData);
-        }
-
         logger.info(`✅ Procesado evento GDACS: ${event.guid} - ${event.title}`);
 
       } catch (error) {
@@ -171,21 +166,6 @@ export async function processGDACSFetch(): Promise<void> {
     if (processedCount > 0) {
       await batch.commit();
       logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
-
-      // Enviar notificaciones para eventos críticos
-      if (criticalEvents.length > 0) {
-        logger.info(`🚨 Enviando notificaciones para ${criticalEvents.length} eventos críticos...`);
-        for (const criticalEvent of criticalEvents) {
-          try {
-            const result = await sendCriticalNotifications(criticalEvent);
-            if (result.sent > 0) {
-              logger.info(`📤 Enviadas ${result.sent} notificaciones para evento crítico ${criticalEvent.externalId}`);
-            }
-          } catch (error) {
-            logger.error(`❌ Error enviando notificaciones para evento ${criticalEvent.externalId}:`, error);
-          }
-        }
-      }
     }
 
     logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
