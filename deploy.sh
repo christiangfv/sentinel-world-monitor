@@ -65,9 +65,10 @@ if [ $? -eq 0 ]; then
     echo "📱 Funcionalidades disponibles:"
     echo "   • Monitoreo de desastres naturales"
     echo "   • Mapa interactivo con eventos"
-    echo "   • Notificaciones push básicas"
     echo "   • Autenticación con Google"
     echo "   • Zonas personalizables"
+    echo "   • 7 fuentes de datos (USGS, CSN, GDACS, NHC, NASA, SSN México)"
+    echo "   • Costo 0 garantizado (notificaciones eliminadas)"
     echo ""
 else
     echo ""

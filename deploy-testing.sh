@@ -17,6 +17,7 @@ if [ ! -f ".env.testing" ]; then
 fi
 
 echo "✅ Verificando build de testing..."
+cp .env.testing .env.local
 npm run build
 
 if [ $? -ne 0 ]; then
@@ -39,9 +40,9 @@ if [ $? -eq 0 ]; then
     echo "📱 Funcionalidades disponibles:"
     echo "   • Monitoreo de desastres naturales en tiempo real"
     echo "   • Mapa interactivo con eventos"
-    echo "   • Notificaciones push"
     echo "   • Autenticación con Google"
     echo "   • Zonas personalizables"
+    echo "   • Costo 0 garantizado (notificaciones eliminadas)"
     echo ""
 else
     echo ""

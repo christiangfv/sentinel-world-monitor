@@ -4,10 +4,6 @@ const nextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true
-  },
-  // Deshabilitar Turbopack para compatibilidad
-  experimental: {
-    turbo: false
   }
 }
 

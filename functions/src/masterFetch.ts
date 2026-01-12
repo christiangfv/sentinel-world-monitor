@@ -5,6 +5,7 @@ import { processCSNFetch } from './fetchCSN';
 import { processGDACSFetch } from './fetchGDACS';
 import { processNHCFetch } from './fetchNHC';
 import { processNASAFetch } from './fetchNASA';
+import { processSSNFetch } from './fetchSSN';
 
 /**
  * Función consolidada que ejecuta todos los fetchers esenciales
@@ -24,7 +25,8 @@ export const fetchAllEvents = onSchedule({
         { name: 'CSN', fn: processCSNFetch },
         { name: 'GDACS', fn: processGDACSFetch },
         { name: 'NHC', fn: processNHCFetch },
-        { name: 'NASA', fn: processNASAFetch }
+        { name: 'NASA', fn: processNASAFetch },
+        { name: 'SSN', fn: processSSNFetch }
     ];
 
     for (const task of tasks) {

@@ -14,18 +14,14 @@ export { testDataSources } from './testSources';
 export const testConnection = async () => {
   try {
     const db = getFirestore();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const messaging = getMessaging();
 
     // Verificar conexión a Firestore
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const testDoc = await db.collection('test').doc('connection').get();
     console.log('✅ Firestore connection OK');
+    console.log('✅ Messaging disabled for cost optimization');
 
-    // Verificar configuración de Messaging
-    console.log('✅ Firebase Messaging configured');
-
-    return { success: true, message: 'All connections OK' };
+    return { success: true, message: 'Connections OK (messaging disabled for cost 0)' };
   } catch (error) {
     console.error('❌ Connection test failed:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };

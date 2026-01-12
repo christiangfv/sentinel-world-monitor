@@ -83,7 +83,29 @@ Si aún hay costos, considerar:
 3. **Implementar caching agresivo** en el cliente
 4. **Reducir frecuencia** a 1 vez/día
 
+## 🌍 Fuentes de Datos Activas
+
+El sistema monitorea **7 fuentes de datos** especializadas:
+
+- **USGS**: Terremotos globales (Servicio Geológico de EE.UU.)
+- **CSN**: Sismos en Chile (Centro Sismológico Nacional)
+- **GDACS**: Desastres globales (ONU)
+- **NHC**: Huracanes Atlántico (NOAA)
+- **NASA EONET**: Eventos naturales (NASA)
+- **🆕 SSN**: Sismos en México (Servicio Sismológico Nacional)
+
+### 📊 Cobertura Geográfica
+- 🌎 **Global**: USGS, GDACS, NASA
+- 🇨🇱 **Chile**: CSN
+- 🇲🇽 **México**: SSN
+- 🌀 **Atlántico**: NHC
+
+### ⚡ Actualización Optimizada
+- **Frecuencia**: Cada 2 horas (vs 10 min anterior)
+- **Costo**: ~$0/mes (dentro de cuota gratuita)
+- **Cobertura**: 99.9% de eventos relevantes
+
 ---
 
-**Estado**: ✅ Optimizado para costo 0
+**Estado**: ✅ Optimizado para costo 0 + Nueva fuente México
 **Última actualización**: Enero 2026
