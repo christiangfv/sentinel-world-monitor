@@ -123,10 +123,35 @@ export const DATA_SOURCES = {
     url: 'https://earthquake.usgs.gov',
     types: ['earthquake']
   },
+  csn: {
+    name: 'Centro Sismológico Nacional (Chile)',
+    url: 'https://www.csn.uchile.cl',
+    types: ['earthquake']
+  },
+  ssn: {
+    name: 'Servicio Sismológico Nacional (México)',
+    url: 'https://www.ssn.unam.mx',
+    types: ['earthquake']
+  },
+  cenapred: {
+    name: 'Centro Nacional de Prevención de Desastres (México)',
+    url: 'https://www.gob.mx/cenapred',
+    types: ['volcano']
+  },
   gdacs: {
     name: 'Global Disaster Alert and Coordination System',
     url: 'https://www.gdacs.org',
-    types: ['earthquake', 'tsunami', 'volcano', 'wildfire', 'flood', 'storm']
+    types: ['earthquake', 'tsunami', 'volcano', 'wildfire', 'flood', 'storm', 'landslide']
+  },
+  nhc: {
+    name: 'National Hurricane Center (USA)',
+    url: 'https://www.nhc.noaa.gov',
+    types: ['storm']
+  },
+  nasa_eonet: {
+    name: 'NASA Earth Observatory Natural Event Tracker',
+    url: 'https://eonet.gsfc.nasa.gov',
+    types: ['wildfire', 'volcano', 'landslide', 'flood', 'storm']
   }
 } as const;
 
@@ -136,9 +161,29 @@ export const POLLING_CONFIG = {
     intervalMinutes: 5,
     endpoint: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson'
   },
+  csn: {
+    intervalMinutes: 10,
+    endpoint: 'https://www.csn.uchile.cl/wp-json/csnmobile/v1/sismos/'
+  },
+  ssn: {
+    intervalMinutes: 10,
+    endpoint: 'http://www.ssn.unam.mx/rss/ultimos-sismos.xml'
+  },
+  cenapred: {
+    intervalMinutes: 30,
+    endpoint: 'https://www.gob.mx/cenapred'
+  },
   gdacs: {
     intervalMinutes: 15,
     endpoint: 'https://www.gdacs.org/xml/rss.xml'
+  },
+  nhc: {
+    intervalMinutes: 30,
+    endpoint: 'https://www.nhc.noaa.gov/CurrentStorms.json'
+  },
+  nasa_eonet: {
+    intervalMinutes: 60,
+    endpoint: 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=30&category=8,12,14,9,10'
   }
 } as const;
 
