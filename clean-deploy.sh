@@ -131,3 +131,4 @@ else
     echo "   • Revisa configuración en Firebase Console"
     echo "   • Verifica permisos del proyecto"
 fi
+

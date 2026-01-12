@@ -74,3 +74,4 @@ echo "🔗 ENLACES ÚTILES:"
 echo "   Firebase Console: https://console.firebase.google.com"
 echo "   Hosting: https://console.firebase.google.com/project/sentinel-prod-9c937/hosting"
 echo "   Settings: https://console.firebase.google.com/project/sentinel-prod-9c937/settings/general"
+

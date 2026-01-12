@@ -85,7 +85,7 @@ Si aún hay costos, considerar:
 
 ## 🌍 Fuentes de Datos Activas
 
-El sistema monitorea **7 fuentes de datos** especializadas:
+El sistema monitorea **8 fuentes de datos** especializadas:
 
 - **USGS**: Terremotos globales (Servicio Geológico de EE.UU.)
 - **CSN**: Sismos en Chile (Centro Sismológico Nacional)
@@ -93,12 +93,19 @@ El sistema monitorea **7 fuentes de datos** especializadas:
 - **NHC**: Huracanes Atlántico (NOAA)
 - **NASA EONET**: Eventos naturales (NASA)
 - **🆕 SSN**: Sismos en México (Servicio Sismológico Nacional)
+- **🆕 CENAPRED**: Volcanes en México (Centro Nacional de Prevención de Desastres)
 
 ### 📊 Cobertura Geográfica
 - 🌎 **Global**: USGS, GDACS, NASA
 - 🇨🇱 **Chile**: CSN
-- 🇲🇽 **México**: SSN
+- 🇲🇽 **México**: SSN (sismos), CENAPRED (volcanes)
 - 🌀 **Atlántico**: NHC
+
+### 🏔️ Monitoreo Específico de Volcanes Mexicanos
+- **Popocatépetl**: Volcán más activo de México
+- **Volcán de Colima**: Alta actividad eruptiva
+- **Ceboruco**: Sierra Occidental
+- **Pico de Orizaba**: Volcán más alto de México
 
 ### ⚡ Actualización Optimizada
 - **Frecuencia**: Cada 2 horas (vs 10 min anterior)

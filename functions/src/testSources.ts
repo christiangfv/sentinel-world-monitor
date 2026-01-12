@@ -5,6 +5,7 @@ import { processGDACSFetch } from './fetchGDACS';
 import { processCSNFetch } from './fetchCSN';
 import { processNHCFetch } from './fetchNHC';
 import { processSSNFetch } from './fetchSSN';
+import { processCENAPREDFetch } from './fetchCENAPRED';
 
 // Función para probar todas las fuentes de datos
 export const testAllSources = async () => {
@@ -16,7 +17,8 @@ export const testAllSources = async () => {
     { name: 'CSN (Chile)', function: processCSNFetch },
     { name: 'NHC (Huracanes)', function: processNHCFetch },
     { name: 'NASA EONET', function: () => import('./fetchNASA').then(m => m.processNASAFetch()) },
-    { name: 'SSN (México)', function: processSSNFetch }
+    { name: 'SSN (México)', function: processSSNFetch },
+    { name: 'CENAPRED (México)', function: processCENAPREDFetch }
   ];
 
   const results = [];
@@ -108,6 +110,11 @@ export const testFetchConnectivity = async () => {
       name: 'SSN México',
       url: 'http://www.ssn.unam.mx/rss/ultimos-sismos.xml',
       timeout: 10000
+    },
+    {
+      name: 'CENAPRED México',
+      url: 'https://www.gob.mx/cenapred',
+      timeout: 15000
     }
   ];
 

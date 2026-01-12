@@ -67,7 +67,7 @@ if [ $? -eq 0 ]; then
     echo "   • Mapa interactivo con eventos"
     echo "   • Autenticación con Google"
     echo "   • Zonas personalizables"
-    echo "   • 7 fuentes de datos (USGS, CSN, GDACS, NHC, NASA, SSN México)"
+    echo "   • 8 fuentes de datos (USGS, CSN, GDACS, NHC, NASA, SSN, CENAPRED México)"
     echo "   • Costo 0 garantizado (notificaciones eliminadas)"
     echo ""
 else

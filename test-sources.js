@@ -64,6 +64,11 @@ const sources = [
     name: 'SSN México',
     url: 'http://www.ssn.unam.mx/rss/ultimos-sismos.xml',
     description: 'Servicio Sismológico Nacional de México - Sismos en México'
+  },
+  {
+    name: 'CENAPRED México',
+    url: 'https://www.gob.mx/cenapred',
+    description: 'Centro Nacional de Prevención de Desastres - Volcanes en México'
   }
 ];
 
