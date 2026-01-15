@@ -45,9 +45,17 @@ function parseSSNDescription(description: string): {
   };
 }
 
+type FetchOptions = { dryRun?: boolean };
+
 // Función principal para procesar el fetch del SSN (Servicio Sismológico Nacional de México)
-export async function processSSNFetch(): Promise<void> {
+export async function processSSNFetch(
+  options: FetchOptions = {}
+): Promise<{ dryRun: boolean; total: number; processed: number; skipped: number } | void> {
+  const dryRun = options.dryRun === true;
   logger.info('🇲🇽 Iniciando fetch de eventos del SSN (México)');
+  if (dryRun) {
+    logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+  }
 
   try {
     const response = await fetch('http://www.ssn.unam.mx/rss/ultimos-sismos.xml');
@@ -64,23 +72,25 @@ export async function processSSNFetch(): Promise<void> {
     logger.info(`📊 Encontrados ${events.length} sismos en el feed del SSN`);
 
     // OPTIMIZACIÓN PARA COSTO 0: Obtener IDs existentes de las últimas 48 horas
-    const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
     const existingIds = new Set<string>();
-    try {
-      const existingDocs = await db.collection('events')
-        .where('source', '==', 'ssn')
-        .where('eventTime', '>=', Timestamp.fromDate(twoDaysAgo))
-        .get();
-      existingDocs.forEach(doc => {
-        const extId = doc.data().externalId;
-        if (extId) existingIds.add(extId);
-      });
-      logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
-    } catch (error) {
-      logger.error('❌ Error cargando IDs existentes:', error);
+    if (!dryRun) {
+      const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+      try {
+        const existingDocs = await db.collection('events')
+          .where('source', '==', 'ssn')
+          .where('eventTime', '>=', Timestamp.fromDate(twoDaysAgo))
+          .get();
+        existingDocs.forEach(doc => {
+          const extId = doc.data().externalId;
+          if (extId) existingIds.add(extId);
+        });
+        logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
+      } catch (error) {
+        logger.error('❌ Error cargando IDs existentes:', error);
+      }
     }
 
-    const batch = db.batch();
+    const batch = dryRun ? null : db.batch();
     let processedCount = 0;
     let skippedCount = 0;
 
@@ -88,10 +98,12 @@ export async function processSSNFetch(): Promise<void> {
       try {
         const { title, description, link, lat, lng } = event;
 
-        // Verificar si el evento ya existe usando link como ID único
-        if (existingIds.has(link)) {
-          skippedCount++;
-          continue;
+        if (!dryRun) {
+          // Verificar si el evento ya existe usando link como ID único
+          if (existingIds.has(link)) {
+            skippedCount++;
+            continue;
+          }
         }
 
         // Parsear datos del evento
@@ -154,7 +166,9 @@ export async function processSSNFetch(): Promise<void> {
           updatedAt: Timestamp.now()
         };
 
-        batch.set(eventRef, eventData);
+        if (!dryRun && batch) {
+          batch.set(eventRef, eventData);
+        }
         processedCount++;
 
         logger.info(`✅ Procesado sismo SSN: M${magnitude.toFixed(1)} - ${cleanTitle}`);
@@ -166,13 +180,21 @@ export async function processSSNFetch(): Promise<void> {
     }
 
     // Ejecutar batch
-    if (processedCount > 0) {
+    if (!dryRun && processedCount > 0 && batch) {
       await batch.commit();
       logger.info(`💾 Guardados ${processedCount} nuevos sismos de México en Firestore`);
     }
 
     logger.info(`📈 Resumen SSN: ${processedCount} procesados, ${skippedCount} omitidos`);
     logger.info('✅ Fetch SSN (México) completado exitosamente');
+    if (dryRun) {
+      return {
+        dryRun: true,
+        total: events.length,
+        processed: processedCount,
+        skipped: skippedCount
+      };
+    }
 
   } catch (error) {
     logger.error('❌ Error en processSSNFetch:', error);
@@ -228,5 +250,6 @@ function parseSSNRSS(xmlText: string): Array<{
 
   return events;
 }
+
 
 

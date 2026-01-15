@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.processGDACSFetch = processGDACSFetch;
 const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
-const index_1 = require("./index");
+// NOTIFICACIONES ELIMINADAS PARA COSTO 0
 const geofire_common_1 = require("geofire-common");
 const db = (0, firestore_1.getFirestore)();
 // Mapeo de tipos GDACS a nuestros tipos de desastre
@@ -85,7 +85,7 @@ async function processGDACSFetch() {
         const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
-        const criticalEvents = []; // Eventos de severidad 4+ para notificaciones
+        // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
         for (const event of events) {
             try {
                 // Verificar si el evento ya existe usando el Set optimizado
@@ -146,10 +146,6 @@ async function processGDACSFetch() {
                 };
                 batch.set(eventRef, eventData);
                 processedCount++;
-                // Agregar a lista de eventos críticos si severidad >= 4
-                if (severity >= 4) {
-                    criticalEvents.push(eventData);
-                }
                 firebase_functions_1.logger.info(`✅ Procesado evento GDACS: ${event.guid} - ${event.title}`);
             }
             catch (error) {
@@ -161,21 +157,6 @@ async function processGDACSFetch() {
         if (processedCount > 0) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
-            // Enviar notificaciones para eventos críticos
-            if (criticalEvents.length > 0) {
-                firebase_functions_1.logger.info(`🚨 Enviando notificaciones para ${criticalEvents.length} eventos críticos...`);
-                for (const criticalEvent of criticalEvents) {
-                    try {
-                        const result = await (0, index_1.sendCriticalNotifications)(criticalEvent);
-                        if (result.sent > 0) {
-                            firebase_functions_1.logger.info(`📤 Enviadas ${result.sent} notificaciones para evento crítico ${criticalEvent.externalId}`);
-                        }
-                    }
-                    catch (error) {
-                        firebase_functions_1.logger.error(`❌ Error enviando notificaciones para evento ${criticalEvent.externalId}:`, error);
-                    }
-                }
-            }
         }
         firebase_functions_1.logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch GDACS completado exitosamente');

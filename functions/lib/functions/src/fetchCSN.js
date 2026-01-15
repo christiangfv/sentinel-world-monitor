@@ -31,8 +31,12 @@ function calculateEventRadius(magnitude) {
 }
 // Cron job: Fetch CSN cada 10 minutos
 // Función principal para procesar el fetch (exportada para consolidación)
-async function processCSNFetch() {
+async function processCSNFetch(options = {}) {
+    const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del CSN');
+    if (dryRun) {
+        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+    }
     try {
         // Sitio web del Centro Sismológico Nacional de Chile
         const response = await fetch('https://sismologia.cl/');
@@ -45,24 +49,26 @@ async function processCSNFetch() {
         firebase_functions_1.logger.info(`📊 Recibidos ${events.length} eventos del CSN`);
         // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
         const existingIds = new Set();
-        try {
-            const existingDocs = await db.collection('events')
-                .where('source', '==', 'csn')
-                .orderBy('eventTime', 'desc')
-                .limit(500)
-                .get();
-            existingDocs.forEach(doc => {
-                const extId = doc.data().externalId;
-                if (extId)
-                    existingIds.add(extId);
-            });
-            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+        if (!dryRun) {
+            try {
+                const existingDocs = await db.collection('events')
+                    .where('source', '==', 'csn')
+                    .orderBy('eventTime', 'desc')
+                    .limit(500)
+                    .get();
+                existingDocs.forEach(doc => {
+                    const extId = doc.data().externalId;
+                    if (extId)
+                        existingIds.add(extId);
+                });
+                firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+            }
+            catch (error) {
+                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+                // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+            }
         }
-        catch (error) {
-            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
-        }
-        const batch = db.batch();
+        const batch = dryRun ? null : db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
@@ -74,21 +80,23 @@ async function processCSNFetch() {
                     skippedCount++;
                     continue;
                 }
-                // Verificar si el evento ya existe usando el Set optimizado
-                if (existingIds.has(event.id)) {
-                    skippedCount++;
-                    continue;
-                }
-                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-                if (existingIds.size === 0) {
-                    const checkDoc = await db.collection('events')
-                        .where('source', '==', 'csn')
-                        .where('externalId', '==', event.id)
-                        .limit(1)
-                        .get();
-                    if (!checkDoc.empty) {
+                if (!dryRun) {
+                    // Verificar si el evento ya existe usando el Set optimizado
+                    if (existingIds.has(event.id)) {
                         skippedCount++;
                         continue;
+                    }
+                    // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                    if (existingIds.size === 0) {
+                        const checkDoc = await db.collection('events')
+                            .where('source', '==', 'csn')
+                            .where('externalId', '==', event.id)
+                            .limit(1)
+                            .get();
+                        if (!checkDoc.empty) {
+                            skippedCount++;
+                            continue;
+                        }
                     }
                 }
                 // Calcular geohash y otros datos
@@ -125,7 +133,9 @@ async function processCSNFetch() {
                     createdAt: firestore_1.Timestamp.now(),
                     updatedAt: firestore_1.Timestamp.now()
                 };
-                batch.set(eventRef, eventData);
+                if (!dryRun && batch) {
+                    batch.set(eventRef, eventData);
+                }
                 processedCount++;
                 firebase_functions_1.logger.info(`✅ Procesado evento CSN: ${event.id} - M${magnitude.toFixed(1)} - ${eventData.title}`);
             }
@@ -135,12 +145,20 @@ async function processCSNFetch() {
             }
         }
         // Ejecutar batch
-        if (processedCount > 0) {
+        if (!dryRun && processedCount > 0 && batch) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch CSN completado exitosamente');
+        if (dryRun) {
+            return {
+                dryRun: true,
+                total: events.length,
+                processed: processedCount,
+                skipped: skippedCount
+            };
+        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processCSNFetch:', error);

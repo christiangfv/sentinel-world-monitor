@@ -47,10 +47,18 @@ function determineDisasterType(title: string, description: string): string {
   return 'earthquake'; // Default
 }
 
+type FetchOptions = { dryRun?: boolean };
+
 // Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
 // Función principal para procesar el fetch (exportada para consolidación)
-export async function processGDACSFetch(): Promise<void> {
+export async function processGDACSFetch(
+  options: FetchOptions = {}
+): Promise<{ dryRun: boolean; total: number; processed: number; skipped: number } | void> {
+  const dryRun = options.dryRun === true;
   logger.info('🚀 Iniciando fetch de eventos del GDACS');
+  if (dryRun) {
+    logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+  }
 
   try {
     const response = await fetch('https://www.gdacs.org/xml/rss.xml');
@@ -67,45 +75,49 @@ export async function processGDACSFetch(): Promise<void> {
 
     // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
     const existingIds = new Set<string>();
-    try {
-      const existingDocs = await db.collection('events')
-        .where('source', '==', 'gdacs')
-        .orderBy('eventTime', 'desc')
-        .limit(500)
-        .get();
-      existingDocs.forEach(doc => {
-        const extId = doc.data().externalId;
-        if (extId) existingIds.add(extId);
-      });
-      logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
-    } catch (error) {
-      logger.error('❌ Error cargando IDs existentes:', error);
-      // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+    if (!dryRun) {
+      try {
+        const existingDocs = await db.collection('events')
+          .where('source', '==', 'gdacs')
+          .orderBy('eventTime', 'desc')
+          .limit(500)
+          .get();
+        existingDocs.forEach(doc => {
+          const extId = doc.data().externalId;
+          if (extId) existingIds.add(extId);
+        });
+        logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+      } catch (error) {
+        logger.error('❌ Error cargando IDs existentes:', error);
+        // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+      }
     }
 
-    const batch = db.batch();
+    const batch = dryRun ? null : db.batch();
     let processedCount = 0;
     let skippedCount = 0;
     // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
 
     for (const event of events) {
       try {
-        // Verificar si el evento ya existe usando el Set optimizado
-        if (existingIds.has(event.guid)) {
-          skippedCount++;
-          continue;
-        }
-
-        // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-        if (existingIds.size === 0) {
-          const checkDoc = await db.collection('events')
-            .where('source', '==', 'gdacs')
-            .where('externalId', '==', event.guid)
-            .limit(1)
-            .get();
-          if (!checkDoc.empty) {
+        if (!dryRun) {
+          // Verificar si el evento ya existe usando el Set optimizado
+          if (existingIds.has(event.guid)) {
             skippedCount++;
             continue;
+          }
+
+          // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+          if (existingIds.size === 0) {
+            const checkDoc = await db.collection('events')
+              .where('source', '==', 'gdacs')
+              .where('externalId', '==', event.guid)
+              .limit(1)
+              .get();
+            if (!checkDoc.empty) {
+              skippedCount++;
+              continue;
+            }
           }
         }
 
@@ -151,7 +163,9 @@ export async function processGDACSFetch(): Promise<void> {
           updatedAt: Timestamp.now()
         };
 
-        batch.set(eventRef, eventData);
+        if (!dryRun && batch) {
+          batch.set(eventRef, eventData);
+        }
         processedCount++;
 
         logger.info(`✅ Procesado evento GDACS: ${event.guid} - ${event.title}`);
@@ -163,13 +177,21 @@ export async function processGDACSFetch(): Promise<void> {
     }
 
     // Ejecutar batch
-    if (processedCount > 0) {
+    if (!dryRun && processedCount > 0 && batch) {
       await batch.commit();
       logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
     }
 
     logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
     logger.info('✅ Fetch GDACS completado exitosamente');
+    if (dryRun) {
+      return {
+        dryRun: true,
+        total: events.length,
+        processed: processedCount,
+        skipped: skippedCount
+      };
+    }
 
   } catch (error) {
     logger.error('❌ Error en processGDACSFetch:', error);

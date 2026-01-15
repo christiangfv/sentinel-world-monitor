@@ -23,13 +23,9 @@ function estimateSeverity(title) {
         return 3;
     return 2; // Default to Medium
 }
-async function processNASAFetch(options = {}) {
+async function processNASAFetch() {
     var _a;
-    const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos de NASA EONET');
-    if (dryRun) {
-        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
-    }
     try {
         // Fetch active events from the last 30 days
         // Categories: 8(Wildfires), 12(Volcanoes), 14(Landslides), 9(Floods), 10(Severe Storms)
@@ -42,34 +38,30 @@ async function processNASAFetch(options = {}) {
         firebase_functions_1.logger.info(`📊 Recibidos ${data.events.length} eventos de NASA EONET`);
         // Optimizado: Obtener IDs existentes masivamente
         const existingIds = new Set();
-        if (!dryRun) {
-            try {
-                const existingDocs = await db.collection('events')
-                    .where('source', '==', 'nasa_eonet')
-                    .limit(500)
-                    .get();
-                existingDocs.forEach(doc => {
-                    const extId = doc.data().externalId;
-                    if (extId)
-                        existingIds.add(extId);
-                });
-            }
-            catch (error) {
-                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-            }
+        try {
+            const existingDocs = await db.collection('events')
+                .where('source', '==', 'nasa_eonet')
+                .limit(500)
+                .get();
+            existingDocs.forEach(doc => {
+                const extId = doc.data().externalId;
+                if (extId)
+                    existingIds.add(extId);
+            });
         }
-        const batch = dryRun ? null : db.batch();
+        catch (error) {
+            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+        }
+        const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         for (const event of data.events) {
             try {
                 const { id, title, description, categories, geometry } = event;
-                if (!dryRun) {
-                    // Skip if exists
-                    if (existingIds.has(id)) {
-                        skippedCount++;
-                        continue;
-                    }
+                // Skip if exists
+                if (existingIds.has(id)) {
+                    skippedCount++;
+                    continue;
                 }
                 // Map Category
                 const categoryId = (_a = categories[0]) === null || _a === void 0 ? void 0 : _a.id;
@@ -115,9 +107,7 @@ async function processNASAFetch(options = {}) {
                     updatedAt: firestore_1.Timestamp.now(),
                     expiresAt: firestore_1.Timestamp.fromMillis(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días
                 };
-                if (!dryRun && batch) {
-                    batch.set(eventRef, eventData);
-                }
+                batch.set(eventRef, eventData);
                 processedCount++;
             }
             catch (err) {
@@ -125,19 +115,11 @@ async function processNASAFetch(options = {}) {
                 continue;
             }
         }
-        if (!dryRun && processedCount > 0 && batch) {
+        if (processedCount > 0) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos de NASA en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen NASA: ${processedCount} procesados, ${skippedCount} omitidos`);
-        if (dryRun) {
-            return {
-                dryRun: true,
-                total: data.events.length,
-                processed: processedCount,
-                skipped: skippedCount
-            };
-        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processNASAFetch:', error);

@@ -29,10 +29,18 @@ function calculateEventRadius(magnitude: number): number {
   return Math.max(50, Math.round(magnitude * 20));
 }
 
+type FetchOptions = { dryRun?: boolean };
+
 // Cron job: Fetch USGS cada 15 minutos (optimizado para reducir costos)
 // Función principal para procesar el fetch (exportada para consolidación)
-export async function processUSGSFetch(): Promise<void> {
+export async function processUSGSFetch(
+  options: FetchOptions = {}
+): Promise<{ dryRun: boolean; total: number; processed: number; skipped: number } | void> {
+  const dryRun = options.dryRun === true;
   logger.info('🚀 Iniciando fetch de eventos del USGS');
+  if (dryRun) {
+    logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+  }
 
   try {
     const response = await fetch(
@@ -46,26 +54,28 @@ export async function processUSGSFetch(): Promise<void> {
     const data = await response.json();
     logger.info(`📊 Recibidos ${data.features.length} eventos del USGS`);
 
-    // OPTIMIZACIÓN PARA COSTO 0: Limitar consultas para mantener gratis
-    // Solo verificar eventos de las últimas 24 horas para reducir lecturas
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const existingIds = new Set<string>();
-    try {
-      const existingDocs = await db.collection('events')
-        .where('source', '==', 'usgs')
-        .where('eventTime', '>=', Timestamp.fromDate(yesterday))
-        .get();
-      existingDocs.forEach(doc => {
-        const extId = doc.data().externalId;
-        if (extId) existingIds.add(extId);
-      });
-      logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
-    } catch (error) {
-      logger.error('❌ Error cargando IDs existentes:', error);
-      // Si falla, continuamos sin verificar duplicados (menos eficiente pero evita costos)
+    if (!dryRun) {
+      // OPTIMIZACIÓN PARA COSTO 0: Limitar consultas para mantener gratis
+      // Solo verificar eventos de las últimas 24 horas para reducir lecturas
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      try {
+        const existingDocs = await db.collection('events')
+          .where('source', '==', 'usgs')
+          .where('eventTime', '>=', Timestamp.fromDate(yesterday))
+          .get();
+        existingDocs.forEach(doc => {
+          const extId = doc.data().externalId;
+          if (extId) existingIds.add(extId);
+        });
+        logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
+      } catch (error) {
+        logger.error('❌ Error cargando IDs existentes:', error);
+        // Si falla, continuamos sin verificar duplicados (menos eficiente pero evita costos)
+      }
     }
 
-    const batch = db.batch();
+    const batch = dryRun ? null : db.batch();
     let processedCount = 0;
     let skippedCount = 0;
     // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
@@ -82,23 +92,25 @@ export async function processUSGSFetch(): Promise<void> {
           continue;
         }
 
-        // Verificar si el evento ya existe usando el Set optimizado
-        if (existingIds.has(id)) {
-          skippedCount++;
-          continue;
-        }
-
-        // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-        // Esto solo debería ocurrir si la carga masiva falló
-        if (existingIds.size === 0) {
-          const checkDoc = await db.collection('events')
-            .where('source', '==', 'usgs')
-            .where('externalId', '==', id)
-            .limit(1)
-            .get();
-          if (!checkDoc.empty) {
+        if (!dryRun) {
+          // Verificar si el evento ya existe usando el Set optimizado
+          if (existingIds.has(id)) {
             skippedCount++;
             continue;
+          }
+
+          // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+          // Esto solo debería ocurrir si la carga masiva falló
+          if (existingIds.size === 0) {
+            const checkDoc = await db.collection('events')
+              .where('source', '==', 'usgs')
+              .where('externalId', '==', id)
+              .limit(1)
+              .get();
+            if (!checkDoc.empty) {
+              skippedCount++;
+              continue;
+            }
           }
         }
 
@@ -154,7 +166,9 @@ export async function processUSGSFetch(): Promise<void> {
           updatedAt: Timestamp.now()
         };
 
-        batch.set(eventRef, eventData);
+        if (!dryRun && batch) {
+          batch.set(eventRef, eventData);
+        }
         processedCount++;
 
         logger.info(`✅ Procesado evento USGS: ${id} - M${magnitude.toFixed(1)} - ${properties.title}`);
@@ -166,13 +180,21 @@ export async function processUSGSFetch(): Promise<void> {
     }
 
     // Ejecutar batch
-    if (processedCount > 0) {
+    if (!dryRun && processedCount > 0 && batch) {
       await batch.commit();
       logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
     }
 
     logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
     logger.info('✅ Fetch USGS completado exitosamente');
+    if (dryRun) {
+      return {
+        dryRun: true,
+        total: data.features.length,
+        processed: processedCount,
+        skipped: skippedCount
+      };
+    }
 
   } catch (error) {
     logger.error('❌ Error en processUSGSFetch:', error);

@@ -1,12 +1,56 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.testDataSources = exports.testFetchConnectivity = exports.testAllSources = void 0;
+exports.testDataSources = exports.testNASA = exports.testFetchConnectivity = exports.testAllSources = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firebase_functions_1 = require("firebase-functions");
 const fetchUSGS_1 = require("./fetchUSGS");
 const fetchGDACS_1 = require("./fetchGDACS");
 const fetchCSN_1 = require("./fetchCSN");
 const fetchNHC_1 = require("./fetchNHC");
+const fetchSSN_1 = require("./fetchSSN");
+const fetchCENAPRED_1 = require("./fetchCENAPRED");
+const getScheduleFrequency = () => {
+    // Usar el project ID para determinar el entorno (más confiable)
+    const projectId = process.env.GCP_PROJECT || 'production';
+    const isDevelopment = projectId.includes('testing') || projectId.includes('dev');
+    firebase_functions_1.logger.info(`🔍 SCHEDULE CONFIG - GCP_PROJECT: ${projectId}, isDevelopment: ${isDevelopment}`);
+    const result = isDevelopment ? 'every 12 hours' : 'every 1 hours';
+    firebase_functions_1.logger.info(`📊 SCHEDULE RESULT: ${result}`);
+    return result;
+};
 // Función para probar todas las fuentes de datos
 const testAllSources = async () => {
     firebase_functions_1.logger.info('🧪 Iniciando pruebas de todas las fuentes de datos...');
@@ -14,7 +58,10 @@ const testAllSources = async () => {
         { name: 'USGS (Terremotos)', function: fetchUSGS_1.processUSGSFetch },
         { name: 'GDACS (Desastres Globales)', function: fetchGDACS_1.processGDACSFetch },
         { name: 'CSN (Chile)', function: fetchCSN_1.processCSNFetch },
-        { name: 'NHC (Huracanes)', function: fetchNHC_1.processNHCFetch }
+        { name: 'NHC (Huracanes)', function: fetchNHC_1.processNHCFetch },
+        { name: 'NASA EONET', function: () => Promise.resolve().then(() => __importStar(require('./fetchNASA'))).then(m => m.processNASAFetch()) },
+        { name: 'SSN (México)', function: fetchSSN_1.processSSNFetch },
+        { name: 'CENAPRED (México)', function: fetchCENAPRED_1.processCENAPREDFetch }
     ];
     const results = [];
     for (const source of sources) {
@@ -88,6 +135,21 @@ const testFetchConnectivity = async () => {
             name: 'NHC Atlantic',
             url: 'https://www.nhc.noaa.gov/index-at.xml',
             timeout: 10000
+        },
+        {
+            name: 'NASA EONET',
+            url: 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5&days=7',
+            timeout: 15000
+        },
+        {
+            name: 'SSN México',
+            url: 'http://www.ssn.unam.mx/rss/ultimos-sismos.xml',
+            timeout: 10000
+        },
+        {
+            name: 'CENAPRED México',
+            url: 'https://www.gob.mx/cenapred',
+            timeout: 15000
         }
     ];
     const results = [];
@@ -141,6 +203,7 @@ const testFetchConnectivity = async () => {
     const warningCount = results.filter(r => r.status === 'warning').length;
     const errorCount = results.filter(r => r.status === 'error').length;
     firebase_functions_1.logger.info(`🌐 Conectividad: ${successCount} OK, ${warningCount} advertencias, ${errorCount} errores`);
+    firebase_functions_1.logger.info(`📊 Total de APIs probadas: ${apis.length}`);
     return {
         total: apis.length,
         successful: successCount,
@@ -150,6 +213,47 @@ const testFetchConnectivity = async () => {
     };
 };
 exports.testFetchConnectivity = testFetchConnectivity;
+// Función específica para probar NASA EONET
+exports.testNASA = (0, https_1.onRequest)({
+    region: 'southamerica-east1',
+    memory: '256MiB',
+    timeoutSeconds: 60,
+}, async (req, res) => {
+    var _a, _b, _c, _d, _e;
+    try {
+        firebase_functions_1.logger.info('🛰️ Probando NASA EONET específicamente...');
+        const nasaUrl = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5&days=7';
+        firebase_functions_1.logger.info(`🔗 URL: ${nasaUrl}`);
+        const response = await fetch(nasaUrl, {
+            headers: {
+                'User-Agent': 'World-Monitor-Test/1.0'
+            }
+        });
+        const data = await response.json();
+        firebase_functions_1.logger.info(`📊 Respuesta: HTTP ${response.status}, Eventos: ${((_a = data.events) === null || _a === void 0 ? void 0 : _a.length) || 0}`);
+        if (data.events && data.events.length > 0) {
+            firebase_functions_1.logger.info('✅ NASA EONET funcionando correctamente');
+            firebase_functions_1.logger.info(`📝 Primer evento: ${data.events[0].title}`);
+        }
+        res.status(200).json({
+            timestamp: new Date().toISOString(),
+            nasaTest: {
+                url: nasaUrl,
+                status: response.status,
+                eventsCount: ((_b = data.events) === null || _b === void 0 ? void 0 : _b.length) || 0,
+                firstEvent: ((_d = (_c = data.events) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.title) || null,
+                success: response.ok && ((_e = data.events) === null || _e === void 0 ? void 0 : _e.length) > 0
+            }
+        });
+    }
+    catch (error) {
+        firebase_functions_1.logger.error('❌ Error probando NASA:', error);
+        res.status(500).json({
+            error: 'Error probando NASA EONET',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
 // Función HTTP para pruebas manuales
 exports.testDataSources = (0, https_1.onRequest)({
     region: 'southamerica-east1',
@@ -157,7 +261,7 @@ exports.testDataSources = (0, https_1.onRequest)({
     timeoutSeconds: 300,
 }, async (req, res) => {
     try {
-        firebase_functions_1.logger.info('🧪 Ejecutando prueba manual de fuentes de datos');
+        firebase_functions_1.logger.info('🧪 Ejecutando prueba manual de fuentes de datos - INICIO');
         const connectivityResults = await (0, exports.testFetchConnectivity)();
         // Ejecutar una función de prueba para verificar funcionamiento real
         let sampleExecutionResult = null;
@@ -176,12 +280,13 @@ exports.testDataSources = (0, https_1.onRequest)({
                 error: error instanceof Error ? error.message : 'Unknown error'
             };
         }
+        const schedule = getScheduleFrequency();
         const response = {
             timestamp: new Date().toISOString(),
             connectivityTest: connectivityResults,
             sampleExecution: sampleExecutionResult,
             activeSources: [
-                { name: 'Consolidado', function: 'fetchAllEvents', schedule: 'every 10 minutes' }
+                { name: 'Consolidado', function: 'fetchAllEvents', schedule: schedule }
             ],
             status: connectivityResults.errors === 0 ? '✅ Todas las fuentes funcionando' : '⚠️ Algunas fuentes con problemas'
         };

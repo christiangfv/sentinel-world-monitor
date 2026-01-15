@@ -7,18 +7,30 @@ import { processNHCFetch } from './fetchNHC';
 import { processSSNFetch } from './fetchSSN';
 import { processCENAPREDFetch } from './fetchCENAPRED';
 
+const getScheduleFrequency = (): string => {
+    // Usar el project ID para determinar el entorno (más confiable)
+    const projectId = process.env.GCP_PROJECT || 'production';
+    const isDevelopment = projectId.includes('testing') || projectId.includes('dev');
+
+    logger.info(`🔍 SCHEDULE CONFIG - GCP_PROJECT: ${projectId}, isDevelopment: ${isDevelopment}`);
+    const result = isDevelopment ? 'every 12 hours' : 'every 1 hours';
+
+    logger.info(`📊 SCHEDULE RESULT: ${result}`);
+    return result;
+};
+
 // Función para probar todas las fuentes de datos
 export const testAllSources = async () => {
-  logger.info('🧪 Iniciando pruebas de todas las fuentes de datos...');
+  logger.info('🧪 Iniciando pruebas de todas las fuentes de datos (modo dryRun)...');
 
   const sources = [
-    { name: 'USGS (Terremotos)', function: processUSGSFetch },
-    { name: 'GDACS (Desastres Globales)', function: processGDACSFetch },
-    { name: 'CSN (Chile)', function: processCSNFetch },
-    { name: 'NHC (Huracanes)', function: processNHCFetch },
-    { name: 'NASA EONET', function: () => import('./fetchNASA').then(m => m.processNASAFetch()) },
-    { name: 'SSN (México)', function: processSSNFetch },
-    { name: 'CENAPRED (México)', function: processCENAPREDFetch }
+    { name: 'USGS (Terremotos)', function: () => processUSGSFetch({ dryRun: true }) },
+    { name: 'GDACS (Desastres Globales)', function: () => processGDACSFetch({ dryRun: true }) },
+    { name: 'CSN (Chile)', function: () => processCSNFetch({ dryRun: true }) },
+    { name: 'NHC (Huracanes)', function: () => processNHCFetch({ dryRun: true }) },
+    { name: 'NASA EONET', function: () => import('./fetchNASA').then(m => m.processNASAFetch({ dryRun: true })) },
+    { name: 'SSN (México)', function: () => processSSNFetch({ dryRun: true }) },
+    { name: 'CENAPRED (México)', function: () => processCENAPREDFetch({ dryRun: true }) }
   ];
 
   const results = [];
@@ -27,25 +39,20 @@ export const testAllSources = async () => {
     try {
       logger.info(`🔍 Probando fuente: ${source.name}`);
 
-      // Para pruebas, vamos a simular una ejecución pero sin guardar en BD
-      // Esto requiere modificar las funciones para tener un modo "test" o
-      // crear versiones de prueba que solo hagan fetch y parse sin guardar
+      const summary = await source.function();
+      const hasSummary = summary && typeof summary === 'object' && 'dryRun' in summary;
 
-      // Por ahora, solo verificamos que las funciones existen y son ejecutables
-      if (typeof source.function === 'function') {
-        logger.info(`✅ Función ${source.name} está disponible`);
-        results.push({
-          source: source.name,
-          status: 'available',
-          error: null
-        });
+      results.push({
+        source: source.name,
+        status: 'success',
+        summary: hasSummary ? summary : null,
+        error: null
+      });
+
+      if (hasSummary) {
+        logger.info(`✅ ${source.name}: ${summary.processed} procesados, ${summary.skipped} omitidos`);
       } else {
-        logger.error(`❌ Función ${source.name} no es válida`);
-        results.push({
-          source: source.name,
-          status: 'error',
-          error: 'Function not valid'
-        });
+        logger.info(`✅ ${source.name}: ejecutado`);
       }
 
     } catch (error) {
@@ -53,6 +60,7 @@ export const testAllSources = async () => {
       results.push({
         source: source.name,
         status: 'error',
+        summary: null,
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -63,10 +71,10 @@ export const testAllSources = async () => {
     logger.info(`${result.source}: ${result.status} ${result.error ? `(${result.error})` : ''}`);
   });
 
-  const successCount = results.filter(r => r.status === 'available').length;
+  const successCount = results.filter(r => r.status === 'success').length;
   const errorCount = results.filter(r => r.status === 'error').length;
 
-  logger.info(`✅ ${successCount} fuentes disponibles, ${errorCount} con errores`);
+  logger.info(`✅ ${successCount} fuentes OK, ${errorCount} con errores`);
 
   return {
     total: sources.length,
@@ -240,35 +248,23 @@ export const testDataSources = onRequest({
   timeoutSeconds: 300,
 }, async (req, res) => {
   try {
-    logger.info('🧪 Ejecutando prueba manual de fuentes de datos');
+    logger.info('🧪 Ejecutando prueba manual de fuentes de datos - INICIO');
 
     const connectivityResults = await testFetchConnectivity();
+    const captureResults = await testAllSources();
 
-    // Ejecutar una función de prueba para verificar funcionamiento real
-    let sampleExecutionResult = null;
-    try {
-      logger.info('🔍 Probando ejecución real de fetchCSNEvents...');
-      // Nota: Esto ejecutará la función pero en un contexto limitado
-      // para evitar duplicar datos en producción
-      sampleExecutionResult = {
-        status: 'Función disponible para ejecución programada',
-        note: 'Las funciones se ejecutan automáticamente según su schedule'
-      };
-    } catch (error) {
-      sampleExecutionResult = {
-        status: 'Error en ejecución',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
-    }
+    const schedule = getScheduleFrequency();
 
     const response = {
       timestamp: new Date().toISOString(),
       connectivityTest: connectivityResults,
-      sampleExecution: sampleExecutionResult,
+      captureTest: captureResults,
       activeSources: [
-        { name: 'Consolidado', function: 'fetchAllEvents', schedule: 'every 10 minutes' }
+        { name: 'Consolidado', function: 'fetchAllEvents', schedule: schedule }
       ],
-      status: connectivityResults.errors === 0 ? '✅ Todas las fuentes funcionando' : '⚠️ Algunas fuentes con problemas'
+      status: connectivityResults.errors === 0 && captureResults.errors === 0
+        ? '✅ Todas las fuentes funcionando'
+        : '⚠️ Algunas fuentes con problemas'
     };
 
     res.status(200).json(response);

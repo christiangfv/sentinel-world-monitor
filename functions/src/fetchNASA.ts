@@ -5,6 +5,8 @@ import { DisasterType } from '../../src/lib/types'; // We might need to duplicat
 
 const db = getFirestore();
 
+type FetchOptions = { dryRun?: boolean };
+
 // Helper to map EONET category to our DisasterType
 function mapCategoryToDisasterType(categoryId: string): string | null {
     switch (categoryId) {
@@ -24,8 +26,14 @@ function estimateSeverity(title: string): number {
     return 2; // Default to Medium
 }
 
-export async function processNASAFetch(): Promise<void> {
+export async function processNASAFetch(
+    options: FetchOptions = {}
+): Promise<{ dryRun: boolean; total: number; processed: number; skipped: number } | void> {
+    const dryRun = options.dryRun === true;
     logger.info('🚀 Iniciando fetch de eventos de NASA EONET');
+    if (dryRun) {
+        logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+    }
 
     try {
         // Fetch active events from the last 30 days
@@ -42,20 +50,22 @@ export async function processNASAFetch(): Promise<void> {
 
         // Optimizado: Obtener IDs existentes masivamente
         const existingIds = new Set<string>();
-        try {
-            const existingDocs = await db.collection('events')
-                .where('source', '==', 'nasa_eonet')
-                .limit(500)
-                .get();
-            existingDocs.forEach(doc => {
-                const extId = doc.data().externalId;
-                if (extId) existingIds.add(extId);
-            });
-        } catch (error) {
-            logger.error('❌ Error cargando IDs existentes:', error);
+        if (!dryRun) {
+            try {
+                const existingDocs = await db.collection('events')
+                    .where('source', '==', 'nasa_eonet')
+                    .limit(500)
+                    .get();
+                existingDocs.forEach(doc => {
+                    const extId = doc.data().externalId;
+                    if (extId) existingIds.add(extId);
+                });
+            } catch (error) {
+                logger.error('❌ Error cargando IDs existentes:', error);
+            }
         }
 
-        const batch = db.batch();
+        const batch = dryRun ? null : db.batch();
         let processedCount = 0;
         let skippedCount = 0;
 
@@ -63,10 +73,12 @@ export async function processNASAFetch(): Promise<void> {
             try {
                 const { id, title, description, categories, geometry } = event;
 
-                // Skip if exists
-                if (existingIds.has(id)) {
-                    skippedCount++;
-                    continue;
+                if (!dryRun) {
+                    // Skip if exists
+                    if (existingIds.has(id)) {
+                        skippedCount++;
+                        continue;
+                    }
                 }
 
                 // Map Category
@@ -119,7 +131,9 @@ export async function processNASAFetch(): Promise<void> {
                     expiresAt: Timestamp.fromMillis(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días
                 };
 
-                batch.set(eventRef, eventData);
+                if (!dryRun && batch) {
+                    batch.set(eventRef, eventData);
+                }
                 processedCount++;
 
             } catch (err) {
@@ -128,12 +142,20 @@ export async function processNASAFetch(): Promise<void> {
             }
         }
 
-        if (processedCount > 0) {
+        if (!dryRun && processedCount > 0 && batch) {
             await batch.commit();
             logger.info(`💾 Guardados ${processedCount} nuevos eventos de NASA en Firestore`);
         }
 
         logger.info(`📈 Resumen NASA: ${processedCount} procesados, ${skippedCount} omitidos`);
+        if (dryRun) {
+            return {
+                dryRun: true,
+                total: data.events.length,
+                processed: processedCount,
+                skipped: skippedCount
+            };
+        }
 
     } catch (error) {
         logger.error('❌ Error en processNASAFetch:', error);

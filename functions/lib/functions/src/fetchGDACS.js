@@ -52,8 +52,12 @@ function determineDisasterType(title, description) {
 }
 // Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
 // Función principal para procesar el fetch (exportada para consolidación)
-async function processGDACSFetch() {
+async function processGDACSFetch(options = {}) {
+    const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del GDACS');
+    if (dryRun) {
+        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+    }
     try {
         const response = await fetch('https://www.gdacs.org/xml/rss.xml');
         if (!response.ok) {
@@ -65,44 +69,48 @@ async function processGDACSFetch() {
         firebase_functions_1.logger.info(`📊 Recibidos ${events.length} eventos del GDACS`);
         // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
         const existingIds = new Set();
-        try {
-            const existingDocs = await db.collection('events')
-                .where('source', '==', 'gdacs')
-                .orderBy('eventTime', 'desc')
-                .limit(500)
-                .get();
-            existingDocs.forEach(doc => {
-                const extId = doc.data().externalId;
-                if (extId)
-                    existingIds.add(extId);
-            });
-            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+        if (!dryRun) {
+            try {
+                const existingDocs = await db.collection('events')
+                    .where('source', '==', 'gdacs')
+                    .orderBy('eventTime', 'desc')
+                    .limit(500)
+                    .get();
+                existingDocs.forEach(doc => {
+                    const extId = doc.data().externalId;
+                    if (extId)
+                        existingIds.add(extId);
+                });
+                firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+            }
+            catch (error) {
+                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+                // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+            }
         }
-        catch (error) {
-            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
-        }
-        const batch = db.batch();
+        const batch = dryRun ? null : db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
         for (const event of events) {
             try {
-                // Verificar si el evento ya existe usando el Set optimizado
-                if (existingIds.has(event.guid)) {
-                    skippedCount++;
-                    continue;
-                }
-                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-                if (existingIds.size === 0) {
-                    const checkDoc = await db.collection('events')
-                        .where('source', '==', 'gdacs')
-                        .where('externalId', '==', event.guid)
-                        .limit(1)
-                        .get();
-                    if (!checkDoc.empty) {
+                if (!dryRun) {
+                    // Verificar si el evento ya existe usando el Set optimizado
+                    if (existingIds.has(event.guid)) {
                         skippedCount++;
                         continue;
+                    }
+                    // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                    if (existingIds.size === 0) {
+                        const checkDoc = await db.collection('events')
+                            .where('source', '==', 'gdacs')
+                            .where('externalId', '==', event.guid)
+                            .limit(1)
+                            .get();
+                        if (!checkDoc.empty) {
+                            skippedCount++;
+                            continue;
+                        }
                     }
                 }
                 // Determinar tipo de desastre
@@ -144,7 +152,9 @@ async function processGDACSFetch() {
                     createdAt: firestore_1.Timestamp.now(),
                     updatedAt: firestore_1.Timestamp.now()
                 };
-                batch.set(eventRef, eventData);
+                if (!dryRun && batch) {
+                    batch.set(eventRef, eventData);
+                }
                 processedCount++;
                 firebase_functions_1.logger.info(`✅ Procesado evento GDACS: ${event.guid} - ${event.title}`);
             }
@@ -154,12 +164,20 @@ async function processGDACSFetch() {
             }
         }
         // Ejecutar batch
-        if (processedCount > 0) {
+        if (!dryRun && processedCount > 0 && batch) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch GDACS completado exitosamente');
+        if (dryRun) {
+            return {
+                dryRun: true,
+                total: events.length,
+                processed: processedCount,
+                skipped: skippedCount
+            };
+        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processGDACSFetch:', error);

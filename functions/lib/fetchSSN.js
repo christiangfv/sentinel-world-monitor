@@ -38,12 +38,8 @@ function parseSSNDescription(description) {
     };
 }
 // Función principal para procesar el fetch del SSN (Servicio Sismológico Nacional de México)
-async function processSSNFetch(options = {}) {
-    const dryRun = options.dryRun === true;
+async function processSSNFetch() {
     firebase_functions_1.logger.info('🇲🇽 Iniciando fetch de eventos del SSN (México)');
-    if (dryRun) {
-        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
-    }
     try {
         const response = await fetch('http://www.ssn.unam.mx/rss/ultimos-sismos.xml');
         if (!response.ok) {
@@ -55,37 +51,33 @@ async function processSSNFetch(options = {}) {
         const events = parseSSNRSS(xmlText);
         firebase_functions_1.logger.info(`📊 Encontrados ${events.length} sismos en el feed del SSN`);
         // OPTIMIZACIÓN PARA COSTO 0: Obtener IDs existentes de las últimas 48 horas
+        const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
         const existingIds = new Set();
-        if (!dryRun) {
-            const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-            try {
-                const existingDocs = await db.collection('events')
-                    .where('source', '==', 'ssn')
-                    .where('eventTime', '>=', firestore_1.Timestamp.fromDate(twoDaysAgo))
-                    .get();
-                existingDocs.forEach(doc => {
-                    const extId = doc.data().externalId;
-                    if (extId)
-                        existingIds.add(extId);
-                });
-                firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
-            }
-            catch (error) {
-                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-            }
+        try {
+            const existingDocs = await db.collection('events')
+                .where('source', '==', 'ssn')
+                .where('eventTime', '>=', firestore_1.Timestamp.fromDate(twoDaysAgo))
+                .get();
+            existingDocs.forEach(doc => {
+                const extId = doc.data().externalId;
+                if (extId)
+                    existingIds.add(extId);
+            });
+            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
         }
-        const batch = dryRun ? null : db.batch();
+        catch (error) {
+            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+        }
+        const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         for (const event of events) {
             try {
                 const { title, description, link, lat, lng } = event;
-                if (!dryRun) {
-                    // Verificar si el evento ya existe usando link como ID único
-                    if (existingIds.has(link)) {
-                        skippedCount++;
-                        continue;
-                    }
+                // Verificar si el evento ya existe usando link como ID único
+                if (existingIds.has(link)) {
+                    skippedCount++;
+                    continue;
                 }
                 // Parsear datos del evento
                 const parsedData = parseSSNDescription(description);
@@ -138,9 +130,7 @@ async function processSSNFetch(options = {}) {
                     createdAt: firestore_1.Timestamp.now(),
                     updatedAt: firestore_1.Timestamp.now()
                 };
-                if (!dryRun && batch) {
-                    batch.set(eventRef, eventData);
-                }
+                batch.set(eventRef, eventData);
                 processedCount++;
                 firebase_functions_1.logger.info(`✅ Procesado sismo SSN: M${magnitude.toFixed(1)} - ${cleanTitle}`);
             }
@@ -150,20 +140,12 @@ async function processSSNFetch(options = {}) {
             }
         }
         // Ejecutar batch
-        if (!dryRun && processedCount > 0 && batch) {
+        if (processedCount > 0) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos sismos de México en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen SSN: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch SSN (México) completado exitosamente');
-        if (dryRun) {
-            return {
-                dryRun: true,
-                total: events.length,
-                processed: processedCount,
-                skipped: skippedCount
-            };
-        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processSSNFetch:', error);

@@ -4,7 +4,7 @@ exports.processUSGSFetch = processUSGSFetch;
 const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
-const index_1 = require("./index");
+// NOTIFICACIONES ELIMINADAS PARA COSTO 0
 const db = (0, firestore_1.getFirestore)();
 // Mapeo de magnitud a severidad para sismos
 function magnitudeToSeverity(magnitude) {
@@ -41,29 +41,30 @@ async function processUSGSFetch() {
         }
         const data = await response.json();
         firebase_functions_1.logger.info(`📊 Recibidos ${data.features.length} eventos del USGS`);
-        // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
+        // OPTIMIZACIÓN PARA COSTO 0: Limitar consultas para mantener gratis
+        // Solo verificar eventos de las últimas 24 horas para reducir lecturas
+        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const existingIds = new Set();
         try {
             const existingDocs = await db.collection('events')
                 .where('source', '==', 'usgs')
-                .orderBy('eventTime', 'desc')
-                .limit(500)
+                .where('eventTime', '>=', firestore_1.Timestamp.fromDate(yesterday))
                 .get();
             existingDocs.forEach(doc => {
                 const extId = doc.data().externalId;
                 if (extId)
                     existingIds.add(extId);
             });
-            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
         }
         catch (error) {
             firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+            // Si falla, continuamos sin verificar duplicados (menos eficiente pero evita costos)
         }
         const batch = db.batch();
         let processedCount = 0;
         let skippedCount = 0;
-        const criticalEvents = []; // Eventos de severidad 4+ para notificaciones
+        // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
         for (const feature of data.features) {
             try {
                 const { id, properties, geometry } = feature;
@@ -144,10 +145,6 @@ async function processUSGSFetch() {
                 };
                 batch.set(eventRef, eventData);
                 processedCount++;
-                // Agregar a lista de eventos críticos si severidad >= 4
-                if (severity >= 4) {
-                    criticalEvents.push(eventData);
-                }
                 firebase_functions_1.logger.info(`✅ Procesado evento USGS: ${id} - M${magnitude.toFixed(1)} - ${properties.title}`);
             }
             catch (error) {
@@ -159,21 +156,6 @@ async function processUSGSFetch() {
         if (processedCount > 0) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
-            // Enviar notificaciones para eventos críticos
-            if (criticalEvents.length > 0) {
-                firebase_functions_1.logger.info(`🚨 Enviando notificaciones para ${criticalEvents.length} eventos críticos...`);
-                for (const criticalEvent of criticalEvents) {
-                    try {
-                        const result = await (0, index_1.sendCriticalNotifications)(criticalEvent);
-                        if (result.sent > 0) {
-                            firebase_functions_1.logger.info(`📤 Enviadas ${result.sent} notificaciones para evento crítico ${criticalEvent.externalId}`);
-                        }
-                    }
-                    catch (error) {
-                        firebase_functions_1.logger.error(`❌ Error enviando notificaciones para evento ${criticalEvent.externalId}:`, error);
-                    }
-                }
-            }
         }
         firebase_functions_1.logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch USGS completado exitosamente');
