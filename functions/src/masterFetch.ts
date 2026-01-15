@@ -15,21 +15,30 @@ import { processCENAPREDFetch } from './fetchCENAPRED';
  * - Desarrollo: cada 12 horas (baja frecuencia para testing)
  */
 const getScheduleFrequency = (): string => {
-    // Verificar si estamos en desarrollo por variable de entorno o project ID
-    const isDevelopment = process.env.NODE_ENV === 'development' ||
-                         process.env.FIREBASE_PROJECT_ID?.includes('testing') ||
-                         process.env.FIREBASE_PROJECT_ID?.includes('dev');
+    // Usar el project ID para determinar el entorno (más confiable)
+    const projectId = process.env.GCP_PROJECT || 'production';
+    const isDevelopment = projectId.includes('testing') || projectId.includes('dev');
 
-    return isDevelopment ? 'every 12 hours' : 'every 1 hours';
+    logger.info(`🔍 SCHEDULE CONFIG - GCP_PROJECT: ${projectId}, isDevelopment: ${isDevelopment}`);
+    const result = isDevelopment ? 'every 12 hours' : 'every 1 hours';
+
+    logger.info(`📊 SCHEDULE RESULT: ${result}`);
+    return result;
 };
 
 export const fetchAllEvents = onSchedule({
     schedule: getScheduleFrequency(),
-    region: 'southamerica-east1',
-    timeoutSeconds: 300, // Aumentamos el timeout para dar tiempo a todas las fuentes
+    timeoutSeconds: 120,
     memory: '256MiB',
 }, async (): Promise<void> => {
-    logger.info('🚀 Iniciando ejecución consolidada de fetchAllEvents');
+    const frequency = getScheduleFrequency();
+    const isDevelopment = process.env.NODE_ENV === 'development' ||
+                         process.env.FIREBASE_PROJECT_ID?.includes('testing') ||
+                         process.env.FIREBASE_PROJECT_ID?.includes('dev');
+    const projectId = process.env.FIREBASE_PROJECT_ID || 'unknown';
+
+    logger.info(`🚀 Iniciando ejecución consolidada de fetchAllEvents`);
+    logger.info(`📊 CONFIGURACIÓN - Proyecto: ${projectId}, Ambiente: ${isDevelopment ? 'DESARROLLO' : 'PRODUCCIÓN'}, Frecuencia: ${frequency}`);
 
     const start = Date.now();
     const tasks = [
@@ -54,6 +63,6 @@ export const fetchAllEvents = onSchedule({
     }
 
     const duration = (Date.now() - start) / 1000;
-    const frequency = getScheduleFrequency();
-    logger.info(`🏁 Ejecución consolidada finalizada en ${duration}s (frecuencia: ${frequency})`);
+    const scheduleFrequency = getScheduleFrequency();
+    logger.info(`🏁 Ejecución consolidada finalizada en ${duration}s (frecuencia: ${scheduleFrequency})`);
 });

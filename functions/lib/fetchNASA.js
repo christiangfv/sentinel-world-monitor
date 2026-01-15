@@ -23,9 +23,13 @@ function estimateSeverity(title) {
         return 3;
     return 2; // Default to Medium
 }
-async function processNASAFetch() {
+async function processNASAFetch(options = {}) {
     var _a;
+    const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos de NASA EONET');
+    if (dryRun) {
+        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+    }
     try {
         // Fetch active events from the last 30 days
         // Categories: 8(Wildfires), 12(Volcanoes), 14(Landslides), 9(Floods), 10(Severe Storms)
@@ -38,30 +42,34 @@ async function processNASAFetch() {
         firebase_functions_1.logger.info(`📊 Recibidos ${data.events.length} eventos de NASA EONET`);
         // Optimizado: Obtener IDs existentes masivamente
         const existingIds = new Set();
-        try {
-            const existingDocs = await db.collection('events')
-                .where('source', '==', 'nasa_eonet')
-                .limit(500)
-                .get();
-            existingDocs.forEach(doc => {
-                const extId = doc.data().externalId;
-                if (extId)
-                    existingIds.add(extId);
-            });
+        if (!dryRun) {
+            try {
+                const existingDocs = await db.collection('events')
+                    .where('source', '==', 'nasa_eonet')
+                    .limit(500)
+                    .get();
+                existingDocs.forEach(doc => {
+                    const extId = doc.data().externalId;
+                    if (extId)
+                        existingIds.add(extId);
+                });
+            }
+            catch (error) {
+                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+            }
         }
-        catch (error) {
-            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-        }
-        const batch = db.batch();
+        const batch = dryRun ? null : db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         for (const event of data.events) {
             try {
                 const { id, title, description, categories, geometry } = event;
-                // Skip if exists
-                if (existingIds.has(id)) {
-                    skippedCount++;
-                    continue;
+                if (!dryRun) {
+                    // Skip if exists
+                    if (existingIds.has(id)) {
+                        skippedCount++;
+                        continue;
+                    }
                 }
                 // Map Category
                 const categoryId = (_a = categories[0]) === null || _a === void 0 ? void 0 : _a.id;
@@ -107,7 +115,9 @@ async function processNASAFetch() {
                     updatedAt: firestore_1.Timestamp.now(),
                     expiresAt: firestore_1.Timestamp.fromMillis(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días
                 };
-                batch.set(eventRef, eventData);
+                if (!dryRun && batch) {
+                    batch.set(eventRef, eventData);
+                }
                 processedCount++;
             }
             catch (err) {
@@ -115,11 +125,19 @@ async function processNASAFetch() {
                 continue;
             }
         }
-        if (processedCount > 0) {
+        if (!dryRun && processedCount > 0 && batch) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos de NASA en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen NASA: ${processedCount} procesados, ${skippedCount} omitidos`);
+        if (dryRun) {
+            return {
+                dryRun: true,
+                total: data.events.length,
+                processed: processedCount,
+                skipped: skippedCount
+            };
+        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processNASAFetch:', error);

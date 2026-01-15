@@ -23,6 +23,24 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "eventTime",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "source",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "externalId",
           "order": "ASCENDING"
         }

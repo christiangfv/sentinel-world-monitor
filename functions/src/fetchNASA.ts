@@ -1,7 +1,6 @@
 import { logger } from 'firebase-functions';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { geohashForLocation } from 'geofire-common';
-import { DisasterType } from '../../src/lib/types'; // We might need to duplicate types or cast, as functions/src usually doesn't import from src/lib directly due to build structure. I'll use string casting to be safe.
 
 const db = getFirestore();
 
