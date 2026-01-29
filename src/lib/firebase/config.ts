@@ -3,15 +3,14 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
-// ⚠️ CONFIGURACIÓN SENCILLA: Usar valores directos
-// Firebase API keys son públicas por diseño - la seguridad viene de las reglas
+// Configuración desde variables de entorno (inyectadas en build time)
 const firebaseConfig = {
-  apiKey: "AIzaSyCwDxE9fG8hI1jK2lM3nO4pQ5rS6tU7vW8xY9zA0bC",
-  authDomain: "sentinel-prod-9c937.firebaseapp.com",
-  projectId: "sentinel-prod-9c937",
-  storageBucket: "sentinel-prod-9c937.appspot.com",
-  messagingSenderId: "846642937822",
-  appId: "1:846642937822:web:b0db6f6c5f3db4c3d3274f"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Validar configuración
