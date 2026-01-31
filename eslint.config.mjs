@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Additional ignores for compiled/generated files:
+    ".firebase/**",
+    "functions/lib/**",
   ]),
 ]);
 

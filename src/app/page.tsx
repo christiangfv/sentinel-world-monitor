@@ -228,7 +228,7 @@ function StatCard({ value, label, suffix = '', prefix = '', accent = false }: {
 }
 
 export default function LandingPage() {
-  const { user } = useAuth()
+  useAuth() // Initialize auth context
   const [scrollY, setScrollY] = useState(0)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 
