@@ -76,7 +76,8 @@ export function EventDetail({
               </div>
             </div>
             <Badge
-              variant={`severity${event.severity}` as any}
+              // @ts-expect-error - Dynamic severity variant
+              variant={`severity${event.severity}`}
               className="text-lg px-4 py-2"
             >
               {severityLabel}

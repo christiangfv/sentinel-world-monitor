@@ -11,11 +11,12 @@ interface DisasterGlobeProps {
 }
 
 export function DisasterGlobe({ events, selectedEvent, onEventClick }: DisasterGlobeProps) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globeEl = useRef<any>(undefined);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
     }, []);
 
     // Initial position - Center on Latin America

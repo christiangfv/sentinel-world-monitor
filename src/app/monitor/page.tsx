@@ -39,12 +39,13 @@ export default function HomePage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   // Auto-trigger insight card on selection
-  useEffect(() => {
-    if (selectedEvent) {
-      setContextEvent(selectedEvent)
+  const handleEventSelect = (event: DisasterEvent | null) => {
+    setSelectedEvent(event)
+    if (event) {
+      setContextEvent(event)
       setIsContextOpen(true)
     }
-  }, [selectedEvent])
+  }
 
   // Aplicar tema al elemento html
   useEffect(() => {
@@ -68,14 +69,14 @@ export default function HomePage() {
           <DisasterMap
             events={events}
             selectedEvent={selectedEvent}
-            onEventClick={setSelectedEvent}
+            onEventClick={handleEventSelect}
             showControls={false}
           />
         ) : (
           <DisasterGlobe
             events={events}
             selectedEvent={selectedEvent}
-            onEventClick={setSelectedEvent}
+            onEventClick={handleEventSelect}
           />
         )}
       </div>
@@ -287,7 +288,7 @@ export default function HomePage() {
                 events={events}
                 selectedEvent={selectedEvent}
                 newEventIds={newEventIds}
-                onEventSelect={setSelectedEvent}
+                onEventSelect={handleEventSelect}
                 onMarkEventAsSeen={markEventAsSeen}
                 onShowContext={(e) => {
                   setContextEvent(e)

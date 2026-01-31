@@ -16,7 +16,7 @@ export function EventContextModal({ event, isOpen, onClose }: EventContextModalP
 
     useEffect(() => {
         if (isOpen && event) {
-            setIsAnalyzing(true);
+            setIsAnalyzing(true); // eslint-disable-line react-hooks/set-state-in-effect
             const timer = setTimeout(() => {
                 setIsAnalyzing(false);
             }, 1500);

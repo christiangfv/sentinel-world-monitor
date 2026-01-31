@@ -83,12 +83,12 @@ interface EventMarkerProps {
 }
 
 export function EventMarker({ event, onClick }: EventMarkerProps) {
-  // Validar que las coordenadas existan y sean válidas
-  if (!event.location || typeof event.location.lat !== 'number' || typeof event.location.lng !== 'number' ||
-      isNaN(event.location.lat) || isNaN(event.location.lng)) {
-    console.warn('EventMarker: Invalid coordinates for event:', event.id, event.location);
-    return null; // No renderizar el marker si las coordenadas son inválidas
-  }
+  // Check if coordinates are valid (validation moved after hooks)
+  const hasValidCoords = event.location && 
+    typeof event.location.lat === 'number' && 
+    typeof event.location.lng === 'number' &&
+    !isNaN(event.location.lat) && 
+    !isNaN(event.location.lng);
 
   const markerIcon = useMemo(() => {
     const config = DISASTER_CONFIGS[event.disasterType];
@@ -131,6 +131,12 @@ export function EventMarker({ event, onClick }: EventMarkerProps) {
     const config = DISASTER_CONFIGS[event.disasterType];
     return config.severityLabels[event.severity];
   };
+
+  // Early return for invalid coordinates (after all hooks)
+  if (!hasValidCoords) {
+    console.warn('EventMarker: Invalid coordinates for event:', event.id, event.location);
+    return null;
+  }
 
   return (
     <Marker
