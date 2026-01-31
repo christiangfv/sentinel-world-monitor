@@ -650,7 +650,10 @@ export default function LandingPage() {
             </div>
             
             <p className="text-smoke text-sm">
-              © {new Date().getFullYear()} Sentinel World Monitor. Built for global safety.
+              © {new Date().getFullYear()} Sentinel World Monitor. Built by{' '}
+              <a href="https://fuentesvalenzuela.cl" target="_blank" rel="noopener noreferrer" className="text-plasma hover:text-plasma/80 transition-colors">
+                Christian Fuentes
+              </a>
             </p>
             
             <div className="flex items-center gap-6">
