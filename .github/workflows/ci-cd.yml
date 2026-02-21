@@ -111,7 +111,7 @@ jobs:
       with:
         name: build-files
         path: |
-          .next/
+          out/
           public/
           package.json
           package-lock.json
