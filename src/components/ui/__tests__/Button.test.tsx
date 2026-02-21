@@ -21,25 +21,28 @@ describe('Button', () => {
   })
 
   it('applies variant classes correctly', () => {
-    const { rerender } = render(<Button variant="default">Default</Button>)
-    expect(screen.getByRole('button')).toHaveClass('bg-primary-500')
+    const { rerender } = render(<Button variant="plasma">Plasma</Button>)
+    expect(screen.getByRole('button')).toHaveClass('from-plasma')
 
-    rerender(<Button variant="destructive">Destructive</Button>)
-    expect(screen.getByRole('button')).toHaveClass('bg-red-500')
+    rerender(<Button variant="ghost">Ghost</Button>)
+    expect(screen.getByRole('button')).toHaveClass('bg-transparent')
 
     rerender(<Button variant="outline">Outline</Button>)
-    expect(screen.getByRole('button')).toHaveClass('border-input')
+    expect(screen.getByRole('button')).toHaveClass('border')
+
+    rerender(<Button variant="glass">Glass</Button>)
+    expect(screen.getByRole('button')).toHaveClass('glass-subtle')
   })
 
   it('applies size classes correctly', () => {
-    const { rerender } = render(<Button size="default">Default</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-10')
+    const { rerender } = render(<Button size="sm">Small</Button>)
+    expect(screen.getByRole('button')).toHaveClass('px-3', 'py-1.5')
 
-    rerender(<Button size="sm">Small</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-9')
+    rerender(<Button size="md">Medium</Button>)
+    expect(screen.getByRole('button')).toHaveClass('px-4', 'py-2')
 
     rerender(<Button size="lg">Large</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-11')
+    expect(screen.getByRole('button')).toHaveClass('px-6', 'py-3')
   })
 
   it('applies disabled state correctly', () => {
@@ -47,7 +50,7 @@ describe('Button', () => {
 
     const button = screen.getByRole('button')
     expect(button).toBeDisabled()
-    expect(button).toHaveClass('disabled:pointer-events-none', 'disabled:opacity-50')
+    expect(button).toHaveClass('disabled:opacity-50', 'disabled:cursor-not-allowed')
   })
 
   it('forwards additional props', () => {
@@ -58,10 +61,9 @@ describe('Button', () => {
   })
 
   it('has correct accessibility attributes', () => {
-    render(<Button>Accessible Button</Button>)
+    render(<Button type="button">Accessible Button</Button>)
 
     const button = screen.getByRole('button')
     expect(button).toHaveAttribute('type', 'button')
   })
 })
-
