@@ -31,6 +31,11 @@ const EventMarker = dynamic(
   { ssr: false }
 );
 
+const EventAreaCircle = dynamic(
+  () => import('./EventAreaCircle').then(mod => ({ default: mod.EventAreaCircle })),
+  { ssr: false }
+);
+
 const ZoneCircle = dynamic(
   () => import('./ZoneCircle').then(mod => ({ default: mod.ZoneCircle })),
   { ssr: false }
@@ -259,6 +264,15 @@ export function DisasterMap({
             key={`zone-${zone.id}`}
             zone={zone}
             onClick={onZoneClick}
+          />
+        ))}
+
+        {/* Círculos de área para eventos tipo wildfire/flood/storm (debajo de markers) */}
+        {events.map((event) => (
+          <EventAreaCircle
+            key={`area-${event.id}`}
+            event={event}
+            isSelected={selectedEvent?.id === event.id}
           />
         ))}
 
