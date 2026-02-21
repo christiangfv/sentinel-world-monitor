@@ -1,9 +1,6 @@
 {
   "hosting": {
-    "source": ".",
-    "frameworksBackend": {
-      "region": "southamerica-east1"
-    },
+    "public": "out",
     "ignore": [
       "firebase.json",
       "**/.*",
