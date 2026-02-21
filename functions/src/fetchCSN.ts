@@ -10,8 +10,7 @@ function magnitudeToSeverity(magnitude: number): number {
   if (magnitude < 3.0) return 1;
   if (magnitude < 4.0) return 2;
   if (magnitude < 5.0) return 3;
-  if (magnitude < 6.0) return 4;
-  return 5;
+  return 4; // M5.0+ → Severo (máximo soportado)
 }
 
 // Función para formatear ubicación

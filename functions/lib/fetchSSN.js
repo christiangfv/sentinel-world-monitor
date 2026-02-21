@@ -172,6 +172,7 @@ async function processSSNFetch(options = {}) {
 }
 // Función para parsear el XML RSS del SSN
 function parseSSNRSS(xmlText) {
+    var _a;
     const events = [];
     try {
         // Extraer items del RSS
@@ -179,17 +180,17 @@ function parseSSNRSS(xmlText) {
         let match;
         while ((match = itemRegex.exec(xmlText)) !== null) {
             const itemText = match[1];
-            // Extraer datos del item
-            const titleMatch = itemText.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
-            const descMatch = itemText.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/);
-            const linkMatch = itemText.match(/<link><!\[CDATA\[(.*?)\]\]><\/link>/);
+            // Extraer datos del item — soporta tanto texto plano como CDATA
+            const titleMatch = itemText.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
+            const descMatch = itemText.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/);
+            const linkMatch = itemText.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/s);
             const latMatch = itemText.match(/<geo:lat>([\d.-]+)<\/geo:lat>/);
             const lngMatch = itemText.match(/<geo:long>([\d.-]+)<\/geo:long>/);
-            if (titleMatch && descMatch && linkMatch && latMatch && lngMatch) {
+            if (titleMatch && descMatch && latMatch && lngMatch) {
                 events.push({
                     title: titleMatch[1].trim(),
                     description: descMatch[1].trim(),
-                    link: linkMatch[1].trim(),
+                    link: ((_a = linkMatch === null || linkMatch === void 0 ? void 0 : linkMatch[1]) === null || _a === void 0 ? void 0 : _a.trim()) || '',
                     lat: parseFloat(latMatch[1]),
                     lng: parseFloat(lngMatch[1])
                 });

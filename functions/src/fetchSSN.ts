@@ -226,18 +226,18 @@ function parseSSNRSS(xmlText: string): Array<{
     while ((match = itemRegex.exec(xmlText)) !== null) {
       const itemText = match[1];
 
-      // Extraer datos del item
-      const titleMatch = itemText.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
-      const descMatch = itemText.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/);
-      const linkMatch = itemText.match(/<link><!\[CDATA\[(.*?)\]\]><\/link>/);
+      // Extraer datos del item — soporta tanto texto plano como CDATA
+      const titleMatch = itemText.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
+      const descMatch = itemText.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/);
+      const linkMatch = itemText.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/s);
       const latMatch = itemText.match(/<geo:lat>([\d.-]+)<\/geo:lat>/);
       const lngMatch = itemText.match(/<geo:long>([\d.-]+)<\/geo:long>/);
 
-      if (titleMatch && descMatch && linkMatch && latMatch && lngMatch) {
+      if (titleMatch && descMatch && latMatch && lngMatch) {
         events.push({
           title: titleMatch[1].trim(),
           description: descMatch[1].trim(),
-          link: linkMatch[1].trim(),
+          link: linkMatch?.[1]?.trim() || '',
           lat: parseFloat(latMatch[1]),
           lng: parseFloat(lngMatch[1])
         });
