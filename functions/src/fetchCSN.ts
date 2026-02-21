@@ -216,7 +216,7 @@ function parseCSNHTML(htmlText: string): any[] {
       let cellMatch;
 
       while ((cellMatch = cellRegex.exec(rowContent)) !== null) {
-        let cellContent = cellMatch[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        const cellContent = cellMatch[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         cells.push(cellContent);
       }
 

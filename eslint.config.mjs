@@ -15,6 +15,10 @@ const eslintConfig = defineConfig([
     // Additional ignores for compiled/generated files:
     ".firebase/**",
     "functions/lib/**",
+    // Node.js utility/debug scripts and config files (use CommonJS require)
+    "debug-map.js",
+    "test-sources.js",
+    "jest.config.js",
   ]),
   // Custom rules for this project
   {
