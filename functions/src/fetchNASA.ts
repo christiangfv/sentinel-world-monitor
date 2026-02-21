@@ -19,10 +19,39 @@ function mapCategoryToDisasterType(categoryId: string): string | null {
 }
 
 // Helper to estimate severity (EONET doesn't provide it directly)
-function estimateSeverity(title: string): number {
-    const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('major') || lowerTitle.includes('severe') || lowerTitle.includes('eruption')) return 3;
-    return 2; // Default to Medium
+function estimateSeverity(title: string, categoryId: string): number {
+    const t = title.toLowerCase();
+
+    if (categoryId === 'wildfires') {
+        // Quemas controladas (prescribed fires, RX burns) = baja severidad
+        if (t.includes('rx') || t.includes('prescribed')) return 1;
+        // Incendios grandes o severos
+        if (t.includes('major') || t.includes('large') || t.includes('severe') || t.includes('complex')) return 3;
+        // Incendio forestal estándar
+        return 2;
+    }
+
+    if (t.includes('major') || t.includes('severe') || t.includes('eruption') || t.includes('large')) return 3;
+    return 2;
+}
+
+// Helper to extract location name from EONET title
+// Titles like "SHNF C-92 RX Prescribed Fire, San Jacinto, Texas" → "San Jacinto, Texas"
+function extractLocationName(title: string): string {
+    // Buscar patrón: "..., Place, State/Country"
+    const parts = title.split(',');
+    if (parts.length >= 2) {
+        // El nombre del lugar está en las últimas 1-2 partes
+        return parts.slice(-2).map(p => p.trim()).join(', ');
+    }
+    // Si no hay comas, buscar últimas palabras después de keywords
+    const cleaned = title
+        .replace(/\bRX\b/gi, '')
+        .replace(/Prescribed Fire/gi, '')
+        .replace(/Wildfire/gi, '')
+        .replace(/Fire/gi, '')
+        .trim();
+    return cleaned || 'Ubicación remota (Satellite)';
 }
 
 export async function processNASAFetch(
@@ -101,7 +130,8 @@ export async function processNASAFetch(
                 }
 
                 const geohash = geohashForLocation([lat, lng]);
-                const severity = estimateSeverity(title);
+                const severity = estimateSeverity(title, categoryId);
+                const locationName = extractLocationName(title);
 
                 // Doc Ref
                 const eventRef = db.collection('events').doc();
@@ -118,7 +148,7 @@ export async function processNASAFetch(
                         longitude: lng
                     },
                     geohash,
-                    locationName: 'Ubicación remota (Satellite)', // EONET rarely gives place names
+                    locationName,
                     radiusKm: 20 + (severity * 10),
                     metadata: {
                         eonet_link: event.link,

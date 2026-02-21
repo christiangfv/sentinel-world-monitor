@@ -167,11 +167,11 @@ async function processGDACSFetch(options = {}) {
 // Extrae texto de un tag XML, soportando tanto texto plano como CDATA
 function extractXmlText(content, tag) {
     // Intentar CDATA primero
-    const cdataMatch = content.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[(.*?)\\]\\]><\\/${tag}>`, 's'));
+    const cdataMatch = content.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`));
     if (cdataMatch)
         return cdataMatch[1].trim();
     // Fallback: texto plano
-    const plainMatch = content.match(new RegExp(`<${tag}[^>]*>(.*?)<\\/${tag}>`, 's'));
+    const plainMatch = content.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
     return plainMatch ? plainMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim() : '';
 }
 // Parser de XML GDACS — soporta texto plano y CDATA

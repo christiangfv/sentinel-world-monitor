@@ -41,23 +41,25 @@ export async function getEvents(filters: EventFilters = { disasterTypes: [], min
       constraints.push(where('disasterType', 'in', filters.disasterTypes));
     }
 
-    // Filtro por severidad mínima
-    if (filters.minSeverity && filters.minSeverity > 1) {
-      constraints.push(where('severity', '>=', filters.minSeverity));
+    // Filtro por rango de fechas (en Firestore — evita conflicto con range de severity)
+    if (filters.dateRange?.start) {
+      constraints.push(where('eventTime', '>=', Timestamp.fromDate(filters.dateRange.start)));
+    }
+    if (filters.dateRange?.end) {
+      constraints.push(where('eventTime', '<=', Timestamp.fromDate(filters.dateRange.end)));
     }
 
     // Ordenar por tiempo de evento (más recientes primero)
     constraints.push(orderBy('eventTime', 'desc'));
 
-    // Limitar resultados
-    constraints.push(limit(100));
+    // Aumentar límite para cubrir todos los tipos activos
+    constraints.push(limit(200));
 
     const q = query(collection(db, 'events'), ...constraints);
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => {
+    const events = snapshot.docs.map(doc => {
       const data = doc.data();
-      // Manejar tanto GeoPoint (.latitude/.longitude) como objeto simple (.lat/.lng)
       const location = data.location;
       const lat = location?.latitude ?? location?.lat;
       const lng = location?.longitude ?? location?.lng;
@@ -65,16 +67,17 @@ export async function getEvents(filters: EventFilters = { disasterTypes: [], min
       return {
         id: doc.id,
         ...data,
-        location: {
-          lat,
-          lng
-        },
+        location: { lat, lng },
         eventTime: data.eventTime.toDate(),
         expiresAt: data.expiresAt?.toDate(),
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       } as DisasterEvent;
     });
+
+    // Filtro de severidad aplicado client-side (evita conflicto de range filters en Firestore)
+    const minSev = filters.minSeverity ?? 1;
+    return minSev > 1 ? events.filter(e => e.severity >= minSev) : events;
   } catch (error) {
     console.error('Error getting events:', error);
     throw new Error('Error al obtener eventos');
@@ -131,21 +134,24 @@ export function subscribeToEvents(
     constraints.push(where('disasterType', 'in', filters.disasterTypes));
   }
 
-  // Filtro por severidad mínima
-  if (filters.minSeverity && filters.minSeverity > 1) {
-    constraints.push(where('severity', '>=', filters.minSeverity));
+  // Filtro por rango de fechas (en Firestore)
+  if (filters.dateRange?.start) {
+    constraints.push(where('eventTime', '>=', Timestamp.fromDate(filters.dateRange.start)));
+  }
+  if (filters.dateRange?.end) {
+    constraints.push(where('eventTime', '<=', Timestamp.fromDate(filters.dateRange.end)));
   }
 
   // Ordenar por tiempo de evento
   constraints.push(orderBy('eventTime', 'desc'));
-  constraints.push(limit(50));
+  // Aumentar límite para cubrir todos los eventos activos
+  constraints.push(limit(200));
 
   const q = query(collection(db, 'events'), ...constraints);
 
   return onSnapshot(q, (snapshot) => {
-    const events = snapshot.docs.map(doc => {
+    const allEvents = snapshot.docs.map(doc => {
       const data = doc.data();
-      // Manejar tanto GeoPoint (.latitude/.longitude) como objeto simple (.lat/.lng)
       const location = data.location;
       const lat = location?.latitude ?? location?.lat;
       const lng = location?.longitude ?? location?.lng;
@@ -153,10 +159,7 @@ export function subscribeToEvents(
       return {
         id: doc.id,
         ...data,
-        location: {
-          lat,
-          lng
-        },
+        location: { lat, lng },
         eventTime: data.eventTime.toDate(),
         expiresAt: data.expiresAt?.toDate(),
         createdAt: data.createdAt.toDate(),
@@ -164,6 +167,9 @@ export function subscribeToEvents(
       } as DisasterEvent;
     });
 
+    // Severidad filtrada client-side
+    const minSev = filters.minSeverity ?? 1;
+    const events = minSev > 1 ? allEvents.filter(e => e.severity >= minSev) : allEvents;
     callback(events);
   }, (error) => {
     console.error('Error subscribing to events:', error);

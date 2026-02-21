@@ -181,9 +181,9 @@ function parseSSNRSS(xmlText) {
         while ((match = itemRegex.exec(xmlText)) !== null) {
             const itemText = match[1];
             // Extraer datos del item — soporta tanto texto plano como CDATA
-            const titleMatch = itemText.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
+            const titleMatch = itemText.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/);
             const descMatch = itemText.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/);
-            const linkMatch = itemText.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/s);
+            const linkMatch = itemText.match(/<link>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/);
             const latMatch = itemText.match(/<geo:lat>([\d.-]+)<\/geo:lat>/);
             const lngMatch = itemText.match(/<geo:long>([\d.-]+)<\/geo:long>/);
             if (titleMatch && descMatch && latMatch && lngMatch) {
