@@ -33,10 +33,10 @@ describe('Severity Utils', () => {
 
   describe('getSeverityColor', () => {
     it('should return correct color for each severity level', () => {
-      expect(getSeverityColor(1)).toBe('#22c55e') // green
-      expect(getSeverityColor(2)).toBe('#eab308') // yellow
-      expect(getSeverityColor(3)).toBe('#f97316') // orange
-      expect(getSeverityColor(4)).toBe('#ef4444') // red
+      expect(getSeverityColor(1)).toBe('#7088A0') // Mist - low
+      expect(getSeverityColor(2)).toBe('#D4B57A') // Plasma - medium
+      expect(getSeverityColor(3)).toBe('#A07888') // Sakura - high
+      expect(getSeverityColor(4)).toBe('#E8E8F0') // Muted - critical
     })
   })
 
