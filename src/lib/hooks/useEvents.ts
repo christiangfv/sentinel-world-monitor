@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DisasterEvent, EventFilters } from '@/lib/types';
 import { getEvents, subscribeToEvents, getEventById } from '@/lib/firebase/firestore';
 
@@ -9,22 +9,24 @@ export function useEvents(filters: EventFilters = { disasterTypes: [], minSeveri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newEventIds, setNewEventIds] = useState<Set<string>>(new Set());
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  // useRef para evitar stale closure en el callback de onSnapshot
+  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
 
     // Cargar eventos iniciales
+    isInitialLoadRef.current = true;
     getEvents(filters)
       .then((initialEvents) => {
         setEvents(initialEvents);
-        setIsInitialLoad(false); // Marcar que ya se completó la carga inicial
+        isInitialLoadRef.current = false; // Marcar que ya se completó la carga inicial
       })
       .catch((err) => {
         console.error('Error loading events:', err);
         setError('Error al cargar eventos');
-        setIsInitialLoad(false);
+        isInitialLoadRef.current = false;
       })
       .finally(() => setLoading(false));
 
@@ -32,7 +34,8 @@ export function useEvents(filters: EventFilters = { disasterTypes: [], minSeveri
     const unsubscribe = subscribeToEvents(
       (updatedEvents) => {
         // Solo detectar eventos nuevos después de la carga inicial
-        if (!isInitialLoad) {
+        // Usa ref para evitar stale closure
+        if (!isInitialLoadRef.current) {
           const existingIds = new Set(events.map(e => e.id));
           const newIds = new Set<string>();
 

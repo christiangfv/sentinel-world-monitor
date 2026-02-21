@@ -32,8 +32,12 @@ function calculateEventRadius(magnitude) {
 }
 // Cron job: Fetch USGS cada 15 minutos (optimizado para reducir costos)
 // Función principal para procesar el fetch (exportada para consolidación)
-async function processUSGSFetch() {
+async function processUSGSFetch(options = {}) {
+    const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del USGS');
+    if (dryRun) {
+        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+    }
     try {
         const response = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
         if (!response.ok) {
@@ -41,27 +45,29 @@ async function processUSGSFetch() {
         }
         const data = await response.json();
         firebase_functions_1.logger.info(`📊 Recibidos ${data.features.length} eventos del USGS`);
-        // OPTIMIZACIÓN PARA COSTO 0: Limitar consultas para mantener gratis
-        // Solo verificar eventos de las últimas 24 horas para reducir lecturas
-        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const existingIds = new Set();
-        try {
-            const existingDocs = await db.collection('events')
-                .where('source', '==', 'usgs')
-                .where('eventTime', '>=', firestore_1.Timestamp.fromDate(yesterday))
-                .get();
-            existingDocs.forEach(doc => {
-                const extId = doc.data().externalId;
-                if (extId)
-                    existingIds.add(extId);
-            });
-            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
+        if (!dryRun) {
+            // OPTIMIZACIÓN PARA COSTO 0: Limitar consultas para mantener gratis
+            // Solo verificar eventos de las últimas 24 horas para reducir lecturas
+            const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            try {
+                const existingDocs = await db.collection('events')
+                    .where('source', '==', 'usgs')
+                    .where('eventTime', '>=', firestore_1.Timestamp.fromDate(yesterday))
+                    .get();
+                existingDocs.forEach(doc => {
+                    const extId = doc.data().externalId;
+                    if (extId)
+                        existingIds.add(extId);
+                });
+                firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
+            }
+            catch (error) {
+                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+                // Si falla, continuamos sin verificar duplicados (menos eficiente pero evita costos)
+            }
         }
-        catch (error) {
-            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-            // Si falla, continuamos sin verificar duplicados (menos eficiente pero evita costos)
-        }
-        const batch = db.batch();
+        const batch = dryRun ? null : db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
@@ -75,22 +81,24 @@ async function processUSGSFetch() {
                     skippedCount++;
                     continue;
                 }
-                // Verificar si el evento ya existe usando el Set optimizado
-                if (existingIds.has(id)) {
-                    skippedCount++;
-                    continue;
-                }
-                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-                // Esto solo debería ocurrir si la carga masiva falló
-                if (existingIds.size === 0) {
-                    const checkDoc = await db.collection('events')
-                        .where('source', '==', 'usgs')
-                        .where('externalId', '==', id)
-                        .limit(1)
-                        .get();
-                    if (!checkDoc.empty) {
+                if (!dryRun) {
+                    // Verificar si el evento ya existe usando el Set optimizado
+                    if (existingIds.has(id)) {
                         skippedCount++;
                         continue;
+                    }
+                    // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                    // Esto solo debería ocurrir si la carga masiva falló
+                    if (existingIds.size === 0) {
+                        const checkDoc = await db.collection('events')
+                            .where('source', '==', 'usgs')
+                            .where('externalId', '==', id)
+                            .limit(1)
+                            .get();
+                        if (!checkDoc.empty) {
+                            skippedCount++;
+                            continue;
+                        }
                     }
                 }
                 // Calcular geohash y otros datos
@@ -143,7 +151,9 @@ async function processUSGSFetch() {
                     createdAt: firestore_1.Timestamp.now(),
                     updatedAt: firestore_1.Timestamp.now()
                 };
-                batch.set(eventRef, eventData);
+                if (!dryRun && batch) {
+                    batch.set(eventRef, eventData);
+                }
                 processedCount++;
                 firebase_functions_1.logger.info(`✅ Procesado evento USGS: ${id} - M${magnitude.toFixed(1)} - ${properties.title}`);
             }
@@ -153,12 +163,20 @@ async function processUSGSFetch() {
             }
         }
         // Ejecutar batch
-        if (processedCount > 0) {
+        if (!dryRun && processedCount > 0 && batch) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch USGS completado exitosamente');
+        if (dryRun) {
+            return {
+                dryRun: true,
+                total: data.features.length,
+                processed: processedCount,
+                skipped: skippedCount
+            };
+        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processUSGSFetch:', error);

@@ -52,8 +52,12 @@ const mexicanVolcanoes = [
     }
 ];
 // Función principal para procesar el fetch de CENAPRED
-async function processCENAPREDFetch() {
+async function processCENAPREDFetch(options = {}) {
+    const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🌋 Iniciando fetch de CENAPRED (Volcanes México)');
+    if (dryRun) {
+        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+    }
     try {
         // Intentar obtener datos del sitio web de CENAPRED
         const response = await fetch('https://www.gob.mx/cenapred');
@@ -66,31 +70,33 @@ async function processCENAPREDFetch() {
         const volcanoEvents = extractVolcanoInfo(htmlText);
         firebase_functions_1.logger.info(`🌋 Encontrados ${volcanoEvents.length} eventos volcánicos en CENAPRED`);
         // OPTIMIZACIÓN PARA COSTO 0: Obtener IDs existentes de las últimas 72 horas
-        const threeDaysAgo = new Date(Date.now() - 72 * 60 * 60 * 1000);
         const existingIds = new Set();
-        try {
-            const existingDocs = await db.collection('events')
-                .where('source', '==', 'cenapred')
-                .where('eventTime', '>=', firestore_1.Timestamp.fromDate(threeDaysAgo))
-                .get();
-            existingDocs.forEach(doc => {
-                const extId = doc.data().externalId;
-                if (extId)
-                    existingIds.add(extId);
-            });
-            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
+        if (!dryRun) {
+            const threeDaysAgo = new Date(Date.now() - 72 * 60 * 60 * 1000);
+            try {
+                const existingDocs = await db.collection('events')
+                    .where('source', '==', 'cenapred')
+                    .where('eventTime', '>=', firestore_1.Timestamp.fromDate(threeDaysAgo))
+                    .get();
+                existingDocs.forEach(doc => {
+                    const extId = doc.data().externalId;
+                    if (extId)
+                        existingIds.add(extId);
+                });
+                firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
+            }
+            catch (error) {
+                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+            }
         }
-        catch (error) {
-            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-        }
-        const batch = db.batch();
+        const batch = dryRun ? null : db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         for (const volcanoEvent of volcanoEvents) {
             try {
                 // Verificar si el evento ya existe
                 const externalId = `cenapred_${volcanoEvent.volcanoName}_${volcanoEvent.date}`;
-                if (existingIds.has(externalId)) {
+                if (!dryRun && existingIds.has(externalId)) {
                     skippedCount++;
                     continue;
                 }
@@ -127,7 +133,9 @@ async function processCENAPREDFetch() {
                     createdAt: firestore_1.Timestamp.now(),
                     updatedAt: firestore_1.Timestamp.now()
                 };
-                batch.set(eventRef, eventData);
+                if (!dryRun && batch) {
+                    batch.set(eventRef, eventData);
+                }
                 processedCount++;
                 firebase_functions_1.logger.info(`🌋 Procesado volcán CENAPRED: ${volcanoEvent.volcanoName} - ${volcanoEvent.alertColor}`);
             }
@@ -137,12 +145,20 @@ async function processCENAPREDFetch() {
             }
         }
         // Ejecutar batch
-        if (processedCount > 0) {
+        if (!dryRun && processedCount > 0 && batch) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} eventos volcánicos de CENAPRED en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen CENAPRED: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch CENAPRED (México) completado exitosamente');
+        if (dryRun) {
+            return {
+                dryRun: true,
+                total: volcanoEvents.length,
+                processed: processedCount,
+                skipped: skippedCount
+            };
+        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processCENAPREDFetch:', error);

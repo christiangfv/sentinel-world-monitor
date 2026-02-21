@@ -6,45 +6,29 @@ import { geohashForLocation } from 'geofire-common';
 const db = getFirestore();
 
 // Mapeo de tipos GDACS a nuestros tipos de desastre
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const GDACS_TYPE_MAPPING: Record<string, string> = {
-  'EQ': 'earthquake',     // Earthquake
-  'TC': 'storm',          // Tropical Cyclone
-  'FL': 'flood',          // Flood
-  'VO': 'volcano',        // Volcano
-  'WF': 'wildfire',       // Wildfire
-  'DR': 'landslide',      // Drought (mapeado a landslide por ahora)
-  'TS': 'tsunami'         // Tsunami
+  'EQ': 'earthquake',
+  'TC': 'storm',
+  'FL': 'flood',
+  'VO': 'volcano',
+  'WF': 'wildfire',
+  'DR': 'landslide',   // Drought → landslide (más cercano en nuestro sistema)
+  'TS': 'tsunami'
 };
 
-// Mapeo de severidad GDACS a nuestro sistema
-function gdacsAlertLevelToSeverity(alertLevel: string, disasterType: string): number {
-  // GDACS usa Green, Orange, Red
+// Mapeo de severidad GDACS a nuestro sistema (1-4)
+// Red con eventosig alto → 4, Red normal → 3, Orange → 2, Green → 1
+function gdacsAlertLevelToSeverity(alertLevel: string, eventScore?: number): number {
   switch (alertLevel.toLowerCase()) {
-    case 'green':
-      return 1;
+    case 'red':
+      // Si el score es muy alto (>3.0 en escala GDACS), es nivel 4 (crítico)
+      return (eventScore && eventScore >= 3.0) ? 4 : 3;
     case 'orange':
       return 2;
-    case 'red':
-      return 3;
+    case 'green':
     default:
       return 1;
   }
-}
-
-// Función para determinar el tipo de desastre basado en el título y descripción
-function determineDisasterType(title: string, description: string): string {
-  const text = (title + ' ' + description).toLowerCase();
-
-  if (text.includes('earthquake') || text.includes('sismo')) return 'earthquake';
-  if (text.includes('tsunami')) return 'tsunami';
-  if (text.includes('volcan') || text.includes('eruption')) return 'volcano';
-  if (text.includes('flood') || text.includes('inundation')) return 'flood';
-  if (text.includes('fire') || text.includes('wildfire')) return 'wildfire';
-  if (text.includes('cyclone') || text.includes('hurricane') || text.includes('storm')) return 'storm';
-  if (text.includes('landslide') || text.includes('mudslide')) return 'landslide';
-
-  return 'earthquake'; // Default
 }
 
 type FetchOptions = { dryRun?: boolean };
@@ -121,9 +105,9 @@ export async function processGDACSFetch(
           }
         }
 
-        // Determinar tipo de desastre
-        const disasterType = determineDisasterType(event.title, event.description);
-        const severity = gdacsAlertLevelToSeverity(event.alertLevel, disasterType);
+        // Determinar tipo de desastre usando el código GDACS directamente
+        const disasterType = GDACS_TYPE_MAPPING[event.eventType] || 'earthquake';
+        const severity = gdacsAlertLevelToSeverity(event.alertLevel, event.eventScore);
 
         // Calcular geohash
         const geohash = geohashForLocation([event.lat, event.lng]);
@@ -199,12 +183,21 @@ export async function processGDACSFetch(
   }
 }
 
-// Parser simplificado de XML GDACS
+// Extrae texto de un tag XML, soportando tanto texto plano como CDATA
+function extractXmlText(content: string, tag: string): string {
+  // Intentar CDATA primero
+  const cdataMatch = content.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[(.*?)\\]\\]><\\/${tag}>`, 's'));
+  if (cdataMatch) return cdataMatch[1].trim();
+  // Fallback: texto plano
+  const plainMatch = content.match(new RegExp(`<${tag}[^>]*>(.*?)<\\/${tag}>`, 's'));
+  return plainMatch ? plainMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim() : '';
+}
+
+// Parser de XML GDACS — soporta texto plano y CDATA
 function parseGDACSXML(xmlText: string): any[] {
   const events: any[] = [];
 
   try {
-    // Método simplificado: buscar patrones básicos sin flag 's'
     const items = xmlText.split('<item>').slice(1);
 
     for (const item of items) {
@@ -213,44 +206,63 @@ function parseGDACSXML(xmlText: string): any[] {
 
       const itemContent = item.substring(0, endIndex);
 
-      // Extraer datos básicos
-      const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
-      const descriptionMatch = itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/);
-      const linkMatch = itemContent.match(/<link>(.*?)<\/link>/);
-      const guidMatch = itemContent.match(/<guid>(.*?)<\/guid>/);
-      const pubDateMatch = itemContent.match(/<pubDate>(.*?)<\/pubDate>/);
+      // Campos básicos — soporta CDATA y texto plano
+      const title = extractXmlText(itemContent, 'title');
+      const description = extractXmlText(itemContent, 'description');
+      const link = extractXmlText(itemContent, 'link');
+      const guid = extractXmlText(itemContent, 'guid');
+      const pubDate = extractXmlText(itemContent, 'pubDate');
+
+      // Coordenadas: <geo:lat> / <geo:long> o <georss:point>
+      let lat: number | null = null;
+      let lng: number | null = null;
+
       const latMatch = itemContent.match(/<geo:lat>(.*?)<\/geo:lat>/);
       const lngMatch = itemContent.match(/<geo:long>(.*?)<\/geo:long>/);
-
-      const alertLevelMatch = itemContent.match(/<gdacs:alertlevel>(.*?)<\/gdacs:alertlevel>/);
-      const countryMatch = itemContent.match(/<gdacs:country>(.*?)<\/gdacs:country>/);
-
-      const title = titleMatch?.[1] || '';
-      const description = descriptionMatch?.[1] || '';
-      const link = linkMatch?.[1] || '';
-      const guid = guidMatch?.[1] || '';
-      const pubDate = pubDateMatch?.[1] || '';
-      const lat = latMatch?.[1] ? parseFloat(latMatch[1]) : null;
-      const lng = lngMatch?.[1] ? parseFloat(lngMatch[1]) : null;
-
-      const alertLevel = alertLevelMatch?.[1] || 'Green';
-      const country = countryMatch?.[1] || '';
-
-      // Validar coordenadas: deben existir, ser números válidos y no ser 0,0
-      if (!lat || !lng || isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0) || !title) {
-        continue; // Saltar eventos con coordenadas inválidas
+      if (latMatch && lngMatch) {
+        lat = parseFloat(latMatch[1]);
+        lng = parseFloat(lngMatch[1]);
+      } else {
+        // Fallback: <georss:point>lat lng</georss:point>
+        const pointMatch = itemContent.match(/<georss:point>(.*?)<\/georss:point>/);
+        if (pointMatch) {
+          const parts = pointMatch[1].trim().split(/\s+/);
+          if (parts.length >= 2) {
+            lat = parseFloat(parts[0]);
+            lng = parseFloat(parts[1]);
+          }
+        }
       }
+
+      // Tags GDACS específicos
+      const alertLevel = extractXmlText(itemContent, 'gdacs:alertlevel') || 'Green';
+      const country = extractXmlText(itemContent, 'gdacs:country');
+      // gdacs:eventtype: EQ, TC, FL, VO, WF, DR, TS
+      const eventType = extractXmlText(itemContent, 'gdacs:eventtype');
+      // gdacs:eventscore: score numérico (0.0 - 4.0+) para determinar severidad
+      const eventScoreRaw = extractXmlText(itemContent, 'gdacs:eventscore');
+      const eventScore = eventScoreRaw ? parseFloat(eventScoreRaw) : undefined;
+
+      // Validar coordenadas
+      if (lat === null || lng === null || isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
+        continue;
+      }
+
+      // Necesitamos al menos guid o title para identificar el evento
+      if (!guid && !title) continue;
 
       events.push({
         title,
         description,
         link,
-        guid,
+        guid: guid || `gdacs-${pubDate}-${lat}-${lng}`,
         pubDate,
         lat,
         lng,
         alertLevel,
         country,
+        eventType,    // EQ, TC, FL, VO, WF, DR, TS
+        eventScore,   // score numérico para severidad
         version: 1
       });
     }

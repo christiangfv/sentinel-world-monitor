@@ -36,8 +36,8 @@ export async function processNASAFetch(
 
     try {
         // Fetch active events from the last 30 days
-        // Categories: 8(Wildfires), 12(Volcanoes), 14(Landslides), 9(Floods), 10(Severe Storms)
-        const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=30&category=8,12,14,9,10';
+        // API v3 usa slugs (no IDs numéricos de v2)
+        const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=30&category=wildfires,volcanoes,landslides,floods,severeStorms';
 
         const response = await fetch(url);
         if (!response.ok) {

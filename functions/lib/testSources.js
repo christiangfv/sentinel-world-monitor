@@ -53,39 +53,33 @@ const getScheduleFrequency = () => {
 };
 // Función para probar todas las fuentes de datos
 const testAllSources = async () => {
-    firebase_functions_1.logger.info('🧪 Iniciando pruebas de todas las fuentes de datos...');
+    firebase_functions_1.logger.info('🧪 Iniciando pruebas de todas las fuentes de datos (modo dryRun)...');
     const sources = [
-        { name: 'USGS (Terremotos)', function: fetchUSGS_1.processUSGSFetch },
-        { name: 'GDACS (Desastres Globales)', function: fetchGDACS_1.processGDACSFetch },
-        { name: 'CSN (Chile)', function: fetchCSN_1.processCSNFetch },
-        { name: 'NHC (Huracanes)', function: fetchNHC_1.processNHCFetch },
-        { name: 'NASA EONET', function: () => Promise.resolve().then(() => __importStar(require('./fetchNASA'))).then(m => m.processNASAFetch()) },
-        { name: 'SSN (México)', function: fetchSSN_1.processSSNFetch },
-        { name: 'CENAPRED (México)', function: fetchCENAPRED_1.processCENAPREDFetch }
+        { name: 'USGS (Terremotos)', function: () => (0, fetchUSGS_1.processUSGSFetch)({ dryRun: true }) },
+        { name: 'GDACS (Desastres Globales)', function: () => (0, fetchGDACS_1.processGDACSFetch)({ dryRun: true }) },
+        { name: 'CSN (Chile)', function: () => (0, fetchCSN_1.processCSNFetch)({ dryRun: true }) },
+        { name: 'NHC (Huracanes)', function: () => (0, fetchNHC_1.processNHCFetch)({ dryRun: true }) },
+        { name: 'NASA EONET', function: () => Promise.resolve().then(() => __importStar(require('./fetchNASA'))).then(m => m.processNASAFetch({ dryRun: true })) },
+        { name: 'SSN (México)', function: () => (0, fetchSSN_1.processSSNFetch)({ dryRun: true }) },
+        { name: 'CENAPRED (México)', function: () => (0, fetchCENAPRED_1.processCENAPREDFetch)({ dryRun: true }) }
     ];
     const results = [];
     for (const source of sources) {
         try {
             firebase_functions_1.logger.info(`🔍 Probando fuente: ${source.name}`);
-            // Para pruebas, vamos a simular una ejecución pero sin guardar en BD
-            // Esto requiere modificar las funciones para tener un modo "test" o
-            // crear versiones de prueba que solo hagan fetch y parse sin guardar
-            // Por ahora, solo verificamos que las funciones existen y son ejecutables
-            if (typeof source.function === 'function') {
-                firebase_functions_1.logger.info(`✅ Función ${source.name} está disponible`);
-                results.push({
-                    source: source.name,
-                    status: 'available',
-                    error: null
-                });
+            const summary = await source.function();
+            const hasSummary = summary && typeof summary === 'object' && 'dryRun' in summary;
+            results.push({
+                source: source.name,
+                status: 'success',
+                summary: hasSummary ? summary : null,
+                error: null
+            });
+            if (hasSummary) {
+                firebase_functions_1.logger.info(`✅ ${source.name}: ${summary.processed} procesados, ${summary.skipped} omitidos`);
             }
             else {
-                firebase_functions_1.logger.error(`❌ Función ${source.name} no es válida`);
-                results.push({
-                    source: source.name,
-                    status: 'error',
-                    error: 'Function not valid'
-                });
+                firebase_functions_1.logger.info(`✅ ${source.name}: ejecutado`);
             }
         }
         catch (error) {
@@ -93,6 +87,7 @@ const testAllSources = async () => {
             results.push({
                 source: source.name,
                 status: 'error',
+                summary: null,
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
         }
@@ -101,9 +96,9 @@ const testAllSources = async () => {
     results.forEach(result => {
         firebase_functions_1.logger.info(`${result.source}: ${result.status} ${result.error ? `(${result.error})` : ''}`);
     });
-    const successCount = results.filter(r => r.status === 'available').length;
+    const successCount = results.filter(r => r.status === 'success').length;
     const errorCount = results.filter(r => r.status === 'error').length;
-    firebase_functions_1.logger.info(`✅ ${successCount} fuentes disponibles, ${errorCount} con errores`);
+    firebase_functions_1.logger.info(`✅ ${successCount} fuentes OK, ${errorCount} con errores`);
     return {
         total: sources.length,
         successful: successCount,
@@ -263,32 +258,18 @@ exports.testDataSources = (0, https_1.onRequest)({
     try {
         firebase_functions_1.logger.info('🧪 Ejecutando prueba manual de fuentes de datos - INICIO');
         const connectivityResults = await (0, exports.testFetchConnectivity)();
-        // Ejecutar una función de prueba para verificar funcionamiento real
-        let sampleExecutionResult = null;
-        try {
-            firebase_functions_1.logger.info('🔍 Probando ejecución real de fetchCSNEvents...');
-            // Nota: Esto ejecutará la función pero en un contexto limitado
-            // para evitar duplicar datos en producción
-            sampleExecutionResult = {
-                status: 'Función disponible para ejecución programada',
-                note: 'Las funciones se ejecutan automáticamente según su schedule'
-            };
-        }
-        catch (error) {
-            sampleExecutionResult = {
-                status: 'Error en ejecución',
-                error: error instanceof Error ? error.message : 'Unknown error'
-            };
-        }
+        const captureResults = await (0, exports.testAllSources)();
         const schedule = getScheduleFrequency();
         const response = {
             timestamp: new Date().toISOString(),
             connectivityTest: connectivityResults,
-            sampleExecution: sampleExecutionResult,
+            captureTest: captureResults,
             activeSources: [
                 { name: 'Consolidado', function: 'fetchAllEvents', schedule: schedule }
             ],
-            status: connectivityResults.errors === 0 ? '✅ Todas las fuentes funcionando' : '⚠️ Algunas fuentes con problemas'
+            status: connectivityResults.errors === 0 && captureResults.errors === 0
+                ? '✅ Todas las fuentes funcionando'
+                : '⚠️ Algunas fuentes con problemas'
         };
         res.status(200).json(response);
     }

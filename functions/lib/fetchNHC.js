@@ -43,8 +43,12 @@ function extractWindSpeed(text) {
 }
 // Cron job: Fetch NHC cada 30 minutos
 // Función principal para procesar el fetch (exportada para consolidación)
-async function processNHCFetch() {
+async function processNHCFetch(options = {}) {
+    const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del NHC');
+    if (dryRun) {
+        firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
+    }
     try {
         // API del National Hurricane Center - Atlantic
         const atlanticResponse = await fetch('https://www.nhc.noaa.gov/index-at.xml');
@@ -70,44 +74,48 @@ async function processNHCFetch() {
         firebase_functions_1.logger.info(`📊 Recibidos ${allEvents.length} eventos del NHC (${atlanticEvents.length} Atlántico, ${pacificEvents.length} Pacífico)`);
         // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
         const existingIds = new Set();
-        try {
-            const existingDocs = await db.collection('events')
-                .where('source', '==', 'nhc')
-                .orderBy('eventTime', 'desc')
-                .limit(500)
-                .get();
-            existingDocs.forEach(doc => {
-                const extId = doc.data().externalId;
-                if (extId)
-                    existingIds.add(extId);
-            });
-            firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+        if (!dryRun) {
+            try {
+                const existingDocs = await db.collection('events')
+                    .where('source', '==', 'nhc')
+                    .orderBy('eventTime', 'desc')
+                    .limit(500)
+                    .get();
+                existingDocs.forEach(doc => {
+                    const extId = doc.data().externalId;
+                    if (extId)
+                        existingIds.add(extId);
+                });
+                firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
+            }
+            catch (error) {
+                firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
+                // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
+            }
         }
-        catch (error) {
-            firebase_functions_1.logger.error('❌ Error cargando IDs existentes:', error);
-            // Continuamos aunque falle la carga masiva (menos eficiente pero seguro)
-        }
-        const batch = db.batch();
+        const batch = dryRun ? null : db.batch();
         let processedCount = 0;
         let skippedCount = 0;
         // NOTIFICACIONES ELIMINADAS COMPLETAMENTE PARA COSTO 0
         for (const event of allEvents) {
             try {
-                // Verificar si el evento ya existe usando el Set optimizado
-                if (existingIds.has(event.guid)) {
-                    skippedCount++;
-                    continue;
-                }
-                // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-                if (existingIds.size === 0) {
-                    const checkDoc = await db.collection('events')
-                        .where('source', '==', 'nhc')
-                        .where('externalId', '==', event.guid)
-                        .limit(1)
-                        .get();
-                    if (!checkDoc.empty) {
+                if (!dryRun) {
+                    // Verificar si el evento ya existe usando el Set optimizado
+                    if (existingIds.has(event.guid)) {
                         skippedCount++;
                         continue;
+                    }
+                    // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
+                    if (existingIds.size === 0) {
+                        const checkDoc = await db.collection('events')
+                            .where('source', '==', 'nhc')
+                            .where('externalId', '==', event.guid)
+                            .limit(1)
+                            .get();
+                        if (!checkDoc.empty) {
+                            skippedCount++;
+                            continue;
+                        }
                     }
                 }
                 // Extraer coordenadas si están disponibles
@@ -153,7 +161,9 @@ async function processNHCFetch() {
                     createdAt: firestore_1.Timestamp.now(),
                     updatedAt: firestore_1.Timestamp.now()
                 };
-                batch.set(eventRef, eventData);
+                if (!dryRun && batch) {
+                    batch.set(eventRef, eventData);
+                }
                 processedCount++;
                 firebase_functions_1.logger.info(`✅ Procesado evento NHC: ${event.guid} - ${event.title}`);
             }
@@ -163,12 +173,20 @@ async function processNHCFetch() {
             }
         }
         // Ejecutar batch
-        if (processedCount > 0) {
+        if (!dryRun && processedCount > 0 && batch) {
             await batch.commit();
             firebase_functions_1.logger.info(`💾 Guardados ${processedCount} nuevos eventos en Firestore`);
         }
         firebase_functions_1.logger.info(`📈 Resumen: ${processedCount} procesados, ${skippedCount} omitidos`);
         firebase_functions_1.logger.info('✅ Fetch NHC completado exitosamente');
+        if (dryRun) {
+            return {
+                dryRun: true,
+                total: allEvents.length,
+                processed: processedCount,
+                skipped: skippedCount
+            };
+        }
     }
     catch (error) {
         firebase_functions_1.logger.error('❌ Error en processNHCFetch:', error);
