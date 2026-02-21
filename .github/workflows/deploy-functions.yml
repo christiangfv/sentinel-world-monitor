@@ -38,13 +38,13 @@ jobs:
 
     - name: Deploy functions to staging
       if: github.ref == 'refs/heads/develop'
-      run: firebase deploy --only functions --project sentinel-staging
+      run: firebase deploy --only functions --project sentinel-89591
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_STAGING }}
 
     - name: Deploy functions to production
       if: github.ref == 'refs/heads/main'
-      run: firebase deploy --only functions --project sentinel-prod
+      run: firebase deploy --only functions --project sentinel-prod-9c937
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
 
