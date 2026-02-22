@@ -11,6 +11,8 @@
 
 *Monitoreo inteligente de desastres naturales en tiempo real*
 
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-christiangfv-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/christiangfv)
+
 [📱 Demo en Producción](https://sentinel-prod-9c937.web.app) • [🧪 Demo de Testing](https://sentinel-89591.web.app) • [📖 Documentación](#-documentación) • [🚀 Inicio Rápido](#-instalación-rápida)
 
 ---
@@ -424,7 +426,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 ## 👥 Equipo
 
 ### **Desarrollo**
-- **Christian González** - *Full Stack Developer* - [christiangfv](https://github.com/christiangfv)
+- **Christian Fuentes** - Full Stack & AI/ML Engineer - [christiangfv](https://github.com/christiangfv)
 
 ### **Colaboradores**
 ¡Únete a nuestro equipo! Ver [CONTRIBUTING.md](CONTRIBUTING.md) para más información.
@@ -459,6 +461,6 @@ Para soporte técnico urgente, contactar al equipo de desarrollo.
 
 ---
 
-*Última actualización: Enero 2025*
+*Última actualización: 2026*
 
 </div>
