@@ -6,6 +6,9 @@ const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
 // NOTIFICACIONES ELIMINADAS PARA COSTO 0
 const db = (0, firestore_1.getFirestore)();
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30000;
 // Mapeo de categorías de huracanes a severidad
 function hurricaneCategoryToSeverity(category) {
     if (category.includes('Tropical Depression') || category.includes('Low'))
@@ -51,7 +54,7 @@ async function processNHCFetch(options = {}) {
     }
     try {
         // API del National Hurricane Center - Atlantic
-        const atlanticResponse = await fetch('https://www.nhc.noaa.gov/index-at.xml');
+        const atlanticResponse = await fetch('https://www.nhc.noaa.gov/index-at.xml', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
         if (!atlanticResponse.ok) {
             throw new Error(`HTTP error! status: ${atlanticResponse.status}`);
         }
@@ -61,7 +64,7 @@ async function processNHCFetch(options = {}) {
         // Intentar obtener eventos del Pacífico también
         let pacificEvents = [];
         try {
-            const pacificResponse = await fetch('https://www.nhc.noaa.gov/index-ep.xml');
+            const pacificResponse = await fetch('https://www.nhc.noaa.gov/index-ep.xml', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
             if (pacificResponse.ok) {
                 const pacificXmlText = await pacificResponse.text();
                 pacificEvents = parseNHCXML(pacificXmlText, 'Pacific');
@@ -74,6 +77,10 @@ async function processNHCFetch(options = {}) {
         firebase_functions_1.logger.info(`📊 Recibidos ${allEvents.length} eventos del NHC (${atlanticEvents.length} Atlántico, ${pacificEvents.length} Pacífico)`);
         // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
         const existingIds = new Set();
+        // Only fall back to per-event reads when the bulk load itself failed —
+        // an empty result is legitimate (e.g. a source with no rows yet) and the
+        // per-event fallback costs one read per incoming event.
+        let bulkLoaded = false;
         if (!dryRun) {
             try {
                 const existingDocs = await db.collection('events')
@@ -86,6 +93,7 @@ async function processNHCFetch(options = {}) {
                     if (extId)
                         existingIds.add(extId);
                 });
+                bulkLoaded = true;
                 firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
             }
             catch (error) {
@@ -106,7 +114,7 @@ async function processNHCFetch(options = {}) {
                         continue;
                     }
                     // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-                    if (existingIds.size === 0) {
+                    if (!bulkLoaded) {
                         const checkDoc = await db.collection('events')
                             .where('source', '==', 'nhc')
                             .where('externalId', '==', event.guid)

@@ -84,8 +84,13 @@ export async function processNASAFetch(
         const existingIds = new Set<string>();
         if (!dryRun) {
             try {
+                // orderBy is required: without it Firestore returns an
+                // arbitrary 500 of the ~thousands of stored EONET rows, the
+                // recent IDs are missing from the set and every run re-inserts
+                // the same open events (observed: 71/43/24/15/8 "new" per run).
                 const existingDocs = await db.collection('events')
                     .where('source', '==', 'nasa_eonet')
+                    .orderBy('eventTime', 'desc')
                     .limit(500)
                     .get();
                 existingDocs.forEach(doc => {

@@ -6,6 +6,9 @@ const firestore_1 = require("firebase-admin/firestore");
 // NOTIFICACIONES ELIMINADAS PARA COSTO 0
 const geofire_common_1 = require("geofire-common");
 const db = (0, firestore_1.getFirestore)();
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30000;
 // Mapeo de tipos GDACS a nuestros tipos de desastre
 const GDACS_TYPE_MAPPING = {
     'EQ': 'earthquake',
@@ -33,13 +36,14 @@ function gdacsAlertLevelToSeverity(alertLevel, eventScore) {
 // Cron job: Fetch GDACS cada 30 minutos (optimizado para reducir costos)
 // Función principal para procesar el fetch (exportada para consolidación)
 async function processGDACSFetch(options = {}) {
+    var _a, _b, _c, _d;
     const dryRun = options.dryRun === true;
     firebase_functions_1.logger.info('🚀 Iniciando fetch de eventos del GDACS');
     if (dryRun) {
         firebase_functions_1.logger.info('🧪 Modo dryRun activo (sin escrituras en Firestore)');
     }
     try {
-        const response = await fetch('https://www.gdacs.org/xml/rss.xml');
+        const response = await fetch('https://www.gdacs.org/xml/rss.xml', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -49,6 +53,10 @@ async function processGDACSFetch(options = {}) {
         firebase_functions_1.logger.info(`📊 Recibidos ${events.length} eventos del GDACS`);
         // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
         const existingIds = new Set();
+        // Only fall back to per-event reads when the bulk load itself failed —
+        // an empty result is legitimate (e.g. a source with no rows yet) and the
+        // per-event fallback costs one read per incoming event.
+        let bulkLoaded = false;
         if (!dryRun) {
             try {
                 const existingDocs = await db.collection('events')
@@ -61,6 +69,7 @@ async function processGDACSFetch(options = {}) {
                     if (extId)
                         existingIds.add(extId);
                 });
+                bulkLoaded = true;
                 firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
             }
             catch (error) {
@@ -81,7 +90,7 @@ async function processGDACSFetch(options = {}) {
                         continue;
                     }
                     // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-                    if (existingIds.size === 0) {
+                    if (!bulkLoaded) {
                         const checkDoc = await db.collection('events')
                             .where('source', '==', 'gdacs')
                             .where('externalId', '==', event.guid)
@@ -122,10 +131,10 @@ async function processGDACSFetch(options = {}) {
                         alertLevel: event.alertLevel,
                         eventType: event.eventType,
                         country: event.country,
-                        glide: event.glide,
-                        version: event.version,
-                        link: event.link,
-                        enclosure: event.enclosure
+                        glide: (_a = event.glide) !== null && _a !== void 0 ? _a : null,
+                        version: (_b = event.version) !== null && _b !== void 0 ? _b : 1,
+                        link: (_c = event.link) !== null && _c !== void 0 ? _c : null,
+                        enclosure: (_d = event.enclosure) !== null && _d !== void 0 ? _d : null
                     },
                     eventTime: firestore_1.Timestamp.fromDate(new Date(event.pubDate)),
                     expiresAt: firestore_1.Timestamp.fromMillis(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días

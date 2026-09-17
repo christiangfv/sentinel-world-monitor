@@ -6,6 +6,9 @@ const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
 // NOTIFICACIONES ELIMINADAS PARA COSTO 0
 const db = (0, firestore_1.getFirestore)();
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30000;
 // Mapeo de magnitud a severidad para sismos
 function magnitudeToSeverity(magnitude) {
     if (magnitude < 3.0)
@@ -37,7 +40,7 @@ async function processCSNFetch(options = {}) {
     }
     try {
         // Sitio web del Centro Sismológico Nacional de Chile
-        const response = await fetch('https://sismologia.cl/');
+        const response = await fetch('https://sismologia.cl/', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -47,6 +50,10 @@ async function processCSNFetch(options = {}) {
         firebase_functions_1.logger.info(`📊 Recibidos ${events.length} eventos del CSN`);
         // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
         const existingIds = new Set();
+        // Only fall back to per-event reads when the bulk load itself failed —
+        // an empty result is legitimate (e.g. a source with no rows yet) and the
+        // per-event fallback costs one read per incoming event.
+        let bulkLoaded = false;
         if (!dryRun) {
             try {
                 const existingDocs = await db.collection('events')
@@ -59,6 +66,7 @@ async function processCSNFetch(options = {}) {
                     if (extId)
                         existingIds.add(extId);
                 });
+                bulkLoaded = true;
                 firebase_functions_1.logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
             }
             catch (error) {
@@ -85,7 +93,7 @@ async function processCSNFetch(options = {}) {
                         continue;
                     }
                     // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-                    if (existingIds.size === 0) {
+                    if (!bulkLoaded) {
                         const checkDoc = await db.collection('events')
                             .where('source', '==', 'csn')
                             .where('externalId', '==', event.id)

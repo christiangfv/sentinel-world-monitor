@@ -5,6 +5,9 @@ const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
 const db = (0, firestore_1.getFirestore)();
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30000;
 // Mapeo de colores CENAPRED a severidad
 function colorToSeverity(color) {
     switch (color.toLowerCase()) {
@@ -60,7 +63,7 @@ async function processCENAPREDFetch(options = {}) {
     }
     try {
         // Intentar obtener datos del sitio web de CENAPRED
-        const response = await fetch('https://www.gob.mx/cenapred');
+        const response = await fetch('https://www.gob.mx/cenapred', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

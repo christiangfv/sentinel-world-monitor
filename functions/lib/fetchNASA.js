@@ -5,6 +5,9 @@ const firebase_functions_1 = require("firebase-functions");
 const firestore_1 = require("firebase-admin/firestore");
 const geofire_common_1 = require("geofire-common");
 const db = (0, firestore_1.getFirestore)();
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30000;
 // Helper to map EONET category to our DisasterType
 function mapCategoryToDisasterType(categoryId) {
     switch (categoryId) {
@@ -62,7 +65,7 @@ async function processNASAFetch(options = {}) {
         // Fetch active events from the last 30 days
         // API v3 usa slugs (no IDs numéricos de v2)
         const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=30&category=wildfires,volcanoes,landslides,floods,severeStorms';
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -72,8 +75,13 @@ async function processNASAFetch(options = {}) {
         const existingIds = new Set();
         if (!dryRun) {
             try {
+                // orderBy is required: without it Firestore returns an
+                // arbitrary 500 of the ~thousands of stored EONET rows, the
+                // recent IDs are missing from the set and every run re-inserts
+                // the same open events (observed: 71/43/24/15/8 "new" per run).
                 const existingDocs = await db.collection('events')
                     .where('source', '==', 'nasa_eonet')
+                    .orderBy('eventTime', 'desc')
                     .limit(500)
                     .get();
                 existingDocs.forEach(doc => {
