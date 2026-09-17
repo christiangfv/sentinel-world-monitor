@@ -4,6 +4,10 @@ import { geohashForLocation } from 'geofire-common';
 
 const db = getFirestore();
 
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30_000;
+
 // Mapeo de magnitud a severidad para sismos (escala mexicana)
 function magnitudeToSeverity(magnitude: number): number {
   if (magnitude < 4.0) return 1; // Leve
@@ -58,7 +62,7 @@ export async function processSSNFetch(
   }
 
   try {
-    const response = await fetch('http://www.ssn.unam.mx/rss/ultimos-sismos.xml');
+    const response = await fetch('http://www.ssn.unam.mx/rss/ultimos-sismos.xml', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

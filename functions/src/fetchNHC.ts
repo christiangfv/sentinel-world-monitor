@@ -5,6 +5,10 @@ import { geohashForLocation } from 'geofire-common';
 
 const db = getFirestore();
 
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30_000;
+
 // Mapeo de categorías de huracanes a severidad
 function hurricaneCategoryToSeverity(category: string): number {
   if (category.includes('Tropical Depression') || category.includes('Low')) return 1;
@@ -54,7 +58,7 @@ export async function processNHCFetch(
 
   try {
     // API del National Hurricane Center - Atlantic
-    const atlanticResponse = await fetch('https://www.nhc.noaa.gov/index-at.xml');
+    const atlanticResponse = await fetch('https://www.nhc.noaa.gov/index-at.xml', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 
     if (!atlanticResponse.ok) {
       throw new Error(`HTTP error! status: ${atlanticResponse.status}`);
@@ -68,7 +72,7 @@ export async function processNHCFetch(
     // Intentar obtener eventos del Pacífico también
     let pacificEvents: any[] = [];
     try {
-      const pacificResponse = await fetch('https://www.nhc.noaa.gov/index-ep.xml');
+      const pacificResponse = await fetch('https://www.nhc.noaa.gov/index-ep.xml', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
       if (pacificResponse.ok) {
         const pacificXmlText = await pacificResponse.text();
         pacificEvents = parseNHCXML(pacificXmlText, 'Pacific');
@@ -82,6 +86,10 @@ export async function processNHCFetch(
 
     // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
     const existingIds = new Set<string>();
+    // Only fall back to per-event reads when the bulk load itself failed —
+    // an empty result is legitimate (e.g. a source with no rows yet) and the
+    // per-event fallback costs one read per incoming event.
+    let bulkLoaded = false;
     if (!dryRun) {
       try {
         const existingDocs = await db.collection('events')
@@ -93,6 +101,7 @@ export async function processNHCFetch(
           const extId = doc.data().externalId;
           if (extId) existingIds.add(extId);
         });
+        bulkLoaded = true;
         logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
       } catch (error) {
         logger.error('❌ Error cargando IDs existentes:', error);
@@ -115,7 +124,7 @@ export async function processNHCFetch(
           }
 
           // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-          if (existingIds.size === 0) {
+          if (!bulkLoaded) {
             const checkDoc = await db.collection('events')
               .where('source', '==', 'nhc')
               .where('externalId', '==', event.guid)

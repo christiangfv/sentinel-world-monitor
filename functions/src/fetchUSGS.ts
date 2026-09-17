@@ -5,6 +5,8 @@ import { geohashForLocation } from 'geofire-common';
 
 const db = getFirestore();
 
+const FETCH_TIMEOUT_MS = 30_000;
+
 // Mapeo de magnitud a severidad para sismos
 function magnitudeToSeverity(magnitude: number): number {
   if (magnitude < 4.0) return 1;
@@ -44,7 +46,8 @@ export async function processUSGSFetch(
 
   try {
     const response = await fetch(
-      'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson'
+      'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson',
+      { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) }
     );
 
     if (!response.ok) {
@@ -55,6 +58,10 @@ export async function processUSGSFetch(
     logger.info(`📊 Recibidos ${data.features.length} eventos del USGS`);
 
     const existingIds = new Set<string>();
+    // Only fall back to per-event reads when the bulk load itself failed —
+    // an empty result is legitimate (e.g. a source with no rows yet) and the
+    // per-event fallback costs one read per incoming event.
+    let bulkLoaded = false;
     if (!dryRun) {
       // OPTIMIZACIÓN PARA COSTO 0: Limitar consultas para mantener gratis
       // Solo verificar eventos de las últimas 24 horas para reducir lecturas
@@ -68,6 +75,7 @@ export async function processUSGSFetch(
           const extId = doc.data().externalId;
           if (extId) existingIds.add(extId);
         });
+        bulkLoaded = true;
         logger.info(`🔍 Cargados ${existingIds.size} IDs recientes para verificación (costo optimizado)`);
       } catch (error) {
         logger.error('❌ Error cargando IDs existentes:', error);
@@ -101,7 +109,7 @@ export async function processUSGSFetch(
 
           // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
           // Esto solo debería ocurrir si la carga masiva falló
-          if (existingIds.size === 0) {
+          if (!bulkLoaded) {
             const checkDoc = await db.collection('events')
               .where('source', '==', 'usgs')
               .where('externalId', '==', id)

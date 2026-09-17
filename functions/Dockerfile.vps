@@ -1,0 +1,21 @@
+# Standalone image for running the Sentinel fetchers from a cron on the VPS.
+# Build:  docker build -f Dockerfile.vps -t sentinel-fetcher .
+# Run:    docker run --rm -e GCLOUD_PROJECT=sentinel-prod-9c937 \
+#           -e GOOGLE_APPLICATION_CREDENTIALS=/sa.json \
+#           -v /root/secrets/sentinel-sa.json:/sa.json:ro sentinel-fetcher
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=build /app/lib ./lib
+USER node
+CMD ["node", "lib/runOnce.js"]

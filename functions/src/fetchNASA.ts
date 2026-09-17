@@ -4,6 +4,10 @@ import { geohashForLocation } from 'geofire-common';
 
 const db = getFirestore();
 
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30_000;
+
 type FetchOptions = { dryRun?: boolean };
 
 // Helper to map EONET category to our DisasterType
@@ -68,7 +72,7 @@ export async function processNASAFetch(
         // API v3 usa slugs (no IDs numéricos de v2)
         const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=30&category=wildfires,volcanoes,landslides,floods,severeStorms';
 
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

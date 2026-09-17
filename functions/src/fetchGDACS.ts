@@ -5,6 +5,10 @@ import { geohashForLocation } from 'geofire-common';
 
 const db = getFirestore();
 
+// Upstream sources occasionally hang (gob.mx held a socket open for 32 min);
+// never let one source stall the whole run.
+const FETCH_TIMEOUT_MS = 30_000;
+
 // Mapeo de tipos GDACS a nuestros tipos de desastre
 const GDACS_TYPE_MAPPING: Record<string, string> = {
   'EQ': 'earthquake',
@@ -45,7 +49,7 @@ export async function processGDACSFetch(
   }
 
   try {
-    const response = await fetch('https://www.gdacs.org/xml/rss.xml');
+    const response = await fetch('https://www.gdacs.org/xml/rss.xml', { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -59,6 +63,10 @@ export async function processGDACSFetch(
 
     // OPTIMIZACIÓN: Obtener IDs existentes de una vez para evitar lecturas en el loop
     const existingIds = new Set<string>();
+    // Only fall back to per-event reads when the bulk load itself failed —
+    // an empty result is legitimate (e.g. a source with no rows yet) and the
+    // per-event fallback costs one read per incoming event.
+    let bulkLoaded = false;
     if (!dryRun) {
       try {
         const existingDocs = await db.collection('events')
@@ -70,6 +78,7 @@ export async function processGDACSFetch(
           const extId = doc.data().externalId;
           if (extId) existingIds.add(extId);
         });
+        bulkLoaded = true;
         logger.info(`🔍 Cargados ${existingIds.size} IDs existentes para verificación`);
       } catch (error) {
         logger.error('❌ Error cargando IDs existentes:', error);
@@ -92,7 +101,7 @@ export async function processGDACSFetch(
           }
 
           // Fallback: Si el Set está vacío (por error en carga masiva), verificar individualmente
-          if (existingIds.size === 0) {
+          if (!bulkLoaded) {
             const checkDoc = await db.collection('events')
               .where('source', '==', 'gdacs')
               .where('externalId', '==', event.guid)
@@ -136,10 +145,10 @@ export async function processGDACSFetch(
             alertLevel: event.alertLevel,
             eventType: event.eventType,
             country: event.country,
-            glide: event.glide,
-            version: event.version,
-            link: event.link,
-            enclosure: event.enclosure
+            glide: event.glide ?? null,
+            version: event.version ?? 1,
+            link: event.link ?? null,
+            enclosure: event.enclosure ?? null
           },
           eventTime: Timestamp.fromDate(new Date(event.pubDate)),
           expiresAt: Timestamp.fromMillis(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
